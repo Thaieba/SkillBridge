@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile - SkillBridge</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">SkillBridge</a>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../skills.html">Skills</a></li>
+                <li><a href="../progress.html">Progress</a></li>
+                <li><a href="../certificate.html">Certificates</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="mycourses.html">My Courses</a></li>
+                <li><a href="certificates.html">My Certificates</a></li>
+                <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section" style="padding: 3rem 1rem;">
+        <div class="container" style="max-width: 900px;">
+            <h1 class="section-title" style="margin-bottom: 1.5rem;">🧾 My Profile</h1>
+
+            <div class="progress-stat-box" style="border-left: 6px solid var(--secondary-color);">
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div>
+                        <div style="color: var(--text-light); font-weight: 700;">Full Name</div>
+                        <div id="profileFullName" style="font-size: 1.25rem; font-weight: 800; margin-top: 0.25rem;">-</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-light); font-weight: 700;">Username</div>
+                        <div id="profileUsername" style="font-size: 1.25rem; font-weight: 800; margin-top: 0.25rem;">-</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-light); font-weight: 700;">Role</div>
+                        <div id="profileRole" style="font-size: 1.25rem; font-weight: 800; margin-top: 0.25rem;">-</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <h2 class="progress-section-title" style="margin-bottom: 1rem;">🎓 Certificate Name</h2>
+                    <p style="color: var(--text-light); margin-bottom: 1rem;">
+                        Certificate generator uses <strong>userFullName</strong> from localStorage.
+                    </p>
+                    <div style="display:flex; gap: 1rem; flex-wrap: wrap;">
+                        <input id="editFullName" type="text" class="search-input" style="max-width: 350px;" placeholder="Update full name">
+                        <button class="btn btn-primary" type="button" onclick="saveName()">Save</button>
+                    </div>
+                    <div id="profileStatus" class="form-status" style="margin-top: 1rem;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>SkillBridge</h4>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SkillBridge. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            requireRole('student');
+            const session = getSession();
+
+            const fullName = session?.fullName || localStorage.getItem('userFullName') || 'Learner';
+            const username = session?.username || '-';
+
+            document.getElementById('profileFullName').textContent = fullName;
+            document.getElementById('profileUsername').textContent = username;
+            document.getElementById('profileRole').textContent = session?.role || 'student';
+
+            const editInput = document.getElementById('editFullName');
+            if(editInput) editInput.value = fullName;
+
+            // prefill for certificate generator
+            localStorage.setItem('userFullName', fullName);
+        });
+
+        function saveName(){
+            const input = document.getElementById('editFullName');
+            const statusEl = document.getElementById('profileStatus');
+            const name = input?.value?.trim();
+            if(!name){
+                statusEl.textContent = 'Full name cannot be empty.';
+                statusEl.classList.remove('success');
+                statusEl.classList.add('error');
+                statusEl.style.display='block';
+                return;
+            }
+            localStorage.setItem('userFullName', name);
+            statusEl.textContent = 'Saved! Certificates will use this name.';
+            statusEl.classList.remove('error');
+            statusEl.classList.add('success');
+            statusEl.style.display='block';
+            document.getElementById('profileFullName').textContent = name;
+        }
+    </script>
+</body>
+</html>
+

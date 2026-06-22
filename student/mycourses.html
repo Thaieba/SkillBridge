@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses - Student | SkillBridge</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">SkillBridge</a>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="profile.html">My Profile</a></li>
+                <li><a href="certificates.html">My Certificates</a></li>
+                <li><a href="../skills.html">Skills</a></li>
+                <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section" style="padding: 3rem 1rem;">
+        <div class="container" style="max-width: 1100px;">
+            <h1 class="section-title" style="margin-bottom: 1.5rem;">📚 My Courses</h1>
+
+            <div style="display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; align-items:center; margin-bottom: 2rem;">
+                <div style="color: var(--text-light);">Completed courses saved locally on this browser.</div>
+                <button class="btn btn-secondary" onclick="window.location.href='../skills.html'">Explore More</button>
+            </div>
+
+            <div id="myCoursesGrid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div class="progress-empty" style="display:none;">
+                    <div style="font-size:3rem; margin-bottom: 1rem;">📭</div>
+                    <p>No completed courses yet. Enroll in a course to see it here.</p>
+                    <a href="../skills.html" class="btn btn-primary" style="margin-top: 1rem;">Start Learning</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>SkillBridge</h4>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SkillBridge. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            requireRole('student');
+            const completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
+            const grid = document.getElementById('myCoursesGrid');
+
+            const empty = grid.querySelector('.progress-empty');
+
+            if(!completedCourses.length){
+                empty.style.display='block';
+                return;
+            }
+
+            empty.style.display='none';
+
+            grid.innerHTML = completedCourses.map(c => `
+                <div class="progress-course-card">
+                    <h3>${c.title}</h3>
+                    <div class="progress-course-meta">Completed on: ${c.completedAt}</div>
+                </div>
+            `).join('');
+        });
+    </script>
+</body>
+</html>
+

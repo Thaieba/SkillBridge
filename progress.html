@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Progress - SkillBridge</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- NAVIGATION BAR -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">SkillBridge</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="skills.html">Skills</a></li>
+                <li><a href="progress.html">Progress</a></li>
+                <li><a href="certificate.html">Certificates</a></li>
+                <li><a href="index.html#about-us">About Us</a></li>
+                <li><a href="index.html#contact-us">Contact Us</a></li>
+                <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PAGE HERO -->
+    <section style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 3rem 2rem;">
+        <div class="container">
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Your Learning Progress</h1>
+            <p style="font-size: 1.1rem; opacity: 0.9;">Track your courses, scores, and career development</p>
+        </div>
+    </section>
+
+    <!-- PROGRESS SECTION -->
+    <section class="section">
+        <div class="container">
+            <div class="progress-container"></div>
+
+            <!-- STATISTICS SECTION -->
+            <div style="margin-top: 3rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div class="progress-stat-box" style="border-left: 4px solid var(--primary-color);">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);" id="totalCourses">0</div>
+                    <div class="progress-stat-label">Courses Completed</div>
+                </div>
+                <div class="progress-stat-box" style="border-left: 4px solid var(--secondary-color);">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--secondary-color);" id="totalQuizzes">0</div>
+                    <div class="progress-stat-label">Quizzes Completed</div>
+                </div>
+                <div class="progress-stat-box" style="border-left: 4px solid var(--accent-color);">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent-color);" id="avgScore">0%</div>
+                    <div class="progress-stat-label">Average Quiz Score</div>
+                </div>
+            </div>
+
+            <!-- COMPLETED COURSES SECTION -->
+            <div style="margin-top: 3rem;">
+                <h2 class="progress-section-title">📚 Completed Courses</h2>
+                <div id="completedCourses" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <div class="progress-empty">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+                        <p>No completed courses yet. Start learning today!</p>
+                        <a href="skills.html" class="btn btn-primary" style="margin-top: 1rem;">Explore Courses</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUIZ SCORES SECTION -->
+            <div style="margin-top: 3rem;">
+                <h2 class="progress-section-title">📊 Quiz Scores</h2>
+                <div style="overflow-x: auto;">
+                    <table class="quiz-scores-table">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th style="text-align: center;">Score</th>
+                                <th style="text-align: center;">Percentage</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quizScoresTable">
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📝</div>
+                                    <div class="progress-empty" style="background: transparent; padding: 0; text-align: center;">
+                                        No quiz attempts yet. Test your knowledge!
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- EARNED CERTIFICATES SECTION -->
+            <div style="margin-top: 3rem;">
+                <h2 class="progress-section-title">🎓 Earned Certificates</h2>
+                <div id="earnedCertificates" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div class="progress-empty">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📜</div>
+                        <p>No certificates earned yet. Complete courses to earn certificates!</p>
+                        <a href="skills.html" class="btn btn-primary" style="margin-top: 1rem;">Start Learning</a>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <a href="certificate.html" class="btn btn-secondary">View All Certificates</a>
+                </div>
+            </div>
+
+            <!-- CLEAR DATA SECTION -->
+            <div class="clear-data-section">
+                <h3 style="margin-bottom: 0.5rem;">🗑️ Data Management</h3>
+                <p style="margin-bottom: 1rem;">Clear all your progress data from local storage. This action cannot be undone.</p>
+                <button class="btn btn-clear" onclick="clearAllData()">
+                    Clear All Progress
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>About SkillBridge</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Our Mission</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Courses</h4>
+                <ul>
+                    <li><a href="#">All Courses</a></li>
+                    <li><a href="#">Categories</a></li>
+                    <li><a href="#">Trending</a></li>
+                    <li><a href="#">Free Courses</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Feedback</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                    <li><a href="#">Disclaimer</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SkillBridge. All rights reserved. | Empowering careers through education</p>
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        function displayProgress() {
+            const completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
+            const quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
+            const certificates = JSON.parse(localStorage.getItem('certificates')) || [];
+
+            // Update statistics
+            document.getElementById('totalCourses').textContent = completedCourses.length;
+            document.getElementById('totalQuizzes').textContent = quizScores.length;
+            
+            if (quizScores.length > 0) {
+                const avgPercentage = Math.round(quizScores.reduce((a, b) => a + b.percentage, 0) / quizScores.length);
+                document.getElementById('avgScore').textContent = avgPercentage + '%';
+            }
+
+            // Display completed courses
+            const completedCoursesDiv = document.getElementById('completedCourses');
+            if (completedCourses.length > 0) {
+                completedCoursesDiv.innerHTML = completedCourses.map(course => `
+                    <div class="progress-course-card">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <h3>${course.title}</h3>
+                            <span style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem;">✓ Completed</span>
+                        </div>
+                        <p class="progress-course-meta">Completed on: ${course.completedAt}</p>
+                    </div>
+                `).join('');
+            }
+
+            // Display quiz scores
+            const quizScoresTable = document.getElementById('quizScoresTable');
+            if (quizScores.length > 0) {
+                quizScoresTable.innerHTML = quizScores.map((quiz, index) => {
+                    const courseName = coursesData.find(c => c.id == quiz.courseId)?.title || 'Unknown Course';
+                    const statusColor = quiz.percentage >= 70 ? '#10b981' : '#f59e0b';
+                    return `
+                        <tr>
+                            <td style="padding: 1rem;">${courseName}</td>
+                            <td style="padding: 1rem; text-align: center;">${quiz.score}/${quiz.total}</td>
+                            <td style="padding: 1rem; text-align: center; color: ${statusColor}; font-weight: bold;">${quiz.percentage}%</td>
+                            <td style="padding: 1rem; font-size: 0.9rem;">${quiz.date}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Display earned certificates
+            const earnedCertificatesDiv = document.getElementById('earnedCertificates');
+            if (certificates.length > 0) {
+                const recentCerts = certificates.slice(-3).reverse();
+                earnedCertificatesDiv.innerHTML = recentCerts.map(cert => `
+                    <div class="certificate-card" style="cursor: pointer; animation: fadeInUp 0.6s ease;" onclick="viewCertificate('${cert.id}')">
+                        <div class="certificate-badge">
+                            <div class="certificate-badge-icon">${cert.type === 'quiz' ? '📝' : '📜'}</div>
+                        </div>
+                        <div class="certificate-info">
+                            <h3>${cert.courseTitle}</h3>
+                            <p>🏆 ${cert.type === 'quiz' ? 'Quiz Completion' : 'Course Completion'}</p>
+                            <p>📅 ${cert.issuedDate}</p>
+                            <div class="certificate-meta">
+                                <button class="certificate-action-btn" onclick="event.stopPropagation(); viewCertificate('${cert.id}')">View</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all progress data? This cannot be undone.')) {
+                localStorage.removeItem('completedCourses');
+                localStorage.removeItem('quizScores');
+                localStorage.removeItem('certificates');
+                alert('All progress data has been cleared.');
+                location.reload();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            displayProgress();
+            updateProgressDisplay();
+        });
+    </script>
+</body>
+</html>

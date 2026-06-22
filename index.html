@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillBridge - Online Learning and Career Guidance System</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- NAVIGATION BAR -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">SkillBridge</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="skills.html">Skills</a></li>
+                <li><a href="progress.html">Progress</a></li>
+                <li><a href="certificate.html">Certificates</a></li>
+                <li><a href="roadmap.html">Roadmap</a></li>
+                <li><a href="register.html">Register</a></li>
+                <li><a href="#about-us">About Us</a></li>
+                <li><a href="#contact-us">Contact Us</a></li>
+                <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
+            </ul>
+
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Welcome to SkillBridge</h1>
+            <p>Your Gateway to Professional Excellence and Career Success</p>
+            <div class="hero-buttons">
+                <a href="skills.html" class="btn btn-secondary">Explore Skills</a>
+                <a href="#featured" class="btn btn-outline">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURED SKILLS SECTION -->
+    <section class="featured-section section" id="featured">
+        <div class="container">
+            <h2 class="section-title">Featured Skills & Courses</h2>
+            <div class="skills-grid" data-featured-limit="3"></div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="skills.html" class="btn btn-primary">View All Courses</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CAREER OPPORTUNITIES SECTION -->
+    <section class="careers-section section">
+        <div class="container">
+            <h2 class="section-title">Career Opportunities</h2>
+            <div class="career-container">
+                <div class="career-card">
+                    <div class="career-icon">🌐</div>
+                    <h3 class="career-title">Web Development</h3>
+                    <ul class="career-roles">
+                        <li>Frontend Developer</li>
+                        <li>Full Stack Developer</li>
+                        <li>Web Designer</li>
+                        <li>UI Developer</li>
+                        <li>WordPress Developer</li>
+                    </ul>
+                </div>
+
+                <div class="career-card">
+                    <div class="career-icon">🐍</div>
+                    <h3 class="career-title">Python Development</h3>
+                    <ul class="career-roles">
+                        <li>Python Developer</li>
+                        <li>Backend Developer</li>
+                        <li>Data Analyst</li>
+                        <li>Automation Engineer</li>
+                        <li>Machine Learning Engineer</li>
+                    </ul>
+                </div>
+
+                <div class="career-card">
+                    <div class="career-icon">📊</div>
+                    <h3 class="career-title">Data Analytics</h3>
+                    <ul class="career-roles">
+                        <li>Data Analyst</li>
+                        <li>Business Analyst</li>
+                        <li>BI Developer</li>
+                        <li>Data Scientist</li>
+                        <li>Analytics Engineer</li>
+                    </ul>
+                </div>
+
+                <div class="career-card">
+                    <div class="career-icon">☁️</div>
+                    <h3 class="career-title">Cloud Computing</h3>
+                    <ul class="career-roles">
+                        <li>Cloud Engineer</li>
+                        <li>DevOps Engineer</li>
+                        <li>Solutions Architect</li>
+                        <li>Cloud Administrator</li>
+                        <li>Infrastructure Engineer</li>
+                    </ul>
+                </div>
+
+                <div class="career-card">
+                    <div class="career-icon">🔒</div>
+                    <h3 class="career-title">Cyber Security</h3>
+                    <ul class="career-roles">
+                        <li>Security Analyst</li>
+                        <li>Penetration Tester</li>
+                        <li>Security Engineer</li>
+                        <li>SOC Analyst</li>
+                        <li>CISO</li>
+                    </ul>
+                </div>
+
+                <div class="career-card">
+                    <div class="career-icon">🎨</div>
+                    <h3 class="career-title">UI/UX Design</h3>
+                    <ul class="career-roles">
+                        <li>UI/UX Designer</li>
+                        <li>Product Designer</li>
+                        <li>Interaction Designer</li>
+                        <li>Visual Designer</li>
+                        <li>Design Lead</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY CHOOSE SKILLBRIDGE SECTION -->
+    <section style="background: linear-gradient(135deg, var(--light-bg), white); padding: 4rem 2rem;">
+        <div class="container">
+            <h2 class="section-title">Why Choose SkillBridge?</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
+                    <h3 style="margin-bottom: 0.5rem;">Expert-Led Courses</h3>
+                    <p style="color: var(--text-light);">Learn from industry professionals with years of experience</p>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+                    <h3 style="margin-bottom: 0.5rem;">Career-Focused</h3>
+                    <p style="color: var(--text-light);">Curriculum designed for real-world job requirements</p>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">💪</div>
+                    <h3 style="margin-bottom: 0.5rem;">Hands-On Learning</h3>
+                    <p style="color: var(--text-light);">Build real projects and gain practical experience</p>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📈</div>
+                    <h3 style="margin-bottom: 0.5rem;">Growth Tracking</h3>
+                    <p style="color: var(--text-light);">Monitor your progress with detailed analytics</p>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🌍</div>
+                    <h3 style="margin-bottom: 0.5rem;">Global Community</h3>
+                    <p style="color: var(--text-light);">Connect with learners from around the world</p>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎓</div>
+                    <h3 style="margin-bottom: 0.5rem;">Certification</h3>
+                    <p style="color: var(--text-light);">Earn recognized certificates after completion</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT US SECTION -->
+    <section class="about-us-section section" id="about-us">
+        <div class="container">
+            <h2 class="section-title">About SkillBridge</h2>
+            
+            <!-- Platform Introduction -->
+            <div class="about-intro">
+                <div class="about-intro-text">
+                    <h3>Welcome to SkillBridge</h3>
+                    <p>SkillBridge is a revolutionary online learning platform designed to bridge the gap between education and career advancement. We empower individuals with industry-relevant skills and career guidance to achieve professional excellence in the digital age.</p>
+                </div>
+                <div class="about-intro-icon">
+                    <div style="font-size: 5rem;">🌉</div>
+                </div>
+            </div>
+
+            <!-- Mission & Vision -->
+            <div class="about-grid">
+                <div class="about-card">
+                    <div class="about-card-icon">🎯</div>
+                    <h3>Our Mission</h3>
+                    <p>To provide accessible, high-quality education and career guidance that empowers learners to succeed in their professional journeys and contribute meaningfully to the global tech industry.</p>
+                </div>
+
+                <div class="about-card">
+                    <div class="about-card-icon">🚀</div>
+                    <h3>Our Vision</h3>
+                    <p>To become the world's leading platform for career-focused learning, where students and professionals can unlock their potential and achieve extraordinary career growth through practical, industry-led education.</p>
+                </div>
+            </div>
+
+            <!-- Key Features -->
+            <div style="margin-top: 4rem;">
+                <h3 style="text-align: center; font-size: 2rem; margin-bottom: 2rem;">Platform Highlights</h3>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">👨‍🏫</div>
+                        <h4>Expert Instructors</h4>
+                        <p>Learn from industry professionals with 10+ years of experience</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">💼</div>
+                        <h4>Career-Focused Curriculum</h4>
+                        <p>Courses designed based on real job market demands</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">🛠️</div>
+                        <h4>Hands-On Projects</h4>
+                        <p>Build real-world projects and gain practical experience</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">📈</div>
+                        <h4>Progress Tracking</h4>
+                        <p>Monitor your learning journey with detailed analytics</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">🌍</div>
+                        <h4>Global Community</h4>
+                        <p>Connect and collaborate with learners worldwide</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">🎓</div>
+                        <h4>Recognized Certificates</h4>
+                        <p>Earn industry-recognized certificates upon completion</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT US SECTION -->
+    <section class="contact-us-section section" id="contact-us">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            
+            <div class="contact-wrapper">
+                <!-- Contact Form -->
+                <div class="contact-form-container">
+                    <h3>Send us a Message</h3>
+                    <form id="contactForm" class="contact-form">
+                        <div class="form-group">
+                            <label for="contactName">Full Name</label>
+                            <input type="text" id="contactName" name="name" required placeholder="Your full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactEmail">Email Address</label>
+                            <input type="email" id="contactEmail" name="email" required placeholder="your.email@example.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactSubject">Subject</label>
+                            <input type="text" id="contactSubject" name="subject" required placeholder="What is this about?">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactMessage">Message</label>
+                            <textarea id="contactMessage" name="message" rows="5" required placeholder="Tell us your message..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                    <div id="formStatus" class="form-status"></div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="contact-info-container">
+                    <h3>Contact Information</h3>
+                    
+                    <div class="contact-info-item">
+                        <div class="info-icon">📧</div>
+                        <div>
+                            <h4>Email</h4>
+                            <p><a href="mailto:support@skillbridge.com">support@skillbridge.com</a></p>
+                        </div>
+                    </div>
+
+                    <div class="contact-info-item">
+                        <div class="info-icon">📞</div>
+                        <div>
+                            <h4>Phone</h4>
+                            <p><a href="tel:+919876543210">+91 9876543210</a></p>
+                        </div>
+                    </div>
+
+                    <div class="contact-info-item">
+                        <div class="info-icon">📍</div>
+                        <div>
+                            <h4>Location</h4>
+                            <p>No.123, Tech Park Building<br>Anna Nagar<br>Chennai-600002<br>Tamil Nadu, India</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-info-item">
+                        <div class="info-icon">⏰</div>
+                        <div>
+                            <h4>Business Hours</h4>
+                            <p>Monday - Friday: 9:00 AM - 6:00 PM PST<br>Saturday - Sunday: Closed</p>
+                        </div>
+                    </div>
+
+                    <!-- Social Media -->
+                    <div class="social-media">
+                        <h4>Follow Us</h4>
+                        <div class="social-icons">
+                            <a href="#" class="social-icon" title="Facebook">f</a>
+                            <a href="#" class="social-icon" title="Twitter">𝕏</a>
+                            <a href="#" class="social-icon" title="LinkedIn">in</a>
+                            <a href="#" class="social-icon" title="Instagram">📷</a>
+                            <a href="#" class="social-icon" title="YouTube">▶</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>About SkillBridge</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Our Mission</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Courses</h4>
+                <ul>
+                    <li><a href="#">All Courses</a></li>
+                    <li><a href="#">Categories</a></li>
+                    <li><a href="#">Trending</a></li>
+                    <li><a href="#">Free Courses</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Feedback</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                    <li><a href="#">Disclaimer</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SkillBridge. All rights reserved. | Empowering careers through education</p>
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

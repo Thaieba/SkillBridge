@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Register - SkillBridge</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">SkillBridge</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="skills.html">Skills</a></li>
+                <li><a href="progress.html">Progress</a></li>
+                <li><a href="certificate.html">Certificates</a></li>
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section" style="padding: 3rem 1rem;">
+        <div class="container" style="max-width: 650px;">
+            <h1 class="section-title" id="authTitle" style="margin-bottom: 1.5rem;">📝 Register</h1>
+            <p style="text-align:center; color: var(--text-light); margin-bottom: 2rem;">
+    
+            </p>
+
+            <div class="progress-stat-box" id="authBox" style="border-left: 6px solid var(--secondary-color);">
+                <div class="auth-tabs" style="display: flex; margin-bottom: 1.5rem; border-radius: 0.5rem; overflow: hidden; background: rgba(0,0,0,0.05); border: 1px solid var(--border);">
+                    <button type="button" id="tabRegister" class="auth-tab" style="flex: 1; padding: 0.75rem; border: none; font-weight: 700; color: white; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); cursor: pointer;">Register</button>
+                    <button type="button" id="tabLogin" class="auth-tab" style="flex: 1; padding: 0.75rem; border: none; font-weight: 600; color: var(--text-light); background: transparent; cursor: pointer;">Login</button>
+                </div>
+
+                <form id="registerForm" style="display:flex; flex-direction:column; gap: 1rem;">
+                    <div class="form-group" id="fullNameGroup">
+                        <label for="regFullName">Full Name</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon" aria-hidden="true">👤</span>
+                            <input id="regFullName" type="text" required placeholder="Enter your name">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regUsername">Username</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon" aria-hidden="true">👤</span>
+                            <input id="regUsername" type="text" required placeholder="Choose username">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regPassword">Password</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon" aria-hidden="true">🔒</span>
+                            <input id="regPassword" type="password" required placeholder="Choose password">
+                            <button class="password-toggle" type="button" data-toggle-password="regPassword" aria-label="Show password">👁️</button>
+                        </div>
+                    </div>
+
+
+
+                    <button class="btn btn-primary" type="submit" id="authSubmitBtn" style="margin-top: 0.5rem;">Create Account</button>
+                </form>
+
+                <div id="registerStatus" class="form-status" style="margin-top: 1rem; display:none;"></div>
+
+                <div style="margin-top: 1.25rem; text-align:center; color: var(--text-light);">
+                    <a href="index.html" style="color: var(--primary-color); font-weight: 700;">Back to Home</a>
+                </div>
+
+
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align:center; color: var(--text-light); font-size: 0.95rem;">
+        
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>About SkillBridge</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Our Mission</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Feedback</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                    <li><a href="#">Disclaimer</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SkillBridge. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            const form = document.getElementById('registerForm');
+            const statusEl = document.getElementById('registerStatus');
+            const tabRegister = document.getElementById('tabRegister');
+            const tabLogin = document.getElementById('tabLogin');
+            const fullNameGroup = document.getElementById('fullNameGroup');
+            const regFullName = document.getElementById('regFullName');
+            const authTitle = document.getElementById('authTitle');
+            const authSubmitBtn = document.getElementById('authSubmitBtn');
+            const authBox = document.getElementById('authBox');
+
+            let authMode = 'register';
+
+            function setMode(mode) {
+                authMode = mode;
+                statusEl.style.display = 'none';
+                
+                if (mode === 'register') {
+                    tabRegister.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                    tabRegister.style.color = 'white';
+                    tabRegister.style.fontWeight = '700';
+
+                    tabLogin.style.background = 'transparent';
+                    tabLogin.style.color = 'var(--text-light)';
+                    tabLogin.style.fontWeight = '600';
+
+                    fullNameGroup.style.display = 'block';
+                    regFullName.setAttribute('required', 'required');
+                    authTitle.textContent = '📝 Register';
+                    authSubmitBtn.textContent = 'Create Account';
+                    authBox.style.borderLeftColor = 'var(--secondary-color)';
+                } else {
+                    tabLogin.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                    tabLogin.style.color = 'white';
+                    tabLogin.style.fontWeight = '700';
+
+                    tabRegister.style.background = 'transparent';
+                    tabRegister.style.color = 'var(--text-light)';
+                    tabRegister.style.fontWeight = '600';
+
+                    fullNameGroup.style.display = 'none';
+                    regFullName.removeAttribute('required');
+                    authTitle.textContent = '🔐 Login';
+                    authSubmitBtn.textContent = 'Login';
+                    authBox.style.borderLeftColor = 'var(--primary-color)';
+                }
+            }
+
+            tabRegister?.addEventListener('click', () => setMode('register'));
+            tabLogin?.addEventListener('click', () => setMode('login'));
+
+            setMode('register');
+
+            form?.addEventListener('submit', function(e){
+                e.preventDefault();
+
+                const username = document.getElementById('regUsername').value.trim();
+                const password = document.getElementById('regPassword').value;
+                const role = 'student';
+
+                if (authMode === 'register') {
+                    const fullName = regFullName.value.trim();
+                    const res = registerUser({ fullName, username, password, role });
+                    if(res.ok){
+                        localStorage.setItem('session', JSON.stringify({
+                            username: username,
+                            fullName: fullName,
+                            role: role === 'admin' ? 'admin' : 'student'
+                        }));
+                        localStorage.setItem('userFullName', fullName);
+
+                        statusEl.style.display = 'block';
+                        statusEl.textContent = 'Account created! Redirecting to dashboard...';
+                        statusEl.classList.remove('error');
+                        statusEl.classList.add('success');
+
+                        const target = role === 'admin' ? 'admin/dashboard.html' : 'student/dashboard.html';
+                        setTimeout(()=>{ window.location.href = target; }, 650);
+                    } else {
+                        statusEl.style.display = 'block';
+                        statusEl.textContent = res.message;
+                        statusEl.classList.remove('success');
+                        statusEl.classList.add('error');
+                    }
+                } else {
+                    const res = loginUser({ username, password, role });
+                    if(res.ok){
+                        statusEl.style.display = 'block';
+                        statusEl.textContent = res.message;
+                        statusEl.classList.remove('error');
+                        statusEl.classList.add('success');
+
+                        const target = role === 'admin' ? 'admin/dashboard.html' : 'student/dashboard.html';
+                        setTimeout(()=>{ window.location.href = target; }, 650);
+                    } else {
+                        statusEl.style.display = 'block';
+                        statusEl.textContent = res.message;
+                        statusEl.classList.remove('success');
+                        statusEl.classList.add('error');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

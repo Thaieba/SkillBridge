@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - SkillBridge</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">SkillBridge</a>
+            <ul class="nav-links" id="studentNavLinks">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../skills.html">Skills</a></li>
+                <li><a href="../progress.html">Progress</a></li>
+                <li><a href="../certificate.html">Certificates</a></li>
+                <li><a href="profile.html">My Profile</a></li>
+                <li><a href="mycourses.html">My Courses</a></li>
+                <li><a href="certificates.html">My Certificates</a></li>
+                <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section" style="padding: 3rem 1rem;">
+        <div class="container" style="max-width: 1100px;">
+            <h1 class="section-title" style="margin-bottom: 1.5rem;">👋 Student Dashboard</h1>
+
+            <div class="progress-stat-box" style="border-left: 6px solid var(--primary-color); margin-bottom: 2rem;">
+                <div style="display:flex; justify-content:space-between; gap: 1rem; flex-wrap: wrap; align-items:center;">
+                    <div>
+                        <div style="font-size: 1.2rem; font-weight: 800;">Welcome, <span id="studentName">Student</span></div>
+                        <div style="color: var(--text-light); margin-top: 0.25rem;">Role: <span id="studentRole">student</span></div>
+                    </div>
+                    <button class="btn btn-clear" onclick="logoutAndRedirect()">Logout</button>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div class="progress-stat-box" style="border-left: 4px solid var(--primary-color);">
+                    <div style="font-size:2rem; font-weight:800; color: var(--primary-color);" id="statCourses">0</div>
+                    <div class="progress-stat-label">Courses Completed</div>
+                </div>
+                <div class="progress-stat-box" style="border-left: 4px solid var(--secondary-color);">
+                    <div style="font-size:2rem; font-weight:800; color: var(--secondary-color);" id="statQuizzes">0</div>
+                    <div class="progress-stat-label">Quiz Attempts</div>
+                </div>
+                <div class="progress-stat-box" style="border-left: 4px solid var(--accent-color);">
+                    <div style="font-size:2rem; font-weight:800; color: var(--accent-color);" id="statAvg">0%</div>
+                    <div class="progress-stat-label">Average Score</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 2.5rem;">
+                <h2 class="progress-section-title">Quick Links</h2>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <a href="mycourses.html" class="opportunity-card" style="text-decoration:none;">
+                        <h4>📚 My Courses</h4>
+                        <p>See your completed courses with timestamps.</p>
+                    </a>
+                    <a href="certificates.html" class="opportunity-card" style="text-decoration:none;">
+                        <h4>🎓 My Certificates</h4>
+                        <p>View certificates earned from courses and quizzes.</p>
+                    </a>
+                    <a href="../quiz.html" class="opportunity-card" style="text-decoration:none;">
+                        <h4>📝 Take Quiz</h4>
+                        <p>Use course details → Take Quiz.</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>SkillBridge</h4>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../skills.html">Courses</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="../index.html#contact-us">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SkillBridge. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            if (!requireRole('student')) return;
+
+            const session = getSession();
+            const name = session?.fullName || session?.username || 'Student';
+            document.getElementById('studentName').textContent = name;
+            document.getElementById('studentRole').textContent = session?.role || 'student';
+
+            const completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
+            const quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
+
+            document.getElementById('statCourses').textContent = completedCourses.length;
+            document.getElementById('statQuizzes').textContent = quizScores.length;
+
+            const avg = quizScores.length ? Math.round(quizScores.reduce((a,b)=>a+b.percentage,0)/quizScores.length) : 0;
+            document.getElementById('statAvg').textContent = avg + '%';
+        });
+
+        function logoutAndRedirect(){
+            logoutUser();
+            window.location.href = '../register.html';
+        }
+    </script>
+</body>
+</html>
+
