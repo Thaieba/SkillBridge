@@ -3,8 +3,8 @@
    ============================================ */
 
 const DEMO_USERS = [
-    { fullName: 'Demo Student', username: 'student', password: 'student123', role: 'student' },
-    { fullName: 'Demo Admin', username: 'admin', password: 'admin123', role: 'admin' }
+    { fullName: 'Demo Student', username: 'student', email: 'student@skillbridge.com', password: 'student123', role: 'student' },
+    { fullName: 'Demo Admin', username: 'admin', email: 'admin@skillbridge.com', password: 'admin123', role: 'admin' }
 ];
 
 // Initialize app when DOM is loaded
@@ -62,12 +62,12 @@ function seedDemoUsers() {
             return;
         }
 
-        if (existing.password !== demo.password || existing.role !== demo.role) {
-            existing.fullName = demo.fullName;
-            existing.password = demo.password;
-            existing.role = demo.role;
-            changed = true;
-        }
+        ['fullName', 'email', 'password', 'role'].forEach((key) => {
+            if (!existing[key]) {
+                existing[key] = demo[key];
+                changed = true;
+            }
+        });
     });
 
     if (changed) {
@@ -84,6 +84,7 @@ function setupAuthHelpers() {
     window.logoutUser = logoutUser;
     window.registerUser = registerUser;
     window.loginUser = loginUser;
+    window.resetPassword = resetPassword;
 }
 
 function getSession() {
@@ -117,24 +118,42 @@ function logoutUser() {
     localStorage.removeItem('session');
 }
 
-function registerUser({ fullName, username, password, role }) {
+function normalizeEmail(email) {
+    return (email || '').trim().toLowerCase();
+}
+
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function registerUser({ fullName, username, email, password, role }) {
     seedDemoUsers();
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
     const uname = (username || '').trim();
     const fname = (fullName || '').trim();
+    const emailValue = normalizeEmail(email);
 
-    if (!uname || !fname || !password) {
+    if (!uname || !fname || !emailValue || !password) {
         return { ok: false, message: 'Please fill all fields.' };
+    }
+
+    if (!isValidEmail(emailValue)) {
+        return { ok: false, message: 'Please enter a valid email address.' };
     }
 
     if (users.some(u => u.username === uname)) {
         return { ok: false, message: 'Username already exists. Please login.' };
     }
 
+    if (users.some(u => normalizeEmail(u.email) === emailValue)) {
+        return { ok: false, message: 'Email already registered. Please login or reset password.' };
+    }
+
     const user = {
         fullName: fname,
         username: uname,
+        email: emailValue,
         // Demo only (NOT secure). Avoid real hashes for this exercise.
         password: password,
         role: role === 'admin' ? 'admin' : 'student',
@@ -154,13 +173,18 @@ function loginUser({ username, password, role }) {
     seedDemoUsers();
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    const uname = (username || '').trim();
+    const loginId = (username || '').trim();
+    const loginEmail = normalizeEmail(loginId);
 
-    if (!uname || !password) {
-        return { ok: false, message: 'Please enter username and password.' };
+    if (!loginId || !password) {
+        return { ok: false, message: 'Please enter username/email and password.' };
     }
 
-    const matches = users.filter((u) => u.username === uname && u.password === password);
+    const matches = users.filter((u) => {
+        const sameUsername = u.username === loginId;
+        const sameEmail = normalizeEmail(u.email) === loginEmail;
+        return (sameUsername || sameEmail) && u.password === password;
+    });
     if (!matches.length) {
         return { ok: false, message: 'Invalid username or password.' };
     }
@@ -177,6 +201,7 @@ function loginUser({ username, password, role }) {
 
     localStorage.setItem('session', JSON.stringify({
         username: user.username,
+        email: user.email || '',
         fullName: user.fullName,
         role: user.role
     }));
@@ -188,6 +213,33 @@ function loginUser({ username, password, role }) {
         role: user.role,
         message: `Welcome, ${user.fullName}! Redirecting...`
     };
+}
+
+function resetPassword({ username, newPassword, role }) {
+    seedDemoUsers();
+
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const uname = (username || '').trim();
+
+    if (!uname || !newPassword) {
+        return { ok: false, message: 'Please enter username and new password.' };
+    }
+
+    if (newPassword.length < 6) {
+        return { ok: false, message: 'Password must be at least 6 characters.' };
+    }
+
+    const expectedRole = role === 'admin' ? 'admin' : 'student';
+    const user = users.find((u) => u.username === uname && u.role === expectedRole);
+
+    if (!user) {
+        return { ok: false, message: 'No account found with this username.' };
+    }
+
+    user.password = newPassword;
+    localStorage.setItem('users', JSON.stringify(users));
+
+    return { ok: true, message: 'Password reset successfully. Please login with your new password.' };
 }
 
 // ============================================
