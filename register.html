@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Register - SkillBridge</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        #regPassword::-ms-reveal,
+        #regPassword::-ms-clear {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <nav>
@@ -48,16 +54,24 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="regUsername">Username</label>
+                    <div class="form-group" id="usernameGroup">
+                        <label for="regUsername" id="usernameLabel">Username</label>
                         <div class="input-with-icon">
                             <span class="input-icon" aria-hidden="true">👤</span>
                             <input id="regUsername" type="text" required placeholder="Choose username">
                         </div>
                     </div>
 
+                    <div class="form-group" id="emailGroup">
+                        <label for="regEmail">Email</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon" aria-hidden="true">✉️</span>
+                            <input id="regEmail" type="email" required placeholder="you@example.com">
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label for="regPassword">Password</label>
+                        <label for="regPassword" id="passwordLabel">Password</label>
                         <div class="input-with-icon">
                             <span class="input-icon" aria-hidden="true">🔒</span>
                             <input id="regPassword" type="password" required placeholder="Choose password">
@@ -66,6 +80,11 @@
                     </div>
 
 
+
+                    <div id="loginResetActions" style="display:none; text-align:right; margin-top: -0.4rem;">
+                        <button type="button" id="forgotPasswordBtn" style="border:0; background:transparent; color: var(--primary-color); font-weight: 700; cursor:pointer; padding: 0;">Forgot password?</button>
+                        <button type="button" id="backToLoginBtn" style="display:none; border:0; background:transparent; color: var(--primary-color); font-weight: 700; cursor:pointer; padding: 0;">Back to login</button>
+                    </div>
 
                     <button class="btn btn-primary" type="submit" id="authSubmitBtn" style="margin-top: 0.5rem;">Create Account</button>
                 </form>
@@ -76,47 +95,42 @@
                     <a href="index.html" style="color: var(--primary-color); font-weight: 700;">Back to Home</a>
                 </div>
 
-
-            </div>
-
-            <div style="margin-top: 1.5rem; text-align:center; color: var(--text-light); font-size: 0.95rem;">
-        
+                <div style="margin-top: 1.5rem; text-align:center; color: var(--text-light); font-size: 0.95rem;">
+            
+                </div>
             </div>
         </div>
     </section>
 
+    <!-- FOOTER -->
     <footer>
         <div class="footer-container">
             <div class="footer-section">
                 <h4>About SkillBridge</h4>
                 <ul>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Our Mission</a></li>
-                    <li><a href="#">Team</a></li>
-                    <li><a href="#">Blog</a></li>
+                    <li><a href="index.html#about-us">About Us</a></li>
+                    <li><a href="getting-started.html">Quick Start Guide</a></li>
                 </ul>
             </div>
             <div class="footer-section">
-                <h4>Support</h4>
+                <h4>Courses</h4>
                 <ul>
-                    <li><a href="#">Help Center</a></li>
-                    <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">FAQ</a></li>
-                    <li><a href="#">Feedback</a></li>
+                    <li><a href="skills.html">All Courses</a></li>
+                    <li><a href="skills.html#categories">Categories</a></li>
+                    <li><a href="roadmap.html">Career Roadmap</a></li>
                 </ul>
             </div>
             <div class="footer-section">
-                <h4>Legal</h4>
+                <h4>Student Portal</h4>
                 <ul>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
-                    <li><a href="#">Cookie Policy</a></li>
-                    <li><a href="#">Disclaimer</a></li>
+                    <li><a href="progress.html">Your Progress</a></li>
+                    <li><a href="certificate.html">Certificates</a></li>
+                    <li><a href="index.html#contact-us">Contact Us</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 SkillBridge. All rights reserved.</p>
+            <p>&copy; 2026 SkillBridge. All rights reserved. | Empowering careers through education</p>
         </div>
     </footer>
 
@@ -129,7 +143,17 @@
             const tabRegister = document.getElementById('tabRegister');
             const tabLogin = document.getElementById('tabLogin');
             const fullNameGroup = document.getElementById('fullNameGroup');
+            const usernameGroup = document.getElementById('usernameGroup');
+            const emailGroup = document.getElementById('emailGroup');
+            const loginResetActions = document.getElementById('loginResetActions');
+            const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+            const backToLoginBtn = document.getElementById('backToLoginBtn');
             const regFullName = document.getElementById('regFullName');
+            const regUsername = document.getElementById('regUsername');
+            const regEmail = document.getElementById('regEmail');
+            const regPassword = document.getElementById('regPassword');
+            const usernameLabel = document.getElementById('usernameLabel');
+            const passwordLabel = document.getElementById('passwordLabel');
             const authTitle = document.getElementById('authTitle');
             const authSubmitBtn = document.getElementById('authSubmitBtn');
             const authBox = document.getElementById('authBox');
@@ -139,56 +163,101 @@
             function setMode(mode) {
                 authMode = mode;
                 statusEl.style.display = 'none';
-                
+
+                [tabRegister, tabLogin].forEach((tab) => {
+                    tab.style.background = 'transparent';
+                    tab.style.color = 'var(--text-light)';
+                    tab.style.fontWeight = '600';
+                });
+
                 if (mode === 'register') {
                     tabRegister.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
                     tabRegister.style.color = 'white';
                     tabRegister.style.fontWeight = '700';
 
-                    tabLogin.style.background = 'transparent';
-                    tabLogin.style.color = 'var(--text-light)';
-                    tabLogin.style.fontWeight = '600';
-
                     fullNameGroup.style.display = 'block';
+                    usernameGroup.style.display = 'block';
+                    emailGroup.style.display = 'block';
                     regFullName.setAttribute('required', 'required');
+                    regUsername.setAttribute('required', 'required');
+                    regEmail.setAttribute('required', 'required');
+                    usernameLabel.textContent = 'Username';
+                    regUsername.placeholder = 'Choose username';
+                    passwordLabel.textContent = 'Password';
+                    regPassword.placeholder = 'Choose password';
+                    loginResetActions.style.display = 'none';
+                    forgotPasswordBtn.style.display = 'inline';
+                    backToLoginBtn.style.display = 'none';
                     authTitle.textContent = '📝 Register';
                     authSubmitBtn.textContent = 'Create Account';
                     authBox.style.borderLeftColor = 'var(--secondary-color)';
+                } else if (mode === 'login') {
+                    tabLogin.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                    tabLogin.style.color = 'white';
+                    tabLogin.style.fontWeight = '700';
+
+                    fullNameGroup.style.display = 'none';
+                    usernameGroup.style.display = 'block';
+                    emailGroup.style.display = 'none';
+                    regFullName.removeAttribute('required');
+                    regUsername.setAttribute('required', 'required');
+                    regEmail.removeAttribute('required');
+                    usernameLabel.textContent = 'Username or Email';
+                    regUsername.placeholder = 'Enter username or email';
+                    passwordLabel.textContent = 'Password';
+                    regPassword.placeholder = 'Enter password';
+                    loginResetActions.style.display = 'block';
+                    forgotPasswordBtn.style.display = 'inline';
+                    backToLoginBtn.style.display = 'none';
+                    authTitle.textContent = '🔐 Login';
+                    authSubmitBtn.textContent = 'Login';
+                    authBox.style.borderLeftColor = 'var(--primary-color)';
                 } else {
                     tabLogin.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
                     tabLogin.style.color = 'white';
                     tabLogin.style.fontWeight = '700';
 
-                    tabRegister.style.background = 'transparent';
-                    tabRegister.style.color = 'var(--text-light)';
-                    tabRegister.style.fontWeight = '600';
-
                     fullNameGroup.style.display = 'none';
+                    usernameGroup.style.display = 'block';
+                    emailGroup.style.display = 'none';
                     regFullName.removeAttribute('required');
-                    authTitle.textContent = '🔐 Login';
-                    authSubmitBtn.textContent = 'Login';
-                    authBox.style.borderLeftColor = 'var(--primary-color)';
+                    regUsername.setAttribute('required', 'required');
+                    regEmail.removeAttribute('required');
+                    usernameLabel.textContent = 'Username';
+                    regUsername.placeholder = 'Enter your username';
+                    passwordLabel.textContent = 'New Password';
+                    regPassword.placeholder = 'Enter new password';
+                    loginResetActions.style.display = 'block';
+                    forgotPasswordBtn.style.display = 'none';
+                    backToLoginBtn.style.display = 'inline';
+                    authTitle.textContent = '🔁 Reset Password';
+                    authSubmitBtn.textContent = 'Reset Password';
+                    authBox.style.borderLeftColor = 'var(--accent-color)';
                 }
             }
 
             tabRegister?.addEventListener('click', () => setMode('register'));
             tabLogin?.addEventListener('click', () => setMode('login'));
+            forgotPasswordBtn?.addEventListener('click', () => setMode('reset'));
+            backToLoginBtn?.addEventListener('click', () => setMode('login'));
 
             setMode('register');
 
             form?.addEventListener('submit', function(e){
                 e.preventDefault();
 
-                const username = document.getElementById('regUsername').value.trim();
-                const password = document.getElementById('regPassword').value;
+                const username = regUsername.value.trim();
+                const email = regEmail.value.trim();
+                const password = regPassword.value;
                 const role = 'student';
 
                 if (authMode === 'register') {
                     const fullName = regFullName.value.trim();
-                    const res = registerUser({ fullName, username, password, role });
+                    const res = registerUser({ fullName, username, email, password, role });
                     if(res.ok){
                         localStorage.setItem('session', JSON.stringify({
                             username: username,
+                            email: email,
                             fullName: fullName,
                             role: role === 'admin' ? 'admin' : 'student'
                         }));
@@ -207,7 +276,7 @@
                         statusEl.classList.remove('success');
                         statusEl.classList.add('error');
                     }
-                } else {
+                } else if (authMode === 'login') {
                     const res = loginUser({ username, password, role });
                     if(res.ok){
                         statusEl.style.display = 'block';
@@ -222,6 +291,17 @@
                         statusEl.textContent = res.message;
                         statusEl.classList.remove('success');
                         statusEl.classList.add('error');
+                    }
+                } else {
+                    const res = resetPassword({ username, newPassword: password, role });
+                    statusEl.style.display = 'block';
+                    statusEl.textContent = res.message;
+                    statusEl.classList.toggle('success', res.ok);
+                    statusEl.classList.toggle('error', !res.ok);
+
+                    if (res.ok) {
+                        regPassword.value = '';
+                        setTimeout(() => setMode('login'), 900);
                     }
                 }
             });
