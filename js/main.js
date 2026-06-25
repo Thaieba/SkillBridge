@@ -404,6 +404,56 @@ function viewCourseDetails(courseId) {
     window.location.href = `course-details.html?id=${courseId}`;
 }
 
+function getCourseVideoInfo(courseId) {
+    const id = parseInt(courseId, 10);
+    const course = coursesData.find(c => c.id === id);
+    const stored = JSON.parse(localStorage.getItem('courseVideos') || '{}');
+    const override = stored[id] || stored[String(id)];
+
+    if (override?.videoId) {
+        return {
+            videoId: override.videoId,
+            title: override.title || course?.youtubeVideoTitle || 'Course Video'
+        };
+    }
+
+    return {
+        videoId: course?.youtubeVideoId || '',
+        title: course?.youtubeVideoTitle || 'Course Video'
+    };
+}
+
+function renderCourseDetailHero(course) {
+    if (!course.detailImage) return '';
+    return `
+                <section style="padding: 0; overflow: hidden;">
+                    <img src="${course.detailImage}" alt="${course.title}" style="width: 100%; height: auto; display: block;">
+                </section>`;
+}
+
+function renderCourseVideoEmbed(course) {
+    const { videoId, title } = getCourseVideoInfo(course.id);
+    if (!videoId) return '';
+
+    return `
+                    <div style="margin-bottom: 3rem;">
+                        <div style="background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                            <div style="position: relative; padding-bottom: 56.25%; height: 0;">
+                                <iframe
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                                    src="https://www.youtube.com/embed/${videoId}"
+                                    title="${title}"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen="">
+                                </iframe>
+                            </div>
+                        </div>
+                        <p style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
+                            ℹ️ <strong>Video plays on live server.</strong> In development (file://) there may be restrictions, but it works perfectly when deployed!
+                        </p>
+                    </div>`;
+}
+
 function displayCourseDetails() {
     const params = new URLSearchParams(window.location.search);
     const courseId = params.get('id');
@@ -414,6 +464,11 @@ function displayCourseDetails() {
         course = JSON.parse(storedCourse);
     } else {
         course = coursesData.find(c => c.id === parseInt(courseId));
+    }
+
+    const canonicalCourse = coursesData.find(c => c.id === parseInt(courseId || course?.id, 10));
+    if (canonicalCourse) {
+        course = { ...canonicalCourse, ...course };
     }
 
     if (!course) {
@@ -429,180 +484,12 @@ function displayCourseDetails() {
         detailsContainer.innerHTML = `
             <div style="position: relative;">
                 ${adminBtn}
-                ${course.id === 1 ? `
-                <section style="padding: 0; overflow: hidden;">
-                    <img src="images/wd-detail.jpeg" alt="Web Development" style="width: 100%; height: auto; display: block;">
-                </section>
-            ` : course.id === 2 ? `
-            <section style="padding: 0; overflow: hidden;">
-                <img src="images/python-detail.jpeg" alt="Python Programming" style="width: 100%; height: auto; display: block;">
-            </section>
-            ` : course.id === 3 ? `
-            <section style="padding: 0; overflow: hidden;">
-                <img src="images/data-analytics-detail.jpeg" alt="Data Analytics" style="width: 100%; height: auto; display: block;">
-            </section>
-            ` : course.id === 4 ? `
-            <section style="padding: 0; overflow: hidden;">
-                <img src="images/cloud-detail.jpeg" alt="Cloud Computing" style="width: 100%; height: auto; display: block;">
-            </section>
-            ` : course.id === 5 ? `
-            <section style="padding: 0; overflow: hidden;">
-                <img src="images/cyber-detail.jpeg" alt="Cyber Security" style="width: 100%; height: auto; display: block;">
-            </section>
-            ` : course.id === 6 ? `
-            <section style="padding: 0; overflow: hidden;">
-                <img src="images/uiux-detail.jpeg" alt="UI/UX Design" style="width: 100%; height: auto; display: block;">
-            </section>
-            ` : course.id === 7 ? `
-            <section style="padding: 0; overflow: hidden;">
-                <img src="images/mobile-detail.jpeg" alt="Mobile Development" style="width: 100%; height: auto; display: block;">
-            </section>
-            ` : course.id === 8 ? `
-            <section style="padding: 0; overflow: hidden;">
-                <img src="images/ml-detail.jpeg" alt="Machine Learning" style="width: 100%; height: auto; display: block;">
-            </section>
-            ` : ''}
+                ${renderCourseDetailHero(course)}
             </div>
 
             <div class="section">
                 <div class="container">
-                    ${course.id === 1 ? `
-                    <div style="margin-bottom: 3rem;">
-                        <div style="background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-                            <div style="position: relative; padding-bottom: 56.25%; height: 0;">
-                                <iframe 
-                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                                    src="https://www.youtube.com/embed/qz0aGYrrlhU" 
-                                    title="Web Development Tutorial for Beginners"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen="">
-                                </iframe>
-                            </div>
-                        </div>
-                        <p style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
-                            ℹ️ <strong>Video plays on live server.</strong> In development (file://) there may be restrictions, but it works perfectly when deployed!
-                        </p>
-                    </div>
-                    ` : course.id === 2 ? `
-                    <div style="margin-bottom: 3rem;">
-                        <div style="background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);"></div>
-                            <div style="position: relative; padding-bottom: 56.25%; height: 0;">
-                                <iframe 
-                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                                    src="https://www.youtube.com/embed/8ext9G7XspQ" 
-                                    title="Python Full Course for Beginners"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen="">
-                                </iframe>
-                            </div>
-                        </div>
-                        <p style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
-                            ℹ️ <strong>Video plays on live server.</strong> In development (file://) there may be restrictions, but it works perfectly when deployed!
-                        </p>
-                    </div>
-                    ` : course.id === 3 ? `
-                    <div style="margin-bottom: 3rem;">
-                        <div style="background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);"></div>
-                            <div style="position: relative; padding-bottom: 56.25%; height: 0;">
-                                <iframe 
-                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                                    src="https://www.youtube.com/embed/MAy-xUf-Hq4" 
-                                    title="Data Analytics Full Course"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen="">
-                                </iframe>
-                            </div>
-                        </div>
-                        <p style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
-                            ℹ️ <strong>Video plays on live server.</strong> In development (file://) there may be restrictions, but it works perfectly when deployed!
-                        </p>
-                    </div>
-                    ` : course.id === 4 ? `
-                    <div style="margin-bottom: 3rem;">
-                        <div style="background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);"></div>
-                            <div style="position: relative; padding-bottom: 56.25%; height: 0;">
-                                <iframe 
-                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                                    src="https://www.youtube.com/embed/rK6c2m0sxds" 
-                                    title="Cloud Computing Full Course"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen="">
-                                </iframe>
-                            </div>
-                        </div>
-                        <p style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
-                            ℹ️ <strong>Video plays on live server.</strong> In development (file://) there may be restrictions, but it works perfectly when deployed!
-                        </p>
-                    </div>
-                    ` : course.id === 5 ? `
-                    <div style="margin-bottom: 3rem;">
-                        <div style="background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);"></div>
-                            <div style="position: relative; padding-bottom: 56.25%; height: 0;">
-                                <iframe 
-                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                                    src="https://www.youtube.com/embed/x_IWGgo3zTA" 
-                                    title="Cybersecurity Full Course"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen="">
-                                </iframe>
-                            </div>
-                        </div>
-                        <p style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
-                            ℹ️ <strong>Video plays on live server.</strong> In development (file://) there may be restrictions, but it works perfectly when deployed!
-                        </p>
-                    </div>
-                    ` : course.id === 6 ? `
-                    <div style="margin-bottom: 3rem;">
-                        <div style="background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);"></div>
-                            <div style="position: relative; padding-bottom: 56.25%; height: 0;">
-                                <iframe 
-                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                                    src="https://www.youtube.com/embed/ue6qMGUoUu0" 
-                                    title="UI/UX Design Full Course"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen="">
-                                </iframe>
-                            </div>
-                        </div>
-                        <p style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
-                            ℹ️ <strong>Video plays on live server.</strong> In development (file://) there may be restrictions, but it works perfectly when deployed!
-                        </p>
-                    </div>
-                    ` : course.id === 7 ? `
-                    <div style="margin-bottom: 3rem;">
-                        <div style="background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);"></div>
-                            <div style="position: relative; padding-bottom: 56.25%; height: 0;">
-                                <iframe 
-                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                                    src="https://www.youtube.com/embed/fDkWaRwj0Pk" 
-                                    title="Mobile Development Full Course"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen="">
-                                </iframe>
-                            </div>
-                        </div>
-                        <p style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
-                            ℹ️ <strong>Video plays on live server.</strong> In development (file://) there may be restrictions, but it works perfectly when deployed!
-                        </p>
-                    </div>
-                    ` : course.id === 8 ? `
-                    <div style="margin-bottom: 3rem;">
-                        <div style="background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);"></div>
-                            <div style="position: relative; padding-bottom: 56.25%; height: 0;">
-                                <iframe 
-                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                                    src="https://www.youtube.com/embed/QJ5oKfJDfVM" 
-                                    title="Machine Learning Full Course"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen="">
-                                </iframe>
-                            </div>
-                        </div>
-                        <p style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
-                            ℹ️ <strong>Video plays on live server.</strong> In development (file://) there may be restrictions, but it works perfectly when deployed!
-                        </p>
-                    </div>
-                    ` : ''}
+                    ${renderCourseVideoEmbed(course)}
                 </div>
             </div>
 
