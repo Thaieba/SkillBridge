@@ -8,6 +8,7 @@ const coursesData = [
         title: "Web Development",
         category: "Frontend",
         icon: "🌐",
+        image: "images/courses/web-development.png",
         description: "Learn to build modern, responsive websites",
         duration: "12 weeks",
         level: "Beginner",
@@ -45,6 +46,7 @@ const coursesData = [
         title: "Python Programming",
         category: "Backend",
         icon: "🐍",
+        image: "images/courses/python.jpeg",
         description: "Master Python for backend development and automation",
         duration: "10 weeks",
         level: "Beginner",
@@ -84,6 +86,7 @@ const coursesData = [
         title: "Data Analytics",
         category: "Data",
         icon: "📊",
+        image: "images/courses/data-analytics.png",
         description: "Transform raw data into actionable insights",
         duration: "14 weeks",
         level: "Intermediate",
@@ -123,6 +126,7 @@ const coursesData = [
         title: "Cloud Computing",
         category: "Infrastructure",
         icon: "☁️",
+        image: "images/courses/cloud-computing.png",
         description: "Deploy and manage applications on cloud platforms",
         duration: "11 weeks",
         level: "Intermediate",
@@ -162,6 +166,7 @@ const coursesData = [
         title: "Cyber Security",
         category: "Security",
         icon: "🔒",
+        image: "images/courses/cyber-security.png",
         description: "Protect systems and networks from cyber threats",
         duration: "13 weeks",
         level: "Intermediate",
@@ -201,6 +206,7 @@ const coursesData = [
         title: "UI/UX Design",
         category: "Design",
         icon: "🎨",
+        image: "images/courses/uiux-design.png",
         description: "Create beautiful and user-friendly interfaces",
         duration: "10 weeks",
         level: "Beginner",
@@ -233,6 +239,88 @@ const coursesData = [
             "Interaction Designer",
             "Visual Designer",
             "Design Lead"
+        ]
+    },
+    {
+        id: 7,
+        title: "Mobile Development",
+        category: "Mobile",
+        icon: "📱",
+        image: "images/courses/mobile-development.png",
+        description: "Build native and cross-platform mobile applications",
+        duration: "12 weeks",
+        level: "Intermediate",
+        students: "4.9K",
+        rating: 4.8,
+        fullDescription: "Learn to develop professional mobile applications for iOS and Android. Master React Native and native development frameworks.",
+        prerequisites: ["JavaScript knowledge", "Understanding of OOP concepts"],
+        courseDuration: "12 weeks (35-40 hours)",
+        skillsGained: [
+            "React Native Fundamentals",
+            "iOS Development (Swift)",
+            "Android Development (Kotlin)",
+            "Mobile UI/UX Principles",
+            "API Integration",
+            "App Performance Optimization",
+            "App Publishing & Deployment"
+        ],
+        curriculumTopics: [
+            "Mobile Development Basics",
+            "React Native Setup & Components",
+            "Navigation & Routing",
+            "State Management",
+            "Working with APIs",
+            "Local Storage & Databases",
+            "Testing & Debugging Mobile Apps",
+            "Publishing to App Stores"
+        ],
+        careerPaths: [
+            "Mobile Developer",
+            "iOS Developer",
+            "Android Developer",
+            "React Native Developer",
+            "Full Stack Mobile Developer"
+        ]
+    },
+    {
+        id: 8,
+        title: "Machine Learning",
+        category: "AI/ML",
+        icon: "🤖",
+        image: "images/courses/machine-learning.png",
+        description: "Master machine learning algorithms and AI applications",
+        duration: "14 weeks",
+        level: "Advanced",
+        students: "3.6K",
+        rating: 4.9,
+        fullDescription: "Deep dive into machine learning, neural networks, and AI. Build intelligent systems that learn from data and make predictions.",
+        prerequisites: ["Python programming", "Linear algebra basics", "Statistics knowledge"],
+        courseDuration: "14 weeks (45-50 hours)",
+        skillsGained: [
+            "Supervised Learning",
+            "Unsupervised Learning",
+            "Deep Learning & Neural Networks",
+            "Natural Language Processing (NLP)",
+            "Computer Vision",
+            "Model Evaluation & Optimization",
+            "TensorFlow & PyTorch"
+        ],
+        curriculumTopics: [
+            "Machine Learning Fundamentals",
+            "Data Preprocessing & Feature Engineering",
+            "Regression & Classification",
+            "Decision Trees & Random Forests",
+            "Support Vector Machines (SVM)",
+            "Neural Networks & Deep Learning",
+            "NLP & Text Processing",
+            "Model Deployment & Production"
+        ],
+        careerPaths: [
+            "Machine Learning Engineer",
+            "Data Scientist",
+            "AI Engineer",
+            "Computer Vision Specialist",
+            "NLP Specialist"
         ]
     }
 ];
@@ -392,6 +480,111 @@ const quizData = {
                 explanation: "KPI stands for Key Performance Indicator - metrics used to measure success."
             }
         ]
+    },
+    7: { // Mobile Development
+        title: "Mobile Development Fundamentals Quiz",
+        questions: [
+            {
+                id: 1,
+                question: "Which framework is used for cross-platform mobile development?",
+                options: ["React Native", "Angular", "Vue.js", "Express.js"],
+                correct: 0,
+                explanation: "React Native is a popular framework for building cross-platform mobile applications for iOS and Android."
+            },
+            {
+                id: 2,
+                question: "What is the primary language for iOS development?",
+                options: ["Java", "Kotlin", "Swift", "C#"],
+                correct: 2,
+                explanation: "Swift is the primary programming language for iOS app development."
+            },
+            {
+                id: 3,
+                question: "Which language is native to Android development?",
+                options: ["Swift", "Kotlin", "Objective-C", "Ruby"],
+                correct: 1,
+                explanation: "Kotlin is the official language for Android development, replacing Java."
+            },
+            {
+                id: 4,
+                question: "What does API stand for in the context of mobile apps?",
+                options: [
+                    "Advanced Programming Interface",
+                    "Application Programming Interface",
+                    "Application Process Integration",
+                    "Advanced Process Interface"
+                ],
+                correct: 1,
+                explanation: "API stands for Application Programming Interface - used to communicate between app and server."
+            },
+            {
+                id: 5,
+                question: "Which design pattern is most commonly used in mobile apps for state management?",
+                options: ["MVC", "MVP", "MVVM", "All of the above"],
+                correct: 3,
+                explanation: "MVC, MVP, and MVVM are all used in mobile development for managing application state and UI."
+            }
+        ]
+    },
+    8: { // Machine Learning
+        title: "Machine Learning Fundamentals Quiz",
+        questions: [
+            {
+                id: 1,
+                question: "What is the main goal of supervised learning?",
+                options: [
+                    "To discover hidden patterns in data",
+                    "To predict outcomes based on labeled training data",
+                    "To find clusters in data",
+                    "To reduce dimensionality"
+                ],
+                correct: 1,
+                explanation: "Supervised learning uses labeled data to train models that can predict outcomes for new inputs."
+            },
+            {
+                id: 2,
+                question: "Which algorithm is used for image recognition in deep learning?",
+                options: [
+                    "Decision Tree",
+                    "K-Means Clustering",
+                    "Convolutional Neural Networks (CNN)",
+                    "Linear Regression"
+                ],
+                correct: 2,
+                explanation: "Convolutional Neural Networks (CNNs) are specialized for image recognition and computer vision tasks."
+            },
+            {
+                id: 3,
+                question: "What does overfitting mean in machine learning?",
+                options: [
+                    "The model is too simple",
+                    "The model performs well on training data but poorly on new data",
+                    "The model needs more features",
+                    "The model has too few parameters"
+                ],
+                correct: 1,
+                explanation: "Overfitting occurs when a model learns the training data too well, including noise, and fails to generalize."
+            },
+            {
+                id: 4,
+                question: "Which library is most popular for machine learning in Python?",
+                options: ["NumPy", "scikit-learn", "Matplotlib", "Pandas"],
+                correct: 1,
+                explanation: "scikit-learn is the most popular Python library for machine learning algorithms and tools."
+            },
+            {
+                id: 5,
+                question: "What is the purpose of training/testing split in ML?",
+                options: [
+                    "To increase data size",
+                    "To evaluate model performance on unseen data",
+                    "To reduce training time",
+                    "To remove outliers"
+                ],
+                correct: 1,
+                explanation: "Train/test split divides data to evaluate how well the model generalizes to new, unseen data."
+            }
+        ]
     }
 };
 
@@ -503,6 +696,198 @@ const futureOpportunitiesData = {
             "High demand for automation engineers",
             "Data science roles rapidly growing",
             "Python expanding to embedded systems"
+        ]
+    },
+    7: { // Mobile Development
+        title: "Mobile Development Career Growth",
+        growthPaths: [
+            {
+                title: "Mobile Application Developer",
+                salary: "$100K - $170K",
+                demand: "Very High",
+                skills: ["React Native", "Native iOS/Android", "APIs"],
+                growth: "Senior Developer → Tech Lead"
+            },
+            {
+                title: "Full Stack Mobile Developer",
+                salary: "$130K - $200K",
+                demand: "Very High",
+                skills: ["Frontend + Backend", "Mobile Architecture", "DevOps"],
+                growth: "Senior Developer → Architect"
+            },
+            {
+                title: "Mobile Solutions Architect",
+                salary: "$150K - $220K",
+                demand: "High",
+                skills: ["System Design", "Cross-platform Development", "Leadership"],
+                growth: "Architect → Engineering Manager"
+            }
+        ],
+        industryInsights: [
+            "Mobile-first approach becoming standard",
+            "React Native and Flutter gaining popularity",
+            "IoT and wearable app development growing",
+            "App monetization and user retention critical"
+        ]
+    },
+    8: { // Machine Learning
+        title: "Machine Learning Career Growth",
+        growthPaths: [
+            {
+                title: "Machine Learning Engineer",
+                salary: "$120K - $200K",
+                demand: "Very High",
+                skills: ["Algorithms", "Python/TensorFlow", "Data Processing"],
+                growth: "ML Engineer → Senior ML Engineer"
+            },
+            {
+                title: "AI Research Scientist",
+                salary: "$150K - $250K",
+                demand: "Very High",
+                skills: ["Advanced Math", "Research", "Deep Learning"],
+                growth: "Research Scientist → Principal Scientist"
+            },
+            {
+                title: "Data Scientist with ML",
+                salary: "$110K - $180K",
+                demand: "Very High",
+                skills: ["Statistics", "ML Algorithms", "Data Analysis"],
+                growth: "Data Scientist → ML Lead"
+            }
+        ],
+        industryInsights: [
+            "AI/ML adoption accelerating across industries",
+            "Generative AI and LLMs revolutionizing the field",
+            "Edge AI and on-device ML growing rapidly",
+            "Ethical AI and responsible ML becoming critical"
+        ]
+    },
+    3: { // Data Analytics
+        title: "Data Analytics Career Growth",
+        growthPaths: [
+            {
+                title: "Senior Data Analyst",
+                salary: "$90K - $160K",
+                demand: "Very High",
+                skills: ["Advanced Analytics", "SQL/Python", "Data Visualization"],
+                growth: "Data Analyst → Analytics Manager"
+            },
+            {
+                title: "Analytics Engineer",
+                salary: "$110K - $180K",
+                demand: "Very High",
+                skills: ["Data Pipelines", "SQL", "Data Warehousing"],
+                growth: "Analytics Engineer → Data Architecture Lead"
+            },
+            {
+                title: "Business Intelligence Specialist",
+                salary: "$100K - $170K",
+                demand: "High",
+                skills: ["BI Tools", "Dashboard Design", "Business Acumen"],
+                growth: "BI Specialist → BI Architect"
+            }
+        ],
+        industryInsights: [
+            "Real-time analytics becoming standard",
+            "Self-service analytics platforms growing",
+            "Data storytelling becoming critical skill",
+            "Analytics in every department expanding"
+        ]
+    },
+    4: { // Cloud Computing
+        title: "Cloud Computing Career Growth",
+        growthPaths: [
+            {
+                title: "Cloud Solutions Architect",
+                salary: "$130K - $210K",
+                demand: "Very High",
+                skills: ["AWS/Azure/GCP", "System Design", "Best Practices"],
+                growth: "Architect → Enterprise Architect"
+            },
+            {
+                title: "DevOps Engineer",
+                salary: "$110K - $190K",
+                demand: "Very High",
+                skills: ["CI/CD", "Kubernetes", "Automation"],
+                growth: "DevOps Engineer → Infrastructure Lead"
+            },
+            {
+                title: "Cloud Security Engineer",
+                salary: "$120K - $200K",
+                demand: "Very High",
+                skills: ["Cloud Security", "Compliance", "Network Security"],
+                growth: "Security Engineer → Security Architect"
+            }
+        ],
+        industryInsights: [
+            "Hybrid and multi-cloud strategies expanding",
+            "Serverless computing gaining adoption",
+            "Cloud cost optimization becoming critical",
+            "Cloud-native development becoming standard"
+        ]
+    },
+    5: { // Cyber Security
+        title: "Cyber Security Career Growth",
+        growthPaths: [
+            {
+                title: "Security Engineer",
+                salary: "$100K - $180K",
+                demand: "Very High",
+                skills: ["Penetration Testing", "Security Tools", "Risk Assessment"],
+                growth: "Security Engineer → Security Lead"
+            },
+            {
+                title: "Security Architect",
+                salary: "$140K - $220K",
+                demand: "Very High",
+                skills: ["System Design", "Compliance", "Threat Modeling"],
+                growth: "Architect → Chief Information Security Officer"
+            },
+            {
+                title: "Incident Response Specialist",
+                salary: "$110K - $190K",
+                demand: "Very High",
+                skills: ["Incident Management", "Forensics", "Threat Analysis"],
+                growth: "IR Specialist → Security Operations Manager"
+            }
+        ],
+        industryInsights: [
+            "Zero-trust security model adoption",
+            "AI-powered threat detection growing",
+            "Compliance requirements increasing",
+            "Ransomware defense becoming critical"
+        ]
+    },
+    6: { // UI/UX Design
+        title: "UI/UX Design Career Growth",
+        growthPaths: [
+            {
+                title: "Product Designer",
+                salary: "$90K - $160K",
+                demand: "High",
+                skills: ["User Research", "Prototyping", "Design Systems"],
+                growth: "Designer → Design Lead"
+            },
+            {
+                title: "UX Researcher",
+                salary: "$85K - $150K",
+                demand: "High",
+                skills: ["User Research", "Data Analysis", "Psychology"],
+                growth: "Researcher → Head of Research"
+            },
+            {
+                title: "Design Technologist / Design Engineer",
+                salary: "$110K - $180K",
+                demand: "Very High",
+                skills: ["Design + Development", "Prototyping", "Systems"],
+                growth: "Design Engineer → Tech Lead"
+            }
+        ],
+        industryInsights: [
+            "Design systems becoming industry standard",
+            "Design-to-code automation emerging",
+            "Accessibility and inclusive design critical",
+            "AI/ML in design tools revolutionizing workflow"
         ]
     }
 };
