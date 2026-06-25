@@ -19,7 +19,7 @@
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); z-index:1000; align-items:center; justify-content:center; }
     .modal-overlay.open { display:flex; }
     .modal-box { background:var(--card-bg); border-radius:16px; padding:2rem; width:min(640px,95vw); max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.3); }
-    .modal-box h2 { margin-bottom:1.5rem; font-size:1.4rem; background:linear-gradient(135deg,var(--primary-color),var(--secondary-color)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .modal-box h2 { margin-bottom:1.5rem; font-size:1.4rem; background:linear-gradient(135deg,var(--primary-color),var(--secondary-color)); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
     .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
     .form-field { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1rem; }
     .form-field label { font-size:.85rem; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:.05em; }
@@ -49,7 +49,10 @@
     <div class="container" style="max-width:1200px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
         <h1 class="section-title" style="margin:0;">📚 Manage Courses</h1>
-        <button class="btn btn-primary" onclick="openAddModal()" style="padding:.6rem 1.4rem;font-weight:700;">+ Add New Course</button>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="window.location.href='courses-manager.html'" style="padding:.6rem 1.4rem;font-weight:700;background:linear-gradient(135deg,#06b6d4,#0891b2);">📊 Course Manager</button>
+          <button class="btn btn-primary" onclick="openAddModal()" style="padding:.6rem 1.4rem;font-weight:700;">+ Add New Course</button>
+        </div>
       </div>
 
       <div class="stats-row" id="statsRow"></div>
@@ -107,6 +110,19 @@
       <div class="form-field">
         <label>Short Description *</label>
         <input id="fDesc" placeholder="One-line summary shown on cards" />
+      </div>
+      <div class="form-field">
+        <label>Course Image/Thumbnail</label>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <input id="fImage" type="file" accept="image/*" style="flex: 1;" />
+          <button type="button" onclick="openImageEditor()" style="background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer;">🎨 Editor</button>
+        </div>
+        <small style="color: var(--text-light); display: block; margin-bottom: 0.5rem;">Or upload JPG, PNG (recommended: 400x300px)</small>
+        <div style="background: var(--bg-secondary); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.5rem;">
+          <small style="color: var(--text-light);">📁 Current Path:</small>
+          <div id="imagePath" style="color: var(--primary-color); font-weight: 600; font-size: 0.9rem; word-break: break-all; margin-top: 0.3rem;">None</div>
+        </div>
+        <div id="imagePreview" style="margin-top: 0.5rem; max-width: 200px; border: 2px solid var(--border-color); border-radius: 8px; padding: 0.5rem; background: var(--bg-secondary);"></div>
       </div>
       <div class="form-field">
         <label>Full Description</label>
@@ -188,16 +204,23 @@
     }
 
     // ── modal helpers ────────────────────────────────────────────
+    let editingCourseId = null;
+
     function openAddModal() {
+      editingCourseId = null;
       document.getElementById('modalTitle').textContent = '➕ Add New Course';
       document.getElementById('editingId').value = '';
       ['fTitle','fIcon','fCategory','fDuration','fDesc','fFullDesc','fSkills','fTopics','fCareers'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('fRating').value = '4.5';
       document.getElementById('fLevel').value = 'Beginner';
+      document.getElementById('fImage').value = '';
+      document.getElementById('imagePreview').innerHTML = '';
+      document.getElementById('imagePath').textContent = 'None';
       document.getElementById('courseModal').classList.add('open');
     }
 
     function openEditModal(courseId) {
+      editingCourseId = courseId;
       const courses = getAllCourses();
       const c = courses.find(x=>x.id===courseId);
       if (!c) return;
@@ -214,7 +237,29 @@
       document.getElementById('fSkills').value = (c.skillsGained||[]).join(', ');
       document.getElementById('fTopics').value = (c.curriculumTopics||[]).join(', ');
       document.getElementById('fCareers').value = (c.careerPaths||[]).join(', ');
+      document.getElementById('fImage').value = '';
+      
+      // Show existing image path and preview
+      if (c.image) {
+        document.getElementById('imagePath').textContent = c.image;
+        // Fix path for admin subdirectory - add ../ if needed
+        const imagePath = c.image.startsWith('../') ? c.image : '../' + c.image;
+        document.getElementById('imagePreview').innerHTML = `<img src="${imagePath}" alt="${c.title}" style="width: 100%; border-radius: 6px;">`;
+      } else {
+        document.getElementById('imagePath').textContent = 'None';
+        document.getElementById('imagePreview').innerHTML = '';
+      }
+      
       document.getElementById('courseModal').classList.add('open');
+    }
+
+    function openImageEditor() {
+      if (!editingCourseId) {
+        alert('Please save the course first before editing image.');
+        return;
+      }
+      // Redirect to image editor with course ID
+      window.location.href = `image-editor.html?courseId=${editingCourseId}`;
     }
 
     function closeModal() {
@@ -225,6 +270,23 @@
       const title = document.getElementById('fTitle').value.trim();
       if (!title) { alert('Title is required.'); return; }
 
+      const fileInput = document.getElementById('fImage');
+      const file = fileInput.files[0];
+
+      // If new file is selected, convert to base64
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          saveCoursewithImage(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        saveCoursewithImage(null);
+      }
+    }
+
+    function saveCoursewithImage(imageData) {
+      const title = document.getElementById('fTitle').value.trim();
       let courses = getAllCourses();
       const editingId = document.getElementById('editingId').value;
       const isEdit = !!editingId;
@@ -246,6 +308,16 @@
         curriculumTopics: splitCSV(document.getElementById('fTopics').value),
         careerPaths:  splitCSV(document.getElementById('fCareers').value),
       };
+
+      // Add image if provided or keep existing image
+      if (imageData) {
+        course.image = imageData;
+      } else if (isEdit) {
+        const existing = courses.find(c => c.id === parseInt(editingId));
+        if (existing && existing.image) {
+          course.image = existing.image;
+        }
+      }
 
       if (isEdit) {
         const idx = courses.findIndex(c=>c.id===parseInt(editingId));
@@ -283,6 +355,21 @@
 
     document.getElementById('courseModal').addEventListener('click', function(e){
       if (e.target === this) closeModal();
+    });
+
+    // Image preview on file selection
+    document.getElementById('fImage').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      const preview = document.getElementById('imagePreview');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width: 150px; border-radius: 8px; border: 2px solid var(--primary-color);">`;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.innerHTML = '';
+      }
     });
 
     document.addEventListener('DOMContentLoaded', renderTable);
