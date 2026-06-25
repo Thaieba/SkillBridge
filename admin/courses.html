@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Manage Courses | SkillBridge</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <style>
+    .admin-table { width:100%; border-collapse:collapse; background:var(--card-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.08); }
+    .admin-table th { background:linear-gradient(135deg,var(--primary-color),var(--secondary-color)); color:#fff; padding:1rem 1.2rem; text-align:left; font-size:0.9rem; letter-spacing:.04em; }
+    .admin-table td { padding:.9rem 1.2rem; border-bottom:1px solid var(--border-color); color:var(--text-dark); vertical-align:middle; }
+    .admin-table tr:last-child td { border-bottom:none; }
+    .admin-table tr:hover td { background:rgba(99,102,241,.05); }
+    .tag { display:inline-block; padding:.2rem .6rem; border-radius:20px; font-size:.78rem; font-weight:700; background:rgba(99,102,241,.15); color:var(--primary-color); }
+    .btn-edit { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; border:none; padding:.4rem .9rem; border-radius:8px; cursor:pointer; font-size:.85rem; font-weight:600; transition:opacity .2s; }
+    .btn-del  { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; border:none; padding:.4rem .9rem; border-radius:8px; cursor:pointer; font-size:.85rem; font-weight:600; transition:opacity .2s; }
+    .btn-edit:hover,.btn-del:hover { opacity:.85; }
+    /* Modal */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:var(--card-bg); border-radius:16px; padding:2rem; width:min(640px,95vw); max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+    .modal-box h2 { margin-bottom:1.5rem; font-size:1.4rem; background:linear-gradient(135deg,var(--primary-color),var(--secondary-color)); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .form-field { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1rem; }
+    .form-field label { font-size:.85rem; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:.05em; }
+    .form-field input,.form-field select,.form-field textarea { background:var(--bg-secondary,#f8fafc); border:1.5px solid var(--border-color); border-radius:8px; padding:.6rem .9rem; color:var(--text-dark); font-size:.95rem; outline:none; transition:border-color .2s; }
+    .form-field input:focus,.form-field select:focus,.form-field textarea:focus { border-color:var(--primary-color); }
+    .form-field textarea { resize:vertical; min-height:80px; }
+    .modal-actions { display:flex; gap:1rem; justify-content:flex-end; margin-top:1.5rem; }
+    .btn-save { background:linear-gradient(135deg,#10b981,#059669); color:#fff; border:none; padding:.6rem 1.5rem; border-radius:10px; font-weight:700; cursor:pointer; }
+    .btn-cancel { background:rgba(100,100,100,.15); color:var(--text-dark); border:none; padding:.6rem 1.5rem; border-radius:10px; font-weight:700; cursor:pointer; }
+    .empty-state { text-align:center; padding:3rem; color:var(--text-light); }
+    .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:2rem; }
+    .stat-card { background:var(--card-bg); border-radius:12px; padding:1.2rem 1.5rem; border-left:4px solid var(--primary-color); box-shadow:0 2px 10px rgba(0,0,0,.06); }
+    .stat-val { font-size:2rem; font-weight:800; color:var(--primary-color); }
+    .stat-lbl { font-size:.85rem; color:var(--text-light); margin-top:.2rem; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="../index.html" class="logo">SkillBridge</a>
+      <ul class="nav-links"></ul>
+      <div class="hamburger"><span></span><span></span><span></span></div>
+    </div>
+  </nav>
+
+  <section class="section" style="padding:2.5rem 1rem;">
+    <div class="container" style="max-width:1200px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+        <h1 class="section-title" style="margin:0;">📚 Manage Courses</h1>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="window.location.href='courses-manager.html'" style="padding:.6rem 1.4rem;font-weight:700;background:linear-gradient(135deg,#06b6d4,#0891b2);">📊 Course Manager</button>
+          <button class="btn btn-primary" onclick="openAddModal()" style="padding:.6rem 1.4rem;font-weight:700;">+ Add New Course</button>
+        </div>
+      </div>
+
+      <div class="stats-row" id="statsRow"></div>
+
+      <div style="overflow-x:auto;">
+        <table class="admin-table" id="coursesTable">
+          <thead>
+            <tr>
+              <th>Icon</th><th>Title</th><th>Category</th><th>Level</th><th>Duration</th><th>Rating</th><th>Completions</th><th style="text-align:center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="coursesTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Add / Edit Modal -->
+  <div class="modal-overlay" id="courseModal">
+    <div class="modal-box">
+      <h2 id="modalTitle">Add Course</h2>
+      <input type="hidden" id="editingId" value="" />
+      <div class="form-row">
+        <div class="form-field">
+          <label>Title *</label>
+          <input id="fTitle" placeholder="e.g. Web Development" />
+        </div>
+        <div class="form-field">
+          <label>Icon (Emoji)</label>
+          <input id="fIcon" placeholder="🌐" maxlength="4" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Category *</label>
+          <input id="fCategory" placeholder="e.g. Frontend" />
+        </div>
+        <div class="form-field">
+          <label>Level</label>
+          <select id="fLevel">
+            <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Duration</label>
+          <input id="fDuration" placeholder="e.g. 12 weeks" />
+        </div>
+        <div class="form-field">
+          <label>Rating (0-5)</label>
+          <input id="fRating" type="number" min="0" max="5" step="0.1" placeholder="4.8" />
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Short Description *</label>
+        <input id="fDesc" placeholder="One-line summary shown on cards" />
+      </div>
+      <div class="form-field">
+        <label>Course Image/Thumbnail</label>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <input id="fImage" type="file" accept="image/*" style="flex: 1;" />
+          <button type="button" onclick="openImageEditor()" style="background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer;">🎨 Editor</button>
+        </div>
+        <small style="color: var(--text-light); display: block; margin-bottom: 0.5rem;">Or upload JPG, PNG (recommended: 400x300px)</small>
+        <div style="background: var(--bg-secondary); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.5rem;">
+          <small style="color: var(--text-light);">📁 Current Path:</small>
+          <div id="imagePath" style="color: var(--primary-color); font-weight: 600; font-size: 0.9rem; word-break: break-all; margin-top: 0.3rem;">None</div>
+        </div>
+        <div id="imagePreview" style="margin-top: 0.5rem; max-width: 200px; border: 2px solid var(--border-color); border-radius: 8px; padding: 0.5rem; background: var(--bg-secondary);"></div>
+      </div>
+      <div class="form-field">
+        <label>Full Description</label>
+        <textarea id="fFullDesc" rows="3" placeholder="Detailed course overview…"></textarea>
+      </div>
+      <div class="form-field">
+        <label>Skills Gained (comma-separated)</label>
+        <input id="fSkills" placeholder="HTML, CSS, JavaScript, Git" />
+      </div>
+      <div class="form-field">
+        <label>Curriculum Topics (comma-separated)</label>
+        <input id="fTopics" placeholder="HTML Basics, CSS Layouts, DOM…" />
+      </div>
+      <div class="form-field">
+        <label>Career Paths (comma-separated)</label>
+        <input id="fCareers" placeholder="Frontend Dev, Full Stack Dev…" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-save" onclick="saveCourse()">💾 Save Course</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-section"><h4>SkillBridge</h4></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 SkillBridge.</p></div>
+  </footer>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    // ── local store helpers ──────────────────────────────────────
+    function getCustomCourses() {
+      return JSON.parse(localStorage.getItem('customCourses') || 'null');
+    }
+    function saveCustomCourses(arr) {
+      localStorage.setItem('customCourses', JSON.stringify(arr));
+    }
+    function getAllCourses() {
+      return getCustomCourses() || coursesData;
+    }
+
+    // ── render ───────────────────────────────────────────────────
+    function renderTable() {
+      requireRole('admin');
+      const courses = getAllCourses();
+      const completed = JSON.parse(localStorage.getItem('completedCourses') || '[]');
+
+      // Stats
+      const totalComp = completed.length;
+      const avgRating = courses.length ? (courses.reduce((s,c)=>s+(+c.rating||0),0)/courses.length).toFixed(1) : 0;
+      document.getElementById('statsRow').innerHTML = `
+        <div class="stat-card"><div class="stat-val">${courses.length}</div><div class="stat-lbl">Total Courses</div></div>
+        <div class="stat-card" style="border-left-color:#10b981;"><div class="stat-val" style="color:#10b981;">${totalComp}</div><div class="stat-lbl">Total Completions</div></div>
+        <div class="stat-card" style="border-left-color:#f59e0b;"><div class="stat-val" style="color:#f59e0b;">⭐ ${avgRating}</div><div class="stat-lbl">Avg Rating</div></div>
+      `;
+
+      const compMap = completed.reduce((a,c)=>{ a[String(c.id)]=(a[String(c.id)]||0)+1; return a; },{});
+      const tbody = document.getElementById('coursesTbody');
+      if (!courses.length) { tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No courses yet. Click "+ Add New Course".</td></tr>`; return; }
+      tbody.innerHTML = courses.map(c => `
+        <tr>
+          <td style="font-size:1.5rem;">${c.icon||'📖'}</td>
+          <td style="font-weight:700;">${c.title}</td>
+          <td><span class="tag">${c.category||'-'}</span></td>
+          <td>${c.level||'-'}</td>
+          <td>${c.duration||'-'}</td>
+          <td>⭐ ${c.rating||'-'}</td>
+          <td style="text-align:center;font-weight:700;color:var(--primary-color);">${compMap[String(c.id)]||0}</td>
+          <td style="text-align:center;white-space:nowrap;">
+            <button class="btn-edit" onclick="openEditModal(${c.id})">✏️ Edit</button>
+            <button class="btn-del"  onclick="deleteCourse(${c.id})" style="margin-left:.5rem;">🗑 Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ── modal helpers ────────────────────────────────────────────
+    let editingCourseId = null;
+
+    function openAddModal() {
+      editingCourseId = null;
+      document.getElementById('modalTitle').textContent = '➕ Add New Course';
+      document.getElementById('editingId').value = '';
+      ['fTitle','fIcon','fCategory','fDuration','fDesc','fFullDesc','fSkills','fTopics','fCareers'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('fRating').value = '4.5';
+      document.getElementById('fLevel').value = 'Beginner';
+      document.getElementById('fImage').value = '';
+      document.getElementById('imagePreview').innerHTML = '';
+      document.getElementById('imagePath').textContent = 'None';
+      document.getElementById('courseModal').classList.add('open');
+    }
+
+    function openEditModal(courseId) {
+      editingCourseId = courseId;
+      const courses = getAllCourses();
+      const c = courses.find(x=>x.id===courseId);
+      if (!c) return;
+      document.getElementById('modalTitle').textContent = '✏️ Edit Course';
+      document.getElementById('editingId').value = courseId;
+      document.getElementById('fTitle').value = c.title||'';
+      document.getElementById('fIcon').value = c.icon||'';
+      document.getElementById('fCategory').value = c.category||'';
+      document.getElementById('fLevel').value = c.level||'Beginner';
+      document.getElementById('fDuration').value = c.duration||'';
+      document.getElementById('fRating').value = c.rating||'';
+      document.getElementById('fDesc').value = c.description||'';
+      document.getElementById('fFullDesc').value = c.fullDescription||'';
+      document.getElementById('fSkills').value = (c.skillsGained||[]).join(', ');
+      document.getElementById('fTopics').value = (c.curriculumTopics||[]).join(', ');
+      document.getElementById('fCareers').value = (c.careerPaths||[]).join(', ');
+      document.getElementById('fImage').value = '';
+      
+      // Show existing image path and preview
+      if (c.image) {
+        document.getElementById('imagePath').textContent = c.image;
+        // Fix path for admin subdirectory - add ../ if needed
+        const imagePath = c.image.startsWith('../') ? c.image : '../' + c.image;
+        document.getElementById('imagePreview').innerHTML = `<img src="${imagePath}" alt="${c.title}" style="width: 100%; border-radius: 6px;">`;
+      } else {
+        document.getElementById('imagePath').textContent = 'None';
+        document.getElementById('imagePreview').innerHTML = '';
+      }
+      
+      document.getElementById('courseModal').classList.add('open');
+    }
+
+    function openImageEditor() {
+      if (!editingCourseId) {
+        alert('Please save the course first before editing image.');
+        return;
+      }
+      // Redirect to image editor with course ID
+      window.location.href = `image-editor.html?courseId=${editingCourseId}`;
+    }
+
+    function closeModal() {
+      document.getElementById('courseModal').classList.remove('open');
+    }
+
+    function saveCourse() {
+      const title = document.getElementById('fTitle').value.trim();
+      if (!title) { alert('Title is required.'); return; }
+
+      const fileInput = document.getElementById('fImage');
+      const file = fileInput.files[0];
+
+      // If new file is selected, convert to base64
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          saveCoursewithImage(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        saveCoursewithImage(null);
+      }
+    }
+
+    function saveCoursewithImage(imageData) {
+      const title = document.getElementById('fTitle').value.trim();
+      let courses = getAllCourses();
+      const editingId = document.getElementById('editingId').value;
+      const isEdit = !!editingId;
+
+      const course = {
+        id: isEdit ? parseInt(editingId) : (Date.now()),
+        title,
+        icon:        document.getElementById('fIcon').value.trim() || '📖',
+        category:    document.getElementById('fCategory').value.trim(),
+        level:       document.getElementById('fLevel').value,
+        duration:    document.getElementById('fDuration').value.trim(),
+        rating:      parseFloat(document.getElementById('fRating').value) || 4.5,
+        description: document.getElementById('fDesc').value.trim(),
+        fullDescription: document.getElementById('fFullDesc').value.trim(),
+        students:    '0',
+        courseDuration: document.getElementById('fDuration').value.trim(),
+        prerequisites: [],
+        skillsGained:   splitCSV(document.getElementById('fSkills').value),
+        curriculumTopics: splitCSV(document.getElementById('fTopics').value),
+        careerPaths:  splitCSV(document.getElementById('fCareers').value),
+      };
+
+      // Add image if provided or keep existing image
+      if (imageData) {
+        course.image = imageData;
+      } else if (isEdit) {
+        const existing = courses.find(c => c.id === parseInt(editingId));
+        if (existing && existing.image) {
+          course.image = existing.image;
+        }
+      }
+
+      if (isEdit) {
+        const idx = courses.findIndex(c=>c.id===parseInt(editingId));
+        if (idx !== -1) courses[idx] = course;
+      } else {
+        courses.push(course);
+      }
+
+      saveCustomCourses(courses);
+      closeModal();
+      renderTable();
+      showToast(isEdit ? '✅ Course updated!' : '✅ Course added!');
+    }
+
+    function deleteCourse(courseId) {
+      if (!confirm('Delete this course?')) return;
+      let courses = getAllCourses();
+      courses = courses.filter(c=>c.id!==courseId);
+      saveCustomCourses(courses);
+      renderTable();
+      showToast('🗑 Course deleted.');
+    }
+
+    function splitCSV(str) {
+      return str.split(',').map(s=>s.trim()).filter(Boolean);
+    }
+
+    function showToast(msg) {
+      const el = document.createElement('div');
+      el.textContent = msg;
+      el.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#10b981;color:#fff;padding:.75rem 1.5rem;border-radius:10px;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,.2);z-index:9999;animation:fadeIn .3s;';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 2500);
+    }
+
+    document.getElementById('courseModal').addEventListener('click', function(e){
+      if (e.target === this) closeModal();
+    });
+
+    // Image preview on file selection
+    document.getElementById('fImage').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      const preview = document.getElementById('imagePreview');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width: 150px; border-radius: 8px; border: 2px solid var(--primary-color);">`;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.innerHTML = '';
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', renderTable);
+  </script>
+</body>
+</html>

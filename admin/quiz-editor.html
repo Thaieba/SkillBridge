@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Quiz Editor | SkillBridge</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <style>
+    .quiz-editor-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .editor-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 0.6rem 1.2rem;
+      background: var(--bg-secondary);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      color: var(--text-dark);
+    }
+    .tab-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    .tab-btn:hover {
+      border-color: var(--primary-color);
+    }
+    .editor-section {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      margin-bottom: 2rem;
+    }
+    .editor-section h2 {
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
+    .course-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .course-btn {
+      padding: 0.8rem;
+      background: var(--bg-secondary);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .course-btn:hover, .course-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    .questions-list {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .question-item {
+      padding: 1rem;
+      background: var(--bg-secondary);
+      border-left: 4px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .question-item:hover, .question-item.active {
+      border-left-color: var(--primary-color);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    .question-item-text {
+      flex: 1;
+    }
+    .question-item-text strong {
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+    .question-item-text small {
+      color: var(--text-light);
+    }
+    .question-item-num {
+      background: var(--primary-color);
+      color: white;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin-left: 1rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .form-field label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-field input, .form-field select, .form-field textarea {
+      background: var(--bg-secondary);
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.6rem 0.9rem;
+      color: var(--text-dark);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+      border-color: var(--primary-color);
+    }
+    .form-field textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .options-container {
+      display: grid;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+    }
+    .option-field {
+      display: grid;
+      grid-template-columns: 40px 1fr 60px;
+      gap: 0.8rem;
+      align-items: center;
+    }
+    .option-label {
+      background: var(--primary-color);
+      color: white;
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .option-field input {
+      width: 100%;
+    }
+    .option-radio {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .option-radio input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .correct-indicator {
+      background: #10b981;
+      color: white;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+    .btn {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      font-size: 0.95rem;
+    }
+    .btn-save {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      flex: 1;
+      min-width: 120px;
+    }
+    .btn-add {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      flex: 1;
+      min-width: 120px;
+    }
+    .btn-delete {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+    .btn-cancel {
+      background: rgba(100, 100, 100, 0.15);
+      color: var(--text-dark);
+      flex: 1;
+      min-width: 120px;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .messages {
+      margin-bottom: 1.5rem;
+    }
+    .success-message, .error-message {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid #10b981;
+    }
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #ef4444;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--bg-secondary);
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-color);
+    }
+    .stat-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary-color);
+    }
+    .stat-lbl {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="../index.html" class="logo">SkillBridge</a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="quizzes.html">Quizzes</a></li>
+        <li><a href="image-editor.html">Image Editor</a></li>
+        <li><a href="video-editor.html">Video Editor</a></li>
+        <li><a href="quiz-editor.html" style="color: var(--primary-color); font-weight: 700;">Quiz Editor</a></li>
+      </ul>
+      <div class="hamburger"><span></span><span></span><span></span></div>
+    </div>
+  </nav>
+
+  <section class="section" style="padding: 2.5rem 1rem;">
+    <div class="container quiz-editor-wrapper">
+      <h1 class="section-title" style="margin-bottom: 2rem;">📝 Quiz Question Editor</h1>
+      
+      <div class="editor-tabs">
+        <button class="tab-btn active" onclick="switchTab('courses')">📚 Select Course</button>
+        <button class="tab-btn" onclick="switchTab('editor')">✏️ Edit Questions</button>
+      </div>
+
+      <!-- Tab 1: Course Selection -->
+      <div id="coursesTab" class="tab-content">
+        <div class="editor-section">
+          <h2>📚 Select a Course to Edit</h2>
+          <div class="messages">
+            <div id="successMsg" class="success-message"></div>
+            <div id="errorMsg" class="error-message"></div>
+          </div>
+          <div class="course-selector" id="courseSelector"></div>
+          <div class="stats" id="quizStats"></div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Question Editor -->
+      <div id="editorTab" class="tab-content" style="display: none;">
+        <div class="editor-section">
+          <h2 id="selectedCourseTitle">Quiz Editor</h2>
+          <div class="messages">
+            <div id="successMsg2" class="success-message"></div>
+            <div id="errorMsg2" class="error-message"></div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem;">
+            <!-- Questions List -->
+            <div>
+              <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Questions</h3>
+              <div class="questions-list" id="questionsList"></div>
+              <button class="btn btn-add" onclick="addNewQuestion()" style="width: 100%; margin-top: 1rem;">+ Add Question</button>
+            </div>
+
+            <!-- Question Editor -->
+            <div>
+              <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Edit Question</h3>
+              <div id="questionEditor" style="display: none;">
+                <div class="form-field" style="margin-bottom: 1.5rem;">
+                  <label>Question Text *</label>
+                  <textarea id="questionText" placeholder="Enter the question..."></textarea>
+                </div>
+
+                <h4 style="margin: 1.5rem 0 1rem; color: var(--text-dark);">Options</h4>
+                <div class="options-container">
+                  <div class="option-field">
+                    <div class="option-label">A</div>
+                    <input type="text" id="optionA" placeholder="Option A" />
+                    <div class="option-radio">
+                      <input type="radio" name="correctAnswer" value="0" onchange="updateCorrectAnswer(0)" />
+                    </div>
+                  </div>
+                  <div class="option-field">
+                    <div class="option-label">B</div>
+                    <input type="text" id="optionB" placeholder="Option B" />
+                    <div class="option-radio">
+                      <input type="radio" name="correctAnswer" value="1" onchange="updateCorrectAnswer(1)" />
+                    </div>
+                  </div>
+                  <div class="option-field">
+                    <div class="option-label">C</div>
+                    <input type="text" id="optionC" placeholder="Option C" />
+                    <div class="option-radio">
+                      <input type="radio" name="correctAnswer" value="2" onchange="updateCorrectAnswer(2)" />
+                    </div>
+                  </div>
+                  <div class="option-field">
+                    <div class="option-label">D</div>
+                    <input type="text" id="optionD" placeholder="Option D" />
+                    <div class="option-radio">
+                      <input type="radio" name="correctAnswer" value="3" onchange="updateCorrectAnswer(3)" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-field" style="margin-top: 1.5rem;">
+                  <label>Explanation *</label>
+                  <textarea id="explanation" placeholder="Explain the correct answer..."></textarea>
+                </div>
+
+                <div class="btn-group">
+                  <button class="btn btn-save" onclick="saveQuestion()">✓ Save Question</button>
+                  <button class="btn btn-delete" onclick="deleteQuestion()">🗑️ Delete</button>
+                  <button class="btn btn-cancel" onclick="resetEditor()">✕ Reset</button>
+                </div>
+              </div>
+
+              <div id="noQuestionSelected" style="text-align: center; padding: 3rem 1rem; color: var(--text-light);">
+                <p style="font-size: 3rem; margin-bottom: 1rem;">👈</p>
+                <p>Select a question or create a new one</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../quiz-data.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      requireRole('admin');
+      loadCourses();
+    });
+
+    let selectedCourseId = null;
+    let selectedQuestionIndex = null;
+    let currentCorrectAnswer = null;
+
+    // Load all quiz data from quizData
+    let quizEditorData = JSON.parse(JSON.stringify(quizData));
+
+    function loadCourses() {
+      const selector = document.getElementById('courseSelector');
+      selector.innerHTML = '';
+      
+      coursesData.forEach(course => {
+        const btn = document.createElement('button');
+        btn.className = 'course-btn';
+        btn.innerHTML = `${course.icon} ${course.title}`;
+        btn.onclick = () => selectCourse(course.id);
+        selector.appendChild(btn);
+      });
+    }
+
+    function selectCourse(courseId) {
+      selectedCourseId = courseId;
+      selectedQuestionIndex = null;
+      
+      // Update UI
+      document.querySelectorAll('.course-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      const course = coursesData.find(c => c.id === courseId);
+      const quizCount = quizEditorData[courseId]?.questions?.length || 0;
+
+      // Update stats
+      const stats = document.getElementById('quizStats');
+      stats.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-val">${quizCount}</div>
+          <div class="stat-lbl">Questions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">${course.level}</div>
+          <div class="stat-lbl">Level</div>
+        </div>
+      `;
+
+      loadQuestions(courseId);
+    }
+
+    function loadQuestions(courseId) {
+      const questions = quizEditorData[courseId]?.questions || [];
+      const list = document.getElementById('questionsList');
+      list.innerHTML = '';
+
+      questions.forEach((q, idx) => {
+        const div = document.createElement('div');
+        div.className = 'question-item';
+        div.innerHTML = `
+          <div class="question-item-text">
+            <strong>Q${idx + 1}</strong>
+            <small>${q.question.substring(0, 40)}...</small>
+          </div>
+          <div class="question-item-num">${idx + 1}</div>
+        `;
+        div.onclick = () => selectQuestion(courseId, idx);
+        list.appendChild(div);
+      });
+    }
+
+    function selectQuestion(courseId, idx) {
+      selectedQuestionIndex = idx;
+      
+      // Update UI
+      document.querySelectorAll('.question-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+
+      const question = quizEditorData[courseId].questions[idx];
+      
+      // Load question data
+      document.getElementById('questionText').value = question.question;
+      document.getElementById('optionA').value = question.options[0];
+      document.getElementById('optionB').value = question.options[1];
+      document.getElementById('optionC').value = question.options[2];
+      document.getElementById('optionD').value = question.options[3];
+      document.getElementById('explanation').value = question.explanation;
+
+      // Set correct answer radio
+      document.querySelectorAll('input[name="correctAnswer"]').forEach((radio, i) => {
+        radio.checked = i === question.correct;
+      });
+      currentCorrectAnswer = question.correct;
+
+      // Show editor
+      document.getElementById('questionEditor').style.display = 'block';
+      document.getElementById('noQuestionSelected').style.display = 'none';
+      document.getElementById('selectedCourseTitle').textContent = `${coursesData.find(c => c.id === courseId).title} - Question ${idx + 1}`;
+    }
+
+    function updateCorrectAnswer(idx) {
+      currentCorrectAnswer = idx;
+    }
+
+    function saveQuestion() {
+      if (!selectedCourseId || selectedQuestionIndex === null) return;
+
+      const questionText = document.getElementById('questionText').value.trim();
+      const explanation = document.getElementById('explanation').value.trim();
+
+      if (!questionText) {
+        showError('Please enter a question', 'errorMsg2');
+        return;
+      }
+      if (!explanation) {
+        showError('Please enter an explanation', 'errorMsg2');
+        return;
+      }
+      if (currentCorrectAnswer === null) {
+        showError('Please select the correct answer', 'errorMsg2');
+        return;
+      }
+
+      const question = quizEditorData[selectedCourseId].questions[selectedQuestionIndex];
+      question.question = questionText;
+      question.options = [
+        document.getElementById('optionA').value.trim(),
+        document.getElementById('optionB').value.trim(),
+        document.getElementById('optionC').value.trim(),
+        document.getElementById('optionD').value.trim()
+      ];
+      question.explanation = explanation;
+      question.correct = currentCorrectAnswer;
+
+      // Check for empty options
+      if (question.options.some(opt => !opt)) {
+        showError('All options must be filled', 'errorMsg2');
+        return;
+      }
+
+      // Save to localStorage
+      localStorage.setItem('quizEditorData', JSON.stringify(quizEditorData));
+      
+      showSuccess(`✓ Question saved successfully`, 'successMsg2');
+      setTimeout(() => {
+        loadQuestions(selectedCourseId);
+      }, 800);
+    }
+
+    function addNewQuestion() {
+      if (!selectedCourseId) {
+        showError('Please select a course first', 'errorMsg');
+        return;
+      }
+
+      const newQuestion = {
+        id: quizEditorData[selectedCourseId].questions.length + 1,
+        question: 'New Question',
+        options: ['Option A', 'Option B', 'Option C', 'Option D'],
+        correct: 0,
+        explanation: 'Explanation here...'
+      };
+
+      quizEditorData[selectedCourseId].questions.push(newQuestion);
+      localStorage.setItem('quizEditorData', JSON.stringify(quizEditorData));
+
+      loadQuestions(selectedCourseId);
+      selectQuestion(selectedCourseId, quizEditorData[selectedCourseId].questions.length - 1);
+      showSuccess(`✓ New question added`, 'successMsg2');
+    }
+
+    function deleteQuestion() {
+      if (!selectedCourseId || selectedQuestionIndex === null) return;
+
+      if (confirm('Are you sure you want to delete this question?')) {
+        quizEditorData[selectedCourseId].questions.splice(selectedQuestionIndex, 1);
+        localStorage.setItem('quizEditorData', JSON.stringify(quizEditorData));
+        
+        selectedQuestionIndex = null;
+        loadQuestions(selectedCourseId);
+        resetEditor();
+        showSuccess(`✓ Question deleted`, 'successMsg2');
+      }
+    }
+
+    function resetEditor() {
+      document.getElementById('questionEditor').style.display = 'none';
+      document.getElementById('noQuestionSelected').style.display = 'block';
+      document.querySelectorAll('.question-item').forEach(item => {
+        item.classList.remove('active');
+      });
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(t => {
+        t.style.display = 'none';
+      });
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+      });
+
+      if (tab === 'courses') {
+        document.getElementById('coursesTab').style.display = 'block';
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+      } else {
+        document.getElementById('editorTab').style.display = 'block';
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+      }
+    }
+
+    function showSuccess(msg, elemId) {
+      const msgDiv = document.getElementById(elemId || 'successMsg');
+      msgDiv.textContent = msg;
+      msgDiv.style.display = 'block';
+      setTimeout(() => {
+        msgDiv.style.display = 'none';
+      }, 3000);
+    }
+
+    function showError(msg, elemId) {
+      const msgDiv = document.getElementById(elemId || 'errorMsg');
+      msgDiv.textContent = msg;
+      msgDiv.style.display = 'block';
+      setTimeout(() => {
+        msgDiv.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

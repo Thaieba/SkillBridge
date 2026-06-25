@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Manager - SkillBridge Admin</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .admin-feedback-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .feedback-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .feedback-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .feedback-controls button,
+        .feedback-controls select {
+            padding: 0.6rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .feedback-controls button:hover {
+            background: #f8fafc;
+        }
+
+        .feedback-list-container {
+            display: grid;
+            gap: 1rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .admin-feedback-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+        }
+
+        .admin-feedback-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .feedback-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .feedback-badge {
+            display: inline-block;
+            padding: 0.3rem 0.75rem;
+            border-radius: 0.3rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-bug {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-feature {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-course {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-general {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-other {
+            background: #e9d5ff;
+            color: #6b21a8;
+        }
+
+        .feedback-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 0.4rem;
+            background: #f8fafc;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .rating-display {
+            color: #f59e0b;
+            font-size: 0.9rem;
+        }
+
+        html[data-theme="dark"] .admin-feedback-card,
+        html[data-theme="dark"] .feedback-controls button,
+        html[data-theme="dark"] .feedback-controls select {
+            background: #111827;
+            border-color: #374151;
+        }
+
+        html[data-theme="dark"] .admin-feedback-card:hover {
+            box-shadow: 0 22px 55px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        html[data-theme="dark"] .modal-content {
+            background: #111827;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-body {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .modal-row {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 1rem;
+        }
+
+        .modal-label {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .modal-value {
+            color: var(--text-dark);
+        }
+
+        .modal-message {
+            grid-column: 1 / -1;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        html[data-theme="dark"] .modal-message {
+            background: #0f172a;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">SkillBridge</a>
+            <div class="nav-links" id="navLinks">
+                <a href="../index.html">Home</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="courses.html">Courses</a>
+                <a href="students.html">Students</a>
+                <a href="quizzes.html">Quizzes</a>
+                <a href="feedback.html" class="active">Feedback</a>
+                <a href="settings.html">Settings</a>
+                <button id="themeToggle" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: #fff; padding: 0.5rem 0.75rem; border-radius: 0.4rem; cursor: pointer; font-weight: 700;">🌙</button>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section">
+        <div class="container">
+            <h1 style="margin-bottom: 2rem;">📋 Feedback Management</h1>
+
+            <div class="admin-feedback-container">
+                <div>
+                    <h3>Feedback Statistics</h3>
+                    <div class="feedback-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalFeedback">0</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b, #f97316);">
+                            <div class="stat-value" id="avgRating">0</div>
+                            <div class="stat-label">Avg Rating</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3>Feedback by Type</h3>
+                    <div class="feedback-stats">
+                        <div style="background: white; border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #991b1b;" id="bugCount">0</div>
+                            <div style="font-size: 0.85rem; color: var(--text-light);">🐛 Bug</div>
+                        </div>
+                        <div style="background: white; border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #1e40af;" id="featureCount">0</div>
+                            <div style="font-size: 0.85rem; color: var(--text-light);">✨ Feature</div>
+                        </div>
+                        <div style="background: white; border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #92400e;" id="courseCount">0</div>
+                            <div style="font-size: 0.85rem; color: var(--text-light);">📚 Course</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feedback-controls">
+                <select id="typeFilter">
+                    <option value="">All Types</option>
+                    <option value="bug">🐛 Bug Report</option>
+                    <option value="feature">✨ Feature Request</option>
+                    <option value="course">📚 Course Feedback</option>
+                    <option value="general">💬 General Feedback</option>
+                    <option value="other">❓ Other</option>
+                </select>
+                <select id="ratingFilter">
+                    <option value="">All Ratings</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                    <option value="4">⭐⭐⭐⭐ Very Good</option>
+                    <option value="3">⭐⭐⭐ Good</option>
+                    <option value="2">⭐⭐ Fair</option>
+                    <option value="1">⭐ Poor</option>
+                </select>
+                <button onclick="downloadFeedback()">📥 Download All</button>
+                <button onclick="clearAllFeedback()" style="background: #fee2e2; color: #991b1b;">🗑️ Clear All</button>
+            </div>
+
+            <div class="feedback-list-container" id="feedbackListContainer">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>No feedback submitted yet</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Feedback Details</h2>
+                <button class="close-modal" onclick="closeFeedbackModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>Admin</h4>
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="courses.html">Manage Courses</a></li>
+                    <li><a href="feedback.html">Feedback</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 SkillBridge. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setupAdminFeedback();
+            setupThemeToggle();
+            setupHamburger();
+        });
+
+        function setupAdminFeedback() {
+            const filterTypeSelect = document.getElementById('typeFilter');
+            const filterRatingSelect = document.getElementById('ratingFilter');
+
+            filterTypeSelect.addEventListener('change', displayFeedback);
+            filterRatingSelect.addEventListener('change', displayFeedback);
+
+            displayFeedback();
+            updateStats();
+        }
+
+        function displayFeedback() {
+            const typeFilter = document.getElementById('typeFilter').value;
+            const ratingFilter = document.getElementById('ratingFilter').value;
+            const container = document.getElementById('feedbackListContainer');
+
+            let feedbackList = JSON.parse(localStorage.getItem('feedbackList')) || [];
+
+            // Filter feedback
+            let filtered = feedbackList.filter(fb => {
+                const typeMatch = !typeFilter || fb.type === typeFilter;
+                const ratingMatch = !ratingFilter || fb.rating === ratingFilter;
+                return typeMatch && ratingMatch;
+            });
+
+            // Sort by newest first
+            filtered.sort((a, b) => b.timestamp - a.timestamp);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <p>No feedback matches your filters</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(fb => {
+                const ratingStars = '⭐'.repeat(parseInt(fb.rating));
+                const typeBadge = `badge-${fb.type}`;
+                const typeLabel = {
+                    'bug': '🐛 Bug Report',
+                    'feature': '✨ Feature Request',
+                    'course': '📚 Course Feedback',
+                    'general': '💬 General Feedback',
+                    'other': '❓ Other'
+                }[fb.type] || fb.type;
+
+                return `
+                    <div class="admin-feedback-card">
+                        <div class="feedback-header">
+                            <div>
+                                <strong>${escapeHtml(fb.name)}</strong>
+                                <span class="feedback-badge ${typeBadge}">${typeLabel}</span>
+                            </div>
+                            <div class="feedback-actions">
+                                <button class="action-btn" onclick="viewFeedback(${fb.id})">👁️ View</button>
+                                <button class="action-btn" onclick="deleteFeedback(${fb.id})" style="color: #991b1b;">🗑️ Delete</button>
+                            </div>
+                        </div>
+                        <div class="feedback-meta">
+                            <span class="rating-display">${ratingStars}</span>
+                            <span>${fb.email}</span>
+                            <span style="color: var(--text-light);">${fb.date}</span>
+                        </div>
+                        <p style="margin-top: 0.75rem; color: var(--text-dark);">${escapeHtml(fb.message.substring(0, 100))}${fb.message.length > 100 ? '...' : ''}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewFeedback(id) {
+            let feedbackList = JSON.parse(localStorage.getItem('feedbackList')) || [];
+            const fb = feedbackList.find(f => f.id === id);
+
+            if (!fb) return;
+
+            const typeLabel = {
+                'bug': '🐛 Bug Report',
+                'feature': '✨ Feature Request',
+                'course': '📚 Course Feedback',
+                'general': '💬 General Feedback',
+                'other': '❓ Other'
+            }[fb.type] || fb.type;
+
+            const ratingStars = '⭐'.repeat(parseInt(fb.rating));
+
+            let courseDisplay = 'Not specified';
+            if (fb.course && fb.course !== 'Not specified') {
+                const coursesArray = Array.isArray(coursesData) ? coursesData : Object.values(coursesData);
+                const course = coursesArray.find(c => c.id == fb.course);
+                courseDisplay = course ? `${course.emoji} ${course.title}` : fb.course;
+            }
+
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <div class="modal-row">
+                    <div class="modal-label">Name:</div>
+                    <div class="modal-value">${escapeHtml(fb.name)}</div>
+                </div>
+                <div class="modal-row">
+                    <div class="modal-label">Email:</div>
+                    <div class="modal-value">${escapeHtml(fb.email)}</div>
+                </div>
+                <div class="modal-row">
+                    <div class="modal-label">Type:</div>
+                    <div class="modal-value">${typeLabel}</div>
+                </div>
+                <div class="modal-row">
+                    <div class="modal-label">Course:</div>
+                    <div class="modal-value">${escapeHtml(courseDisplay)}</div>
+                </div>
+                <div class="modal-row">
+                    <div class="modal-label">Rating:</div>
+                    <div class="modal-value">${ratingStars}</div>
+                </div>
+                <div class="modal-row">
+                    <div class="modal-label">Date:</div>
+                    <div class="modal-value">${fb.date}</div>
+                </div>
+                <div class="modal-label">Message:</div>
+                <div class="modal-message">${escapeHtml(fb.message)}</div>
+            `;
+
+            document.getElementById('feedbackModal').classList.add('show');
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById('feedbackModal').classList.remove('show');
+        }
+
+        function deleteFeedback(id) {
+            if (confirm('Delete this feedback?')) {
+                let feedbackList = JSON.parse(localStorage.getItem('feedbackList')) || [];
+                feedbackList = feedbackList.filter(f => f.id !== id);
+                localStorage.setItem('feedbackList', JSON.stringify(feedbackList));
+                displayFeedback();
+                updateStats();
+            }
+        }
+
+        function clearAllFeedback() {
+            if (confirm('Are you sure you want to delete ALL feedback? This cannot be undone.')) {
+                localStorage.removeItem('feedbackList');
+                displayFeedback();
+                updateStats();
+            }
+        }
+
+        function updateStats() {
+            let feedbackList = JSON.parse(localStorage.getItem('feedbackList')) || [];
+
+            const totalCount = feedbackList.length;
+            const avgRating = feedbackList.length > 0 
+                ? (feedbackList.reduce((sum, f) => sum + parseInt(f.rating), 0) / feedbackList.length).toFixed(1)
+                : 0;
+
+            const bugCount = feedbackList.filter(f => f.type === 'bug').length;
+            const featureCount = feedbackList.filter(f => f.type === 'feature').length;
+            const courseCount = feedbackList.filter(f => f.type === 'course').length;
+
+            document.getElementById('totalFeedback').textContent = totalCount;
+            document.getElementById('avgRating').textContent = avgRating;
+            document.getElementById('bugCount').textContent = bugCount;
+            document.getElementById('featureCount').textContent = featureCount;
+            document.getElementById('courseCount').textContent = courseCount;
+        }
+
+        function downloadFeedback() {
+            let feedbackList = JSON.parse(localStorage.getItem('feedbackList')) || [];
+
+            if (feedbackList.length === 0) {
+                alert('No feedback to download');
+                return;
+            }
+
+            const csv = [
+                ['Name', 'Email', 'Type', 'Course', 'Rating', 'Date', 'Message'],
+                ...feedbackList.map(f => [
+                    f.name,
+                    f.email,
+                    f.type,
+                    f.course,
+                    f.rating,
+                    f.date,
+                    f.message.replace(/"/g, '""')
+                ])
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `feedback-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Close modal on overlay click
+        document.getElementById('feedbackModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeFeedbackModal();
+            }
+        });
+
+        function setupThemeToggle() {
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    const html = document.documentElement;
+                    const isDark = html.getAttribute('data-theme') === 'dark';
+                    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+                    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+                    themeToggle.textContent = isDark ? '🌙' : '☀️';
+                });
+
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+
+        function setupHamburger() {
+            const hamburger = document.getElementById('hamburger');
+            const navLinks = document.getElementById('navLinks');
+
+            if (hamburger && navLinks) {
+                hamburger.addEventListener('click', function() {
+                    navLinks.classList.toggle('active');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

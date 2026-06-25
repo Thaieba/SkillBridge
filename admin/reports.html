@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Reports</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="../index.html" class="logo">SkillBridge</a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="students.html">Students</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="quizzes.html">Quizzes</a></li>
+        <li><a href="reports.html" class="active">Reports</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
+      </ul>
+      <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <section class="section" style="padding: 3rem 1rem;">
+    <div class="container" style="max-width: 1100px;">
+      <h1 class="section-title" style="margin-bottom: 1.5rem;">📈 Reports (Demo)</h1>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+        <div class="progress-stat-box" style="border-left: 6px solid var(--primary-color);">
+          <div style="font-size:2rem; font-weight:800; color: var(--primary-color);" id="rTotalUsers">0</div>
+          <div class="progress-stat-label">Users (Local)</div>
+        </div>
+        <div class="progress-stat-box" style="border-left: 6px solid var(--secondary-color);">
+          <div style="font-size:2rem; font-weight:800; color: var(--secondary-color);" id="rTotalCerts">0</div>
+          <div class="progress-stat-label">Certificates</div>
+        </div>
+        <div class="progress-stat-box" style="border-left: 6px solid var(--accent-color);">
+          <div style="font-size:2rem; font-weight:800; color: var(--accent-color);" id="rAvgQuiz">0%</div>
+          <div class="progress-stat-label">Avg Quiz %</div>
+        </div>
+      </div>
+
+      <div class="progress-stat-box" style="margin-top: 2rem; border-left: 6px solid var(--primary-color);">
+        <h2 class="progress-section-title" style="margin-bottom: 1rem; font-size: 1.6rem;">Data export (local only)</h2>
+        <p style="color: var(--text-light); margin-bottom: 1rem;">
+          In a real application you would generate server-side reports. For now, you can download a JSON snapshot.
+        </p>
+        <button class="btn btn-primary" onclick="downloadSnapshot()">⬇️ Download Snapshot</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-section">
+        <h4>SkillBridge</h4>
+        <ul>
+          <li><a href="../index.html">Home</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 SkillBridge. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      requireRole('admin');
+
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const certs = JSON.parse(localStorage.getItem('certificates')) || [];
+      const quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
+
+      document.getElementById('rTotalUsers').textContent = users.length;
+      document.getElementById('rTotalCerts').textContent = certs.length;
+
+      const avg = quizScores.length ? Math.round(quizScores.reduce((a,b)=>a+b.percentage,0)/quizScores.length) : 0;
+      document.getElementById('rAvgQuiz').textContent = avg + '%';
+    });
+
+    function downloadSnapshot(){
+      const snapshot = {
+        users: JSON.parse(localStorage.getItem('users')) || [],
+        session: JSON.parse(localStorage.getItem('session')) || null,
+        completedCourses: JSON.parse(localStorage.getItem('completedCourses')) || [],
+        quizScores: JSON.parse(localStorage.getItem('quizScores')) || [],
+        certificates: JSON.parse(localStorage.getItem('certificates')) || []
+      };
+
+      const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'skillbridge-report-snapshot.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
+

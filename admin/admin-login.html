@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - SkillBridge</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">SkillBridge</a>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li>
+                    <button
+                        id="adminLogoutBtn"
+                        class="btn btn-primary"
+                        style="display:none; background: linear-gradient(135deg,#ef4444,#dc2626); border:none; color:#fff; font-weight:700; padding:0.45rem 1.1rem; border-radius:8px; cursor:pointer;"
+                        onclick="adminNavLogout()"
+                    >🚪 Logout</button>
+                </li>
+                <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section" style="padding: 3rem 1rem;">
+        <div class="container" style="max-width: 650px;">
+            <h1 class="section-title" style="margin-bottom: 1.5rem;">🛡️ Admin Login</h1>
+            <p style="text-align:center; color: var(--text-light); margin-bottom: 2rem;">
+                Admin access is demo-only and stored locally in your browser.
+            </p>
+
+            <div class="progress-stat-box" style="border-left: 6px solid var(--accent-color);">
+                <form id="adminLoginForm" style="display:flex; flex-direction:column; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="adminUsername">Username</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon" aria-hidden="true">🛡️</span>
+                            <input id="adminUsername" type="text" required placeholder="Enter admin username">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">Password</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon" aria-hidden="true">🔒</span>
+                            <input id="adminPassword" type="password" required placeholder="Enter password">
+                            <button class="password-toggle" type="button" data-toggle-password="adminPassword" aria-label="Show password">👁️</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Login as Admin</button>
+                </form>
+
+                <div id="adminLoginStatus" class="form-status" style="margin-top: 1rem; display:none;"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>SkillBridge</h4>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SkillBridge. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        // Show logout button if an admin session already exists
+        document.addEventListener('DOMContentLoaded', function(){
+            const session = getSession();
+            const logoutBtn = document.getElementById('adminLogoutBtn');
+
+            if (session && session.role === 'admin') {
+                logoutBtn.style.display = 'inline-flex';
+                logoutBtn.textContent = '🚪 Logout (' + (session.fullName || session.username) + ')';
+            }
+
+            const form = document.getElementById('adminLoginForm');
+            const statusEl = document.getElementById('adminLoginStatus');
+
+            form?.addEventListener('submit', function(e){
+                e.preventDefault();
+
+                const username = document.getElementById('adminUsername').value.trim();
+                const password = document.getElementById('adminPassword').value;
+
+                const res = loginUser({ username, password, role: 'admin' });
+                if(res.ok){
+                    statusEl.style.display = 'block';
+                    statusEl.textContent = res.message;
+                    statusEl.classList.remove('error');
+                    statusEl.classList.add('success');
+
+                    // Admin-login success: go to site home so admin can edit everything
+                    setTimeout(()=>{ window.location.href = '../index.html'; }, 650);
+                } else {
+                    statusEl.style.display = 'block';
+                    statusEl.textContent = res.message;
+                    statusEl.classList.remove('success');
+                    statusEl.classList.add('error');
+                }
+            });
+        });
+
+        function adminNavLogout() {
+            logoutUser();
+            // Refresh to update UI (hide logout button)
+            window.location.reload();
+        }
+    </script>
+
+</body>
+</html>
+

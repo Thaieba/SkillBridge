@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Image Editor | SkillBridge</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <style>
+    .editor-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    @media (max-width: 768px) {
+      .editor-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    .editor-section {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .editor-section h3 {
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+    }
+    .image-preview {
+      width: 100%;
+      height: 250px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+    .form-field label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-field input, .form-field select, .form-field textarea {
+      background: var(--bg-secondary);
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.6rem 0.9rem;
+      color: var(--text-dark);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+      border-color: var(--primary-color);
+    }
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+    .file-input-wrapper input[type="file"] {
+      display: none;
+    }
+    .file-input-label {
+      display: block;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .file-input-label:hover {
+      opacity: 0.9;
+    }
+    .courses-list {
+      display: grid;
+      gap: 0.5rem;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .course-item {
+      padding: 0.8rem;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      border-left: 4px solid transparent;
+      transition: all 0.2s;
+    }
+    .course-item:hover, .course-item.active {
+      border-left-color: var(--primary-color);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    .course-item strong {
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .course-item small {
+      color: var(--text-light);
+    }
+    .btn-group {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1.5rem;
+    }
+    .btn-save {
+      flex: 1;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: none;
+      padding: 0.8rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-save:hover {
+      opacity: 0.9;
+    }
+    .btn-cancel {
+      flex: 1;
+      background: rgba(100, 100, 100, 0.15);
+      color: var(--text-dark);
+      border: none;
+      padding: 0.8rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="../index.html" class="logo">SkillBridge</a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="quizzes.html">Quizzes</a></li>
+        <li><a href="image-editor.html" style="color: var(--primary-color); font-weight: 700;">Image Editor</a></li>
+        <li><a href="video-editor.html">Video Editor</a></li>
+        <li><a href="quiz-editor.html">Quiz Editor</a></li>
+      </ul>
+      <div class="hamburger"><span></span><span></span><span></span></div>
+    </div>
+  </nav>
+
+  <section class="section" style="padding: 2.5rem 1rem;">
+    <div class="container">
+      <h1 class="section-title" style="margin-bottom: 2rem;">🖼️ Image Editor</h1>
+      
+      <div class="editor-container">
+        <!-- Course Selector -->
+        <div class="editor-section">
+          <h3>📚 Select Course</h3>
+          <div id="successMsg" class="success-message"></div>
+          <div id="errorMsg" class="error-message"></div>
+          <div class="courses-list" id="coursesList"></div>
+        </div>
+
+        <!-- Image Editor -->
+        <div class="editor-section">
+          <h3>🎨 Edit Course Image</h3>
+          <div class="image-preview">
+            <img id="imagePreview" src="" alt="Course Image" style="display: none;">
+            <span id="noImageText" style="color: var(--text-light);">No image selected</span>
+          </div>
+          
+          <div class="form-field">
+            <label>Course Title</label>
+            <input id="courseTitle" disabled type="text" />
+          </div>
+
+          <div class="form-field">
+            <label>Current Image Path</label>
+            <input id="imagePath" type="text" placeholder="e.g. images/courses/course.jpg" />
+          </div>
+
+          <div class="form-field">
+            <label>Upload New Image</label>
+            <div class="file-input-wrapper">
+              <input type="file" id="imageFile" accept="image/*" />
+              <label for="imageFile" class="file-input-label">
+                📤 Choose Image
+              </label>
+            </div>
+            <small style="color: var(--text-light); margin-top: 0.4rem;">
+              Accepted: JPG, PNG, WebP (Max 5MB)
+            </small>
+          </div>
+
+          <div class="form-field">
+            <label>Image URL (Alternative)</label>
+            <input id="imageUrl" type="text" placeholder="https://example.com/image.jpg" />
+          </div>
+
+          <div class="btn-group">
+            <button class="btn-save" onclick="saveImageChanges()">✓ Save Changes</button>
+            <button class="btn-cancel" onclick="resetImageEditor()">✕ Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      requireRole('admin');
+      loadCourses();
+      setupImageUpload();
+      
+      // Check if courseId is in URL parameters - auto select course
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('courseId');
+      if (courseId) {
+        // Use a longer timeout to ensure all elements are rendered
+        setTimeout(() => {
+          console.log('Selecting course:', courseId);
+          selectCourseById(parseInt(courseId));
+        }, 300);
+      }
+    });
+
+    let selectedCourseId = null;
+
+    function loadCourses() {
+      const coursesList = document.getElementById('coursesList');
+      coursesList.innerHTML = '';
+      
+      coursesData.forEach(course => {
+        const div = document.createElement('div');
+        div.className = 'course-item';
+        div.id = `course-item-${course.id}`;
+        div.innerHTML = `
+          <strong>${course.icon} ${course.title}</strong>
+          <small>${course.category} • ${course.level}</small>
+        `;
+        div.onclick = () => selectCourse(course.id);
+        coursesList.appendChild(div);
+      });
+    }
+
+    function selectCourseById(courseId) {
+      selectedCourseId = courseId;
+      
+      // Find and mark the course item as active
+      const courseItem = document.getElementById(`course-item-${courseId}`);
+      document.querySelectorAll('.course-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      if (courseItem) {
+        courseItem.classList.add('active');
+      }
+
+      // Load course data
+      const course = coursesData.find(c => c.id === courseId);
+      if (course) {
+        document.getElementById('courseTitle').value = course.title;
+        document.getElementById('imagePath').value = course.image;
+        loadImagePreview(course.image);
+      }
+    }
+
+    function selectCourse(courseId) {
+      selectedCourseId = courseId;
+      
+      // Update UI
+      document.querySelectorAll('.course-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      const courseItem = document.getElementById(`course-item-${courseId}`);
+      if (courseItem) {
+        courseItem.classList.add('active');
+      }
+
+      const course = coursesData.find(c => c.id === courseId);
+      if (course) {
+        document.getElementById('courseTitle').value = course.title;
+        document.getElementById('imagePath').value = course.image;
+        loadImagePreview(course.image);
+      }
+    }
+
+    function loadImagePreview(imagePath) {
+      const preview = document.getElementById('imagePreview');
+      const noImageText = document.getElementById('noImageText');
+      
+      // Fix path for admin subdirectory
+      const fullPath = imagePath.startsWith('../') ? imagePath : '../' + imagePath;
+      preview.src = fullPath;
+      preview.onload = () => {
+        preview.style.display = 'block';
+        noImageText.style.display = 'none';
+      };
+      preview.onerror = () => {
+        preview.style.display = 'none';
+        noImageText.style.display = 'block';
+      };
+    }
+
+    function setupImageUpload() {
+      const fileInput = document.getElementById('imageFile');
+      fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          if (file.size > 5 * 1024 * 1024) {
+            showError('File size exceeds 5MB limit');
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const dataUrl = event.target.result;
+            document.getElementById('imagePreview').src = dataUrl;
+            document.getElementById('imagePreview').style.display = 'block';
+            document.getElementById('noImageText').style.display = 'none';
+            document.getElementById('imagePath').value = '[Base64 Image]';
+            // Store base64 for later
+            window.base64ImageData = dataUrl;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    function saveImageChanges() {
+      if (!selectedCourseId) {
+        showError('Please select a course');
+        return;
+      }
+
+      const course = coursesData.find(c => c.id === selectedCourseId);
+      const imagePath = document.getElementById('imagePath').value;
+      const imageUrl = document.getElementById('imageUrl').value;
+
+      if (!imagePath && !imageUrl && !window.base64ImageData) {
+        showError('Please provide an image (upload, URL, or path)');
+        return;
+      }
+
+      // Update course image
+      if (imagePath && imagePath !== '[Base64 Image]') {
+        course.image = imagePath;
+      } else if (imageUrl) {
+        course.image = imageUrl;
+      } else if (window.base64ImageData) {
+        course.image = window.base64ImageData;
+      }
+
+      // Save to localStorage
+      localStorage.setItem('coursesData', JSON.stringify(coursesData));
+      
+      showSuccess(`✓ Image updated for "${course.title}"`);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    }
+
+    function resetImageEditor() {
+      if (selectedCourseId) {
+        const course = coursesData.find(c => c.id === selectedCourseId);
+        document.getElementById('imagePath').value = course.image;
+        loadImagePreview(course.image);
+        document.getElementById('imageFile').value = '';
+        document.getElementById('imageUrl').value = '';
+        window.base64ImageData = null;
+      }
+    }
+
+    function showSuccess(msg) {
+      const msgDiv = document.getElementById('successMsg');
+      msgDiv.textContent = msg;
+      msgDiv.style.display = 'block';
+      setTimeout(() => {
+        msgDiv.style.display = 'none';
+      }, 3000);
+    }
+
+    function showError(msg) {
+      const msgDiv = document.getElementById('errorMsg');
+      msgDiv.textContent = msg;
+      msgDiv.style.display = 'block';
+      setTimeout(() => {
+        msgDiv.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
