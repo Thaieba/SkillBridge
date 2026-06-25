@@ -16,7 +16,6 @@
                 <li><a href="skills.html">Skills</a></li>
                 <li><a href="progress.html">Progress</a></li>
                 <li><a href="certificate.html">Certificates</a></li>
-                <li><a href="roadmap.html">Roadmap</a></li>
                 <li><a href="register.html">Register</a></li>
                 <li><a href="#about-us">About Us</a></li>
                 <li><a href="#contact-us">Contact Us</a></li>
@@ -128,6 +127,30 @@
                         <li>Interaction Designer</li>
                         <li>Visual Designer</li>
                         <li>Design Lead</li>
+                    </ul>
+                </div>
+
+                <div class="career-card">
+                    <div class="career-icon">📱</div>
+                    <h3 class="career-title">Mobile Development</h3>
+                    <ul class="career-roles">
+                        <li>Mobile Developer</li>
+                        <li>iOS Developer</li>
+                        <li>Android Developer</li>
+                        <li>React Native Developer</li>
+                        <li>Full Stack Mobile Developer</li>
+                    </ul>
+                </div>
+
+                <div class="career-card">
+                    <div class="career-icon">🤖</div>
+                    <h3 class="career-title">Machine Learning</h3>
+                    <ul class="career-roles">
+                        <li>Machine Learning Engineer</li>
+                        <li>Data Scientist</li>
+                        <li>AI Engineer</li>
+                        <li>NLP Specialist</li>
+                        <li>Computer Vision Specialist</li>
                     </ul>
                 </div>
             </div>
@@ -335,6 +358,79 @@
         </div>
     </section>
 
+    <!-- FEEDBACK SECTION -->
+    <section class="section" id="feedback-section" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(236, 72, 153, 0.05));">
+        <div class="container">
+            <h2 class="section-title">Share Your Feedback</h2>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 2rem; font-size: 1.1rem;">Help us improve by sharing your valuable experience with SkillBridge</p>
+            
+            <div class="feedback-container" style="max-width: 900px; margin: 0 auto;">
+                <div class="feedback-form-wrapper" style="grid-column: 1 / -1;">
+                    <form id="homeFeedbackForm" class="contact-form">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label for="feedbackUserName">Your Name</label>
+                                <div class="input-with-icon">
+                                    <span class="input-icon">👤</span>
+                                    <input type="text" id="feedbackUserName" placeholder="Enter your name" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="feedbackUserEmail">Email Address</label>
+                                <div class="input-with-icon">
+                                    <span class="input-icon">✉️</span>
+                                    <input type="email" id="feedbackUserEmail" placeholder="your@email.com" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label for="feedbackHomeCourse">Course (Optional)</label>
+                                <select id="feedbackHomeCourse">
+                                    <option value="">Select a course...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="feedbackHomeType">Feedback Type</label>
+                                <select id="feedbackHomeType" required>
+                                    <option value="">Select feedback type...</option>
+                                    <option value="bug">🐛 Bug Report</option>
+                                    <option value="feature">✨ Feature Request</option>
+                                    <option value="course">📚 Course Feedback</option>
+                                    <option value="general">💬 General Feedback</option>
+                                    <option value="other">❓ Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>How would you rate your experience?</label>
+                            <div class="rating-group" id="homeRatingGroup">
+                                <button type="button" class="rating-btn" data-value="1">😞 Poor</button>
+                                <button type="button" class="rating-btn" data-value="2">😕 Fair</button>
+                                <button type="button" class="rating-btn" data-value="3">😊 Good</button>
+                                <button type="button" class="rating-btn" data-value="4">😄 Very Good</button>
+                                <button type="button" class="rating-btn" data-value="5">🤩 Excellent</button>
+                            </div>
+                            <input type="hidden" id="feedbackHomeRating" value="">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="feedbackHomeText">Your Feedback</label>
+                            <textarea id="feedbackHomeText" placeholder="Tell us what you think..." rows="5" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Feedback</button>
+                        <div id="homeFeedbackStatus"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- FOOTER -->
     <footer>
         <div class="footer-container">
@@ -342,7 +438,7 @@
                 <h4>About SkillBridge</h4>
                 <ul>
                     <li><a href="index.html#about-us">About Us</a></li>
-                    <li><a href="getting-started.html">Quick Start Guide</a></li>
+                    <li><a href="#faq">FAQ</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -368,6 +464,7 @@
     </footer>
 
     <script src="js/data.js"></script>
+    <script src="quiz-data.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
