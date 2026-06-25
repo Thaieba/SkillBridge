@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Feedback - SkillBridge</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">SkillBridge</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="skills.html">Courses</a>
+                <a href="roadmap.html">Roadmap</a>
+                <a href="progress.html">Progress</a>
+                <a href="feedback.html" class="active">Feedback</a>
+                <button id="themeToggle" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: #fff; padding: 0.5rem 0.75rem; border-radius: 0.4rem; cursor: pointer; font-weight: 700;">🌙</button>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="feedback-hero">
+        <div class="container">
+            <h1>📝 Send Us Your Feedback</h1>
+            <p>Help us improve SkillBridge by sharing your valuable feedback</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="feedback-container">
+                <div class="feedback-form-wrapper">
+                    <h2>Your Feedback Matters</h2>
+                    <form id="feedbackForm" class="contact-form">
+                        <div class="form-group">
+                            <label for="userName">Your Name</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">👤</span>
+                                <input type="text" id="userName" placeholder="Enter your name" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="userEmail">Email Address</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">✉️</span>
+                                <input type="email" id="userEmail" placeholder="your@email.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="feedbackCourse">Course (Optional)</label>
+                            <select id="feedbackCourse">
+                                <option value="">Select a course...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="feedbackType">Feedback Type</label>
+                            <select id="feedbackType" required>
+                                <option value="">Select feedback type...</option>
+                                <option value="bug">Bug Report</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="course">Course Feedback</option>
+                                <option value="general">General Feedback</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="feedbackRating">How would you rate your experience?</label>
+                            <div class="rating-group" id="ratingGroup">
+                                <button type="button" class="rating-btn" data-value="1">😞 Poor</button>
+                                <button type="button" class="rating-btn" data-value="2">😕 Fair</button>
+                                <button type="button" class="rating-btn" data-value="3">😊 Good</button>
+                                <button type="button" class="rating-btn" data-value="4">😄 Very Good</button>
+                                <button type="button" class="rating-btn" data-value="5">🤩 Excellent</button>
+                            </div>
+                            <input type="hidden" id="feedbackRating" value="">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="feedbackText">Your Feedback</label>
+                            <textarea id="feedbackText" placeholder="Tell us what you think..." rows="6" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Feedback</button>
+                        <div id="feedbackStatus"></div>
+                    </form>
+                </div>
+
+                <div class="feedback-info">
+                    <h3>Why Your Feedback Matters</h3>
+                    <div class="feedback-benefit">
+                        <span class="benefit-icon">✅</span>
+                        <div>
+                            <h4>Continuous Improvement</h4>
+                            <p>Your feedback helps us improve courses and features</p>
+                        </div>
+                    </div>
+                    <div class="feedback-benefit">
+                        <span class="benefit-icon">🚀</span>
+                        <div>
+                            <h4>Faster Development</h4>
+                            <p>Know what features matter most to our users</p>
+                        </div>
+                    </div>
+                    <div class="feedback-benefit">
+                        <span class="benefit-icon">💡</span>
+                        <div>
+                            <h4>Better Experience</h4>
+                            <p>Help us create the best learning platform</p>
+                        </div>
+                    </div>
+                    <div class="feedback-benefit">
+                        <span class="benefit-icon">🎯</span>
+                        <div>
+                            <h4>Your Voice Heard</h4>
+                            <p>Every suggestion is reviewed and considered</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="recentFeedback" style="margin-top: 4rem; display: none;">
+                <h3>Recent Feedback Submitted</h3>
+                <div id="feedbackList" class="feedback-list"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>About SkillBridge</h4>
+                <ul>
+                    <li><a href="index.html#about-us">About Us</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="feedback.html">Send Feedback</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Courses</h4>
+                <ul>
+                    <li><a href="skills.html">All Courses</a></li>
+                    <li><a href="skills.html#categories">Categories</a></li>
+                    <li><a href="roadmap.html">Career Roadmap</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Student Portal</h4>
+                <ul>
+                    <li><a href="progress.html">Your Progress</a></li>
+                    <li><a href="certificate.html">Certificates</a></li>
+                    <li><a href="index.html#contact-us">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="getting-started.html">Getting Started</a></li>
+                    <li><a href="roadmap.html">Learning Paths</a></li>
+                    <li><a href="feedback.html">Feedback</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 SkillBridge. All rights reserved. | Empowering careers through education
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="quiz-data.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Feedback page specific functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            populateCourseSelect();
+            setupRatingButtons();
+            setupFeedbackForm();
+            displayRecentFeedback();
+        });
+
+        function populateCourseSelect() {
+            const select = document.getElementById('feedbackCourse');
+            const coursesArray = Array.isArray(coursesData) ? coursesData : Object.values(coursesData);
+            
+            coursesArray.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course.id;
+                option.textContent = `${course.emoji} ${course.title}`;
+                select.appendChild(option);
+            });
+        }
+
+        function setupRatingButtons() {
+            const buttons = document.querySelectorAll('.rating-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    buttons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('feedbackRating').value = this.dataset.value;
+                });
+            });
+        }
+
+        function setupFeedbackForm() {
+            document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                if (!document.getElementById('feedbackRating').value) {
+                    showFeedbackStatus('Please select a rating', 'error');
+                    return;
+                }
+
+                const feedback = {
+                    id: Date.now(),
+                    name: document.getElementById('userName').value,
+                    email: document.getElementById('userEmail').value,
+                    course: document.getElementById('feedbackCourse').value || 'Not specified',
+                    type: document.getElementById('feedbackType').value,
+                    rating: document.getElementById('feedbackRating').value,
+                    message: document.getElementById('feedbackText').value,
+                    date: new Date().toLocaleString(),
+                    timestamp: Date.now()
+                };
+
+                let feedbackList = JSON.parse(localStorage.getItem('feedbackList')) || [];
+                feedbackList.push(feedback);
+                localStorage.setItem('feedbackList', JSON.stringify(feedbackList));
+
+                showFeedbackStatus('Thank you! Your feedback has been submitted successfully.', 'success');
+                document.getElementById('feedbackForm').reset();
+                document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('active'));
+                
+                setTimeout(() => {
+                    displayRecentFeedback();
+                }, 500);
+            });
+        }
+
+        function showFeedbackStatus(message, type) {
+            const statusDiv = document.getElementById('feedbackStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `form-status ${type}`;
+            statusDiv.style.marginTop = '1rem';
+        }
+
+        function displayRecentFeedback() {
+            const feedbackList = JSON.parse(localStorage.getItem('feedbackList')) || [];
+            const container = document.getElementById('recentFeedback');
+            const listDiv = document.getElementById('feedbackList');
+
+            if (feedbackList.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+            listDiv.innerHTML = '';
+
+            const recent = feedbackList.slice(-5).reverse();
+            recent.forEach(fb => {
+                const fbDiv = document.createElement('div');
+                fbDiv.className = 'feedback-card';
+                const ratingStars = '⭐'.repeat(parseInt(fb.rating));
+                fbDiv.innerHTML = `
+                    <div class="feedback-card-header">
+                        <div>
+                            <strong>${fb.name}</strong>
+                            <span class="feedback-type">${fb.type}</span>
+                        </div>
+                        <div class="feedback-rating">${ratingStars}</div>
+                    </div>
+                    <p>${fb.message}</p>
+                    <small>${fb.date}</small>
+                `;
+                listDiv.appendChild(fbDiv);
+            });
+        }
+    </script>
+</body>
+</html>
