@@ -261,8 +261,8 @@
         document.getElementById('courseTitle').value = course.title;
         
         const videoData = courseVideos[courseId] || {};
-        document.getElementById('videoId').value = videoData.videoId || '';
-        document.getElementById('videoTitle').value = videoData.title || '';
+        document.getElementById('videoId').value = videoData.videoId || course.youtubeVideoId || '';
+        document.getElementById('videoTitle').value = videoData.title || course.youtubeVideoTitle || '';
         document.getElementById('videoDescription').value = videoData.description || '';
         
         updateVideoPreview();
