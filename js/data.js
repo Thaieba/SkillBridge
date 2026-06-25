@@ -39,7 +39,10 @@ const coursesData = [
             "Web Designer",
             "UI Developer",
             "WordPress Developer"
-        ]
+        ],
+        detailImage: "images/wd-detail.jpeg",
+        youtubeVideoId: "qz0aGYrrlhU",
+        youtubeVideoTitle: "Web Development Tutorial for Beginners"
     },
     {
         id: 2,
@@ -79,7 +82,10 @@ const coursesData = [
             "Data Analyst",
             "Automation Engineer",
             "Machine Learning Engineer"
-        ]
+        ],
+        detailImage: "images/python-detail.jpeg",
+        youtubeVideoId: "8ext9G7XspQ",
+        youtubeVideoTitle: "Python Full Course for Beginners"
     },
     {
         id: 3,
@@ -119,7 +125,10 @@ const coursesData = [
             "SQL Developer",
             "BI Developer",
             "Data Scientist"
-        ]
+        ],
+        detailImage: "images/data-analytics-detail.jpeg",
+        youtubeVideoId: "MAy-xUf-Hq4",
+        youtubeVideoTitle: "Data Analytics Full Course"
     },
     {
         id: 4,
@@ -159,7 +168,10 @@ const coursesData = [
             "Solutions Architect",
             "Cloud Administrator",
             "Infrastructure Engineer"
-        ]
+        ],
+        detailImage: "images/cloud-detail.jpeg",
+        youtubeVideoId: "rK6c2m0sxds",
+        youtubeVideoTitle: "Cloud Computing Full Course"
     },
     {
         id: 5,
@@ -199,7 +211,10 @@ const coursesData = [
             "Security Engineer",
             "SOC Analyst",
             "Chief Information Security Officer (CISO)"
-        ]
+        ],
+        detailImage: "images/cyber-detail.jpeg",
+        youtubeVideoId: "x_IWGgo3zTA",
+        youtubeVideoTitle: "Cybersecurity Full Course"
     },
     {
         id: 6,
@@ -239,7 +254,10 @@ const coursesData = [
             "Interaction Designer",
             "Visual Designer",
             "Design Lead"
-        ]
+        ],
+        detailImage: "images/uiux-detail.jpeg",
+        youtubeVideoId: "ue6qMGUoUu0",
+        youtubeVideoTitle: "UI/UX Design Full Course"
     },
     {
         id: 7,
@@ -280,7 +298,10 @@ const coursesData = [
             "Android Developer",
             "React Native Developer",
             "Full Stack Mobile Developer"
-        ]
+        ],
+        detailImage: "images/mobile-detail.jpeg",
+        youtubeVideoId: "fDkWaRwj0Pk",
+        youtubeVideoTitle: "Mobile Development Full Course"
     },
     {
         id: 8,
@@ -321,7 +342,10 @@ const coursesData = [
             "AI Engineer",
             "Computer Vision Specialist",
             "NLP Specialist"
-        ]
+        ],
+        detailImage: "images/ml-detail.jpeg",
+        youtubeVideoId: "QJ5oKfJDfVM",
+        youtubeVideoTitle: "Machine Learning Full Course"
     }
 ];
 
