@@ -47,18 +47,6 @@
                         <div id="profileRole" style="font-size: 1.25rem; font-weight: 800; margin-top: 0.25rem;">-</div>
                     </div>
                 </div>
-
-                <div style="margin-top: 2rem;">
-                    <h2 class="progress-section-title" style="margin-bottom: 1rem;">🎓 Certificate Name</h2>
-                    <p style="color: var(--text-light); margin-bottom: 1rem;">
-                        Certificate generator uses <strong>userFullName</strong> from localStorage.
-                    </p>
-                    <div style="display:flex; gap: 1rem; flex-wrap: wrap;">
-                        <input id="editFullName" type="text" class="search-input" style="max-width: 350px;" placeholder="Update full name">
-                        <button class="btn btn-primary" type="button" onclick="saveName()">Save</button>
-                    </div>
-                    <div id="profileStatus" class="form-status" style="margin-top: 1rem;"></div>
-                </div>
             </div>
         </div>
     </section>
@@ -90,33 +78,7 @@
             document.getElementById('profileFullName').textContent = fullName;
             document.getElementById('profileUsername').textContent = username;
             document.getElementById('profileRole').textContent = session?.role || 'student';
-
-            const editInput = document.getElementById('editFullName');
-            if(editInput) editInput.value = fullName;
-
-            // prefill for certificate generator
-            localStorage.setItem('userFullName', fullName);
         });
-
-        function saveName(){
-            const input = document.getElementById('editFullName');
-            const statusEl = document.getElementById('profileStatus');
-            const name = input?.value?.trim();
-            if(!name){
-                statusEl.textContent = 'Full name cannot be empty.';
-                statusEl.classList.remove('success');
-                statusEl.classList.add('error');
-                statusEl.style.display='block';
-                return;
-            }
-            localStorage.setItem('userFullName', name);
-            statusEl.textContent = 'Saved! Certificates will use this name.';
-            statusEl.classList.remove('error');
-            statusEl.classList.add('success');
-            statusEl.style.display='block';
-            document.getElementById('profileFullName').textContent = name;
-        }
     </script>
 </body>
 </html>
-
