@@ -64,7 +64,13 @@
         </div>
 
         <div class="editor-section">
-          <div class="editor-title">2) Featured Skills Title</div>
+          <div class="editor-title">2) Featured Courses Manager</div>
+          <div class="form-field"><label>Featured Courses JSON (course IDs to display)</label><textarea id="featuredCoursesJson"></textarea></div>
+          <div class="helper">Example: [1, 2, 3] - Enter course IDs to show on home page. Leave empty to show all courses.</div>
+        </div>
+
+        <div class="editor-section">
+          <div class="editor-title">3) Featured Skills Title</div>
           <div class="row-2">
             <div class="form-field"><label>Featured Header</label><input id="featuredHeader" type="text" /></div>
             <div class="form-field"><label>Featured Limit</label><input id="featuredLimit" type="number" min="0" step="1" /></div>
@@ -72,7 +78,7 @@
         </div>
 
         <div class="editor-section">
-          <div class="editor-title">3) About / Mission / Vision</div>
+          <div class="editor-title">4) About / Mission / Vision</div>
           <div class="form-field"><label>About H2</label><input id="aboutTitle" type="text" /></div>
           <div class="form-field"><label>Intro H3</label><input id="aboutIntroH3" type="text" /></div>
           <div class="form-field"><label>Intro Paragraph</label><textarea id="aboutIntroP"></textarea></div>
@@ -88,13 +94,13 @@
         </div>
 
         <div class="editor-section">
-          <div class="editor-title">4) Why Choose SkillBridge (Cards)</div>
+          <div class="editor-title">5) Why Choose SkillBridge (Cards)</div>
           <div class="form-field"><label>Cards JSON (array of {icon,title,paragraph})</label><textarea id="whyCardsJson"></textarea></div>
           <div class="helper">Example: [{"icon":"📚","title":"Expert-Led Courses","paragraph":"..."}]</div>
         </div>
 
         <div class="editor-section">
-          <div class="editor-title">5) Contact Us</div>
+          <div class="editor-title">6) Contact Us</div>
           <div class="row-2">
             <div class="form-field"><label>Contact H2</label><input id="contactTitle" type="text" /></div>
             <div class="form-field"><label>Contact Form Heading</label><input id="contactFormTitle" type="text" /></div>
@@ -103,12 +109,12 @@
         </div>
 
         <div class="editor-section">
-          <div class="editor-title">6) Social Media</div>
+          <div class="editor-title">7) Social Media</div>
           <div class="form-field"><label>Social Links JSON (array of {label,url,emoji})</label><textarea id="socialJson"></textarea></div>
         </div>
 
         <div class="editor-section">
-          <div class="editor-title">7) Footer Links</div>
+          <div class="editor-title">8) Footer Links</div>
           <div class="form-field"><label>Footer Sections JSON (array of {title,links[]})</label><textarea id="footerJson"></textarea></div>
           <div class="form-field"><label>Footer Bottom Text</label><input id="footerBottom" type="text" /></div>
         </div>
@@ -137,6 +143,7 @@
     const DEFAULTS = {
       heroTitle: 'Welcome to SkillBridge',
       heroSubtitle: 'Your Gateway to Professional Excellence and Career Success',
+      featuredCourses: [1, 2, 3],
       featuredHeader: 'Featured Skills & Courses',
       featuredLimit: 3,
       aboutTitle: 'About SkillBridge',
@@ -207,6 +214,9 @@
       const c = load();
       setVal('heroTitle', c.heroTitle);
       setVal('heroSubtitle', c.heroSubtitle);
+      
+      $("featuredCoursesJson").value = JSON.stringify(c.featuredCourses, null, 2);
+      
       setVal('featuredHeader', c.featuredHeader);
       setVal('featuredLimit', c.featuredLimit);
 
@@ -239,6 +249,7 @@
       const base = load();
       base.heroTitle = $('heroTitle').value.trim();
       base.heroSubtitle = $('heroSubtitle').value.trim();
+      base.featuredCourses = parseJsonOrAlert($("featuredCoursesJson").value, 'Featured Courses');
       base.featuredHeader = $('featuredHeader').value.trim();
       base.featuredLimit = parseInt($('featuredLimit').value, 10) || 0;
 
