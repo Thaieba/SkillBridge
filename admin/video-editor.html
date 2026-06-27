@@ -229,6 +229,28 @@
     });
 
     let selectedCourseId = null;
+    
+    // Fix: Clear any stale localStorage overrides that had broken video IDs
+    // Now uses the working defaults from js/data.js
+    function migrateStaleOverrides() {
+      const brokenIds = ['8ext9G7XspQ', 'MAy-xUf-Hq4', 'rK6c2m0sxds', 'x_IWGgo3zTA', 'ue6qMGUoUu0', 'fDkWaRwj0Pk', 'QJ5oKfJDfVM'];
+      let courseVideos = JSON.parse(localStorage.getItem('courseVideos')) || {};
+      let changed = false;
+      
+      coursesData.forEach(course => {
+        const stored = courseVideos[course.id];
+        if (stored && brokenIds.includes(stored.videoId)) {
+          delete courseVideos[course.id];
+          changed = true;
+        }
+      });
+      
+      if (changed) {
+        localStorage.setItem('courseVideos', JSON.stringify(courseVideos));
+      }
+    }
+    migrateStaleOverrides();
+    
     let courseVideos = JSON.parse(localStorage.getItem('courseVideos')) || {};
 
     function loadCourses() {
