@@ -84,8 +84,8 @@ const coursesData = [
             "Machine Learning Engineer"
         ],
         detailImage: "images/python-detail.jpeg",
-        youtubeVideoId: "8ext9G7XspQ",
-        youtubeVideoTitle: "Python Full Course for Beginners"
+        youtubeVideoId: "rfscVS0vtbw",
+        youtubeVideoTitle: "Learn Python - Full Course for Beginners [Tutorial]"
     },
     {
         id: 3,
@@ -127,8 +127,8 @@ const coursesData = [
             "Data Scientist"
         ],
         detailImage: "images/data-analytics-detail.jpeg",
-        youtubeVideoId: "MAy-xUf-Hq4",
-        youtubeVideoTitle: "Data Analytics Full Course"
+        youtubeVideoId: "PSNXoAs2FtQ",
+        youtubeVideoTitle: "Data Analyst Bootcamp for Beginners"
     },
     {
         id: 4,
@@ -170,8 +170,8 @@ const coursesData = [
             "Infrastructure Engineer"
         ],
         detailImage: "images/cloud-detail.jpeg",
-        youtubeVideoId: "rK6c2m0sxds",
-        youtubeVideoTitle: "Cloud Computing Full Course"
+        youtubeVideoId: "SOTamWNgDKc",
+        youtubeVideoTitle: "AWS Certified Cloud Practitioner Certification Course"
     },
     {
         id: 5,
@@ -213,8 +213,8 @@ const coursesData = [
             "Chief Information Security Officer (CISO)"
         ],
         detailImage: "images/cyber-detail.jpeg",
-        youtubeVideoId: "x_IWGgo3zTA",
-        youtubeVideoTitle: "Cybersecurity Full Course"
+        youtubeVideoId: "XbJQthgnwCo",
+        youtubeVideoTitle: "Cyber Security Full Course 2024"
     },
     {
         id: 6,
@@ -256,8 +256,8 @@ const coursesData = [
             "Design Lead"
         ],
         detailImage: "images/uiux-detail.jpeg",
-        youtubeVideoId: "ue6qMGUoUu0",
-        youtubeVideoTitle: "UI/UX Design Full Course"
+        youtubeVideoId: "mT_Jjn8RJdo",
+        youtubeVideoTitle: "Learn Figma in 6 Hours - Full UI/UX Design Course"
     },
     {
         id: 7,
@@ -300,8 +300,8 @@ const coursesData = [
             "Full Stack Mobile Developer"
         ],
         detailImage: "images/mobile-detail.jpeg",
-        youtubeVideoId: "fDkWaRwj0Pk",
-        youtubeVideoTitle: "Mobile Development Full Course"
+        youtubeVideoId: "0-S5a0eXPoc",
+        youtubeVideoTitle: "React Native Tutorial for Beginners"
     },
     {
         id: 8,
@@ -344,8 +344,8 @@ const coursesData = [
             "NLP Specialist"
         ],
         detailImage: "images/ml-detail.jpeg",
-        youtubeVideoId: "QJ5oKfJDfVM",
-        youtubeVideoTitle: "Machine Learning Full Course"
+        youtubeVideoId: "i_LwzRVP7bg",
+        youtubeVideoTitle: "Machine Learning for Everybody - Full Course"
     }
 ];
 
