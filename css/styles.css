@@ -214,6 +214,17 @@ nav .container {
     background: #ef4444;
 }
 
+.btn-quiz {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, var(--primary-color), #059669);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    font-size: 1.05rem;
+}
+
+.btn-quiz:hover {
+    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.45);
+}
+
 .progress-stat-box,
 .skill-card,
 .career-card,
