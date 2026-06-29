@@ -73,7 +73,7 @@
         <h2 style="margin-bottom:1rem;font-size:1.2rem;color:var(--text-dark);">📊 Student Quiz Attempts</h2>
         <div style="overflow-x:auto;">
           <table class="admin-table">
-            <thead><tr><th>Course</th><th>Score</th><th>%</th><th>Result</th><th>Date</th></tr></thead>
+            <thead><tr><th>Student</th><th>Course</th><th>Score</th><th>%</th><th>Result</th><th>Date</th></tr></thead>
             <tbody id="attemptsTbody"></tbody>
           </table>
         </div>
@@ -156,12 +156,14 @@
       // Attempts
       const attBody = document.getElementById('attemptsTbody');
       if (!attempts.length) {
-        attBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-light);">No attempts yet.</td></tr>`;
+        attBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-light);">No attempts yet.</td></tr>`;
       } else {
         attBody.innerHTML = attempts.slice().reverse().map(a=>{
           const cn = courses.find(c=>String(c.id)===String(a.courseId))?.title || 'Course #'+a.courseId;
           const cls = a.percentage>=70?'pass':'fail';
+          const studentName = a.studentName || 'Unknown';
           return `<tr>
+            <td style="font-weight:600;">${studentName}</td>
             <td>${cn}</td>
             <td>${a.score}/${a.total}</td>
             <td class="${cls}">${a.percentage}%</td>
@@ -182,6 +184,8 @@
     function openAddQuizModal() {
       document.getElementById('quizModalTitle').textContent = '➕ Add Quiz';
       document.getElementById('editingCourseId').value = '';
+      const courseSelect = document.getElementById('qCourse');
+      courseSelect.disabled = false;
       document.getElementById('questionsContainer').innerHTML = '';
       questionCount = 0;
       addQuestionBlock();
@@ -194,14 +198,19 @@
       if (!quiz) return;
       document.getElementById('quizModalTitle').textContent = '✏️ Edit Quiz';
       document.getElementById('editingCourseId').value = courseId;
-      document.getElementById('qCourse').value = courseId;
+      const courseSelect = document.getElementById('qCourse');
+      courseSelect.value = courseId;
+      courseSelect.disabled = true;
       document.getElementById('questionsContainer').innerHTML = '';
       questionCount = 0;
       (quiz.questions||[]).forEach(q => addQuestionBlock(q));
       document.getElementById('quizModal').classList.add('open');
     }
 
-    function closeQuizModal() { document.getElementById('quizModal').classList.remove('open'); }
+    function closeQuizModal() {
+      document.getElementById('quizModal').classList.remove('open');
+      document.getElementById('qCourse').disabled = false;
+    }
 
     function addQuestionBlock(existing) {
       const idx = questionCount++;
