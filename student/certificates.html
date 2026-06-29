@@ -81,6 +81,10 @@
                         <h3>${cert.courseTitle}</h3>
                         <p>🏆 ${cert.type === 'quiz' ? 'Quiz Completion' : 'Course Completion'}</p>
                         <p>📅 ${cert.issuedDate}</p>
+                        <div class="certificate-meta">
+                            <span class="certificate-id">${cert.id}</span>
+                            <button class="certificate-action-btn" onclick="viewCertificate('${cert.id}')">View</button>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -88,4 +92,3 @@
     </script>
 </body>
 </html>
-
