@@ -145,7 +145,7 @@ nav .container {
     color: #fff;
     background:
         linear-gradient(135deg, rgba(17, 24, 39, 0.78), rgba(99, 102, 241, 0.72)),
-        url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80") center/cover;
+        url("../images/hero.jpeg") center/cover;
 }
 
 .hero-content {
