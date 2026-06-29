@@ -872,3 +872,228 @@ html[data-theme="dark"] .rating-btn {
         min-width: auto;
     }
 }
+
+/* ============================================
+   CERTIFICATES & FILTERS STYLES
+   ============================================ */
+.certificate-filters {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.6rem 1.4rem;
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #ffffff !important;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.certificates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.certificate-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.certificate-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+.certificate-badge {
+    background: rgba(16, 185, 129, 0.12);
+    border-radius: 12px;
+    padding: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    min-height: 54px;
+}
+
+.certificate-badge-icon {
+    font-size: 2rem;
+}
+
+.certificate-info {
+    flex: 1;
+}
+
+.certificate-info h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.certificate-info p {
+    font-size: 0.88rem;
+    color: var(--text-light);
+    margin-bottom: 0.3rem;
+}
+
+.certificate-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--border-color);
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.certificate-id {
+    font-size: 0.75rem;
+    font-family: monospace;
+    color: var(--text-light);
+    background: var(--bg-secondary);
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    word-break: break-all;
+}
+
+.certificate-action-btn {
+    background: linear-gradient(135deg, var(--primary-color), #059669);
+    color: #ffffff !important;
+    border: none;
+    padding: 0.45rem 1rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.certificate-action-btn:hover {
+    opacity: 0.9;
+    transform: scale(1.04);
+}
+
+.certificate-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.certificate-modal-content {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 2rem;
+    width: min(850px, 95vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: none;
+    font-size: 1.8rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+/* ============================================
+   SEARCH & CATEGORY FILTER STYLES
+   ============================================ */
+.search-input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.category-btn {
+    padding: 0.5rem 1rem;
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+}
+
+.category-btn:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.category-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #ffffff !important;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
