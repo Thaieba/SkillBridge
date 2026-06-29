@@ -139,8 +139,8 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .form-field input, .form-field select, .form-field textarea {
-      background: var(--bg-secondary);
+    .form-field input, .form-field select, .form-field textarea, .option-field input[type="text"] {
+      background: var(--card-bg);
       border: 1.5px solid var(--border-color);
       border-radius: 8px;
       padding: 0.6rem 0.9rem;
@@ -149,7 +149,7 @@
       outline: none;
       transition: border-color 0.2s;
     }
-    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus, .option-field input[type="text"]:focus {
       border-color: var(--primary-color);
     }
     .form-field textarea {
@@ -162,6 +162,7 @@
       margin: 1.5rem 0;
       padding: 1rem;
       background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
     }
     .option-field {
@@ -179,7 +180,7 @@
       font-weight: 700;
       font-size: 0.9rem;
     }
-    .option-field input {
+    .option-field input[type="text"] {
       width: 100%;
     }
     .option-radio {
