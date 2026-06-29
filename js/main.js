@@ -651,7 +651,32 @@ function renderFutureOpportunities(courseId) {
 // QUIZ FUNCTIONALITY
 // ============================================
 function startQuiz(courseId) {
-    const quiz = quizData[courseId];
+    const cid = String(courseId);
+
+    // Prefer admin-managed quizzes first (customQuizzes from admin/quizzes.html)
+    let quiz = null;
+    try {
+        const custom = JSON.parse(localStorage.getItem('customQuizzes') || 'null');
+        if (custom && custom[cid] && custom[cid].questions) {
+            quiz = custom[cid];
+        }
+    } catch (e) {}
+
+    // Then prefer quiz editor saved data (admin/quiz-editor.html)
+    if (!quiz) {
+        try {
+            const edited = JSON.parse(localStorage.getItem('quizEditorData') || 'null');
+            if (edited && edited[courseId] && edited[courseId].questions) {
+                quiz = edited[courseId];
+            }
+        } catch (e) {}
+    }
+
+    // Fallback to built-in quizData
+    if (!quiz) {
+        quiz = quizData[courseId];
+    }
+
     if (!quiz) {
         alert('Quiz not available for this course yet.');
         return;
@@ -661,6 +686,7 @@ function startQuiz(courseId) {
     sessionStorage.setItem('quizCourseId', courseId);
     window.location.href = 'quiz.html';
 }
+
 
 function displayQuiz() {
     const quizData = JSON.parse(sessionStorage.getItem('currentQuiz'));
@@ -814,13 +840,16 @@ function enrollCourse(courseId, courseTitle) {
 
 function saveQuizProgress(courseId, score, total) {
     let quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
+    const session = getSession();
     
     quizScores.push({
         courseId: courseId,
         score: score,
         total: total,
         percentage: Math.round((score / total) * 100),
-        date: new Date().toLocaleString()
+        date: new Date().toLocaleString(),
+        studentName: session?.fullName || localStorage.getItem('userFullName') || 'Unknown Student',
+        studentUsername: session?.username || 'unknown'
     });
     
     localStorage.setItem('quizScores', JSON.stringify(quizScores));
