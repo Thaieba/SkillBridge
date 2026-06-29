@@ -1881,7 +1881,6 @@ function renderDynamicNavbar() {
         const isDashboard = pageName === 'dashboard.html' && path.includes('/admin/');
         const isStudents = pageName === 'students.html';
         const isCourses = pageName === 'courses.html';
-        const isQuizzes = pageName === 'quizzes.html';
         const isReports = pageName === 'reports.html';
         const isSettings = pageName === 'settings.html';
         const isSiteEditor = pageName === 'site-editor.html';
@@ -1892,7 +1891,6 @@ function renderDynamicNavbar() {
             <li><a href="${inSubfolder ? '' : 'admin/'}dashboard.html" class="${isDashboard ? 'active' : ''}">Dashboard</a></li>
             <li><a href="${inSubfolder ? '' : 'admin/'}students.html" class="${isStudents ? 'active' : ''}">Students</a></li>
             <li><a href="${inSubfolder ? '' : 'admin/'}courses.html" class="${isCourses ? 'active' : ''}">Courses</a></li>
-            <li><a href="${inSubfolder ? '' : 'admin/'}quizzes.html" class="${isQuizzes ? 'active' : ''}">Quizzes</a></li>
             <li><a href="${inSubfolder ? '' : 'admin/'}reports.html" class="${isReports ? 'active' : ''}">Reports</a></li>
             <li><a href="${inSubfolder ? '' : 'admin/'}settings.html" class="${isSettings ? 'active' : ''}">Settings</a></li>
             <li><a href="${inSubfolder ? '' : 'admin/'}site-editor.html" class="${isSiteEditor ? 'active' : ''}">Site Editor</a></li>
