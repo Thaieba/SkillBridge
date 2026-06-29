@@ -6,6 +6,7 @@
     --dark-bg: #ffffff;
     --light-bg: #f0fdf4;
     --bg-secondary: #ecfdf5;
+    --card-bg: #ffffff;
     --text-dark: #0f172a;
     --text-light: #64748b;
     --border: #d1fae5;
@@ -560,15 +561,17 @@ footer {
 
 html[data-theme="dark"] {
     --light-bg: #0f172a;
-    --bg-secondary: #111827;
-    --text-dark: #f0fdf4;
+    --bg-secondary: #1e293b;
+    --card-bg: #1e293b;
+    --text-dark: #f8fafc;
     --text-light: #cbd5e1;
-    --border: #064e3b;
-    --border-color: #064e3b;
+    --border: #334155;
+    --border-color: #334155;
 }
 
 html[data-theme="dark"] body {
     background: #0f172a;
+    color: var(--text-dark);
 }
 
 html[data-theme="dark"] .progress-stat-box,
@@ -580,15 +583,18 @@ html[data-theme="dark"] .contact-form-container,
 html[data-theme="dark"] .contact-info-container,
 html[data-theme="dark"] .opportunity-card,
 html[data-theme="dark"] .details-section,
-html[data-theme="dark"] .details-info-box {
-    background: #111827;
+html[data-theme="dark"] .details-info-box,
+html[data-theme="dark"] .stat-card,
+html[data-theme="dark"] .editor-section {
+    background: #1e293b;
+    color: #f8fafc;
 }
 
-html[data-theme="dark"] .form-group input,
-html[data-theme="dark"] .form-group textarea,
-html[data-theme="dark"] .form-group select {
-    color: #f3f4f6;
-    background: #0f172a;
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select,
+html[data-theme="dark"] button {
+    color: #f8fafc;
 }
 
 @media (max-width: 860px) {
