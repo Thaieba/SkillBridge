@@ -505,6 +505,186 @@ const quizData = {
             }
         ]
     },
+    4: { // Cloud Computing
+        title: "Cloud Computing Fundamentals Quiz",
+        questions: [
+            {
+                id: 1,
+                question: "Which of the following is a major cloud service provider?",
+                options: ["Adobe", "Amazon Web Services (AWS)", "Oracle Forms", "SAP GUI"],
+                correct: 1,
+                explanation: "AWS (Amazon Web Services) is one of the three major cloud providers along with Azure and Google Cloud."
+            },
+            {
+                id: 2,
+                question: "What does IaaS stand for?",
+                options: [
+                    "Internet as a Service",
+                    "Infrastructure as a Service",
+                    "Integration as a Service",
+                    "Information as a Service"
+                ],
+                correct: 1,
+                explanation: "IaaS stands for Infrastructure as a Service — providing virtualized computing resources over the internet."
+            },
+            {
+                id: 3,
+                question: "Which tool is used for containerization?",
+                options: ["Jenkins", "Docker", "Ansible", "Terraform"],
+                correct: 1,
+                explanation: "Docker is the most popular containerization platform for packaging applications."
+            },
+            {
+                id: 4,
+                question: "What is Kubernetes primarily used for?",
+                options: [
+                    "Database management",
+                    "Container orchestration",
+                    "Code compilation",
+                    "Network monitoring"
+                ],
+                correct: 1,
+                explanation: "Kubernetes is an open-source container orchestration system for automating deployment, scaling, and management."
+            },
+            {
+                id: 5,
+                question: "What is a serverless computing model?",
+                options: [
+                    "Computing without any servers",
+                    "Cloud provider manages infrastructure, you only write code",
+                    "Using only physical servers",
+                    "Computing without internet"
+                ],
+                correct: 1,
+                explanation: "Serverless computing means the cloud provider manages the infrastructure and you focus only on writing code."
+            }
+        ]
+    },
+    5: { // Cyber Security
+        title: "Cyber Security Fundamentals Quiz",
+        questions: [
+            {
+                id: 1,
+                question: "What does a firewall do?",
+                options: [
+                    "Speeds up internet",
+                    "Monitors and filters network traffic",
+                    "Stores passwords",
+                    "Creates backups"
+                ],
+                correct: 1,
+                explanation: "A firewall monitors and filters incoming and outgoing network traffic based on security rules."
+            },
+            {
+                id: 2,
+                question: "What is phishing?",
+                options: [
+                    "A type of malware",
+                    "A social engineering attack to steal credentials",
+                    "A network protocol",
+                    "A firewall configuration"
+                ],
+                correct: 1,
+                explanation: "Phishing is a social engineering attack where attackers impersonate trusted entities to steal sensitive information."
+            },
+            {
+                id: 3,
+                question: "What does SSL/TLS provide?",
+                options: [
+                    "Faster loading",
+                    "Encrypted communication over the internet",
+                    "Better UI design",
+                    "Database optimization"
+                ],
+                correct: 1,
+                explanation: "SSL/TLS provides encrypted communication between a client and server over the internet."
+            },
+            {
+                id: 4,
+                question: "What is the purpose of penetration testing?",
+                options: [
+                    "To test software performance",
+                    "To simulate attacks and find vulnerabilities",
+                    "To test user interfaces",
+                    "To optimize databases"
+                ],
+                correct: 1,
+                explanation: "Penetration testing simulates real-world attacks to identify security vulnerabilities before malicious hackers do."
+            },
+            {
+                id: 5,
+                question: "Which of these is a strong password practice?",
+                options: [
+                    "Using your birthday",
+                    "Using the same password everywhere",
+                    "Using a mix of uppercase, lowercase, numbers, and symbols",
+                    "Using short passwords"
+                ],
+                correct: 2,
+                explanation: "Strong passwords use a combination of uppercase, lowercase, numbers, and special characters."
+            }
+        ]
+    },
+    6: { // UI/UX Design
+        title: "UI/UX Design Fundamentals Quiz",
+        questions: [
+            {
+                id: 1,
+                question: "What does UX stand for?",
+                options: [
+                    "Universal Experience",
+                    "User Experience",
+                    "Unified Extension",
+                    "User Execution"
+                ],
+                correct: 1,
+                explanation: "UX stands for User Experience — how a user interacts with and experiences a product."
+            },
+            {
+                id: 2,
+                question: "What is a wireframe?",
+                options: [
+                    "A final design mockup",
+                    "A low-fidelity layout blueprint of a page",
+                    "A type of animation",
+                    "A coding framework"
+                ],
+                correct: 1,
+                explanation: "A wireframe is a low-fidelity, simplified outline of a page layout used to plan structure and functionality."
+            },
+            {
+                id: 3,
+                question: "Which tool is widely used for UI/UX design?",
+                options: ["Visual Studio Code", "Figma", "MySQL", "Git"],
+                correct: 1,
+                explanation: "Figma is a popular collaborative design tool for creating UI/UX designs, prototypes, and design systems."
+            },
+            {
+                id: 4,
+                question: "What is the purpose of usability testing?",
+                options: [
+                    "To test code performance",
+                    "To evaluate how easily users can use a product",
+                    "To test server load",
+                    "To check for bugs"
+                ],
+                correct: 1,
+                explanation: "Usability testing evaluates how easily and intuitively users can interact with a product."
+            },
+            {
+                id: 5,
+                question: "What does 'responsive design' mean in UI/UX?",
+                options: [
+                    "Design that responds to user clicks",
+                    "Design that adapts to different screen sizes and devices",
+                    "Design with fast animations",
+                    "Design that loads quickly"
+                ],
+                correct: 1,
+                explanation: "Responsive design ensures a product looks and works well across different screen sizes and devices."
+            }
+        ]
+    },
     7: { // Mobile Development
         title: "Mobile Development Fundamentals Quiz",
         questions: [
