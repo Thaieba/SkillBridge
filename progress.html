@@ -152,7 +152,7 @@
         function displayProgress() {
             const completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
             const quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
-            const certificates = JSON.parse(localStorage.getItem('certificates')) || [];
+            const certificates = (JSON.parse(localStorage.getItem('certificates')) || []).filter(c => c.type !== 'quiz');
 
             // Update statistics
             document.getElementById('totalCourses').textContent = completedCourses.length;
@@ -201,11 +201,11 @@
                 earnedCertificatesDiv.innerHTML = recentCerts.map(cert => `
                     <div class="certificate-card" style="cursor: pointer; animation: fadeInUp 0.6s ease;" onclick="viewCertificate('${cert.id}')">
                         <div class="certificate-badge">
-                            <div class="certificate-badge-icon">${cert.type === 'quiz' ? '📝' : '📜'}</div>
+                            <div class="certificate-badge-icon">📜</div>
                         </div>
                         <div class="certificate-info">
                             <h3>${cert.courseTitle}</h3>
-                            <p>🏆 ${cert.type === 'quiz' ? 'Quiz Completion' : 'Course Completion'}</p>
+                            <p>🏆 Course Completion</p>
                             <p>📅 ${cert.issuedDate}</p>
                             <div class="certificate-meta">
                                 <button class="certificate-action-btn" onclick="event.stopPropagation(); viewCertificate('${cert.id}')">View</button>
