@@ -2399,17 +2399,17 @@ if (storedCourses) {
 
 // Migration: Update youtubeVideoId for specific courses (both in defaults and in localStorage)
 const videoUpdates = {
-    10: { youtubeVideoId: "9727t-aZzK4", youtubeVideoTitle: "Graphic Design Basics" },
-    12: { youtubeVideoId: "s2W3GgT-f7M", youtubeVideoTitle: "Freelance Content Writing Course" },
-    15: { youtubeVideoId: "tD7_Zk9289k", youtubeVideoTitle: "Business Analyst Tutorial" },
-    16: { youtubeVideoId: "f8H57o2V6Lw", youtubeVideoTitle: "Who Even Is An Entrepreneur? - Crash Course Business" },
-    17: { youtubeVideoId: "Y-uV-a7K6a8", youtubeVideoTitle: "Learn VR Development in 3 Hours - Valem" },
-    18: { youtubeVideoId: "W_9J-lXp9cE", youtubeVideoTitle: "ROS Tutorial - ROS Noetic 2H30 Crash Course" },
-    19: { youtubeVideoId: "CqYQ1D58V-E", youtubeVideoTitle: "Beginners guide to UNITY AR Foundation" },
-    21: { youtubeVideoId: "r6p79p1t4Hk", youtubeVideoTitle: "Accounting Basics: a Guide to (Almost) Everything" },
-    22: { youtubeVideoId: "t769h9f3wS0", youtubeVideoTitle: "Tax Basics: a Beginner's Guide to Everything" },
-    23: { youtubeVideoId: "s5kQ-D5E0g4", youtubeVideoTitle: "Basics of Stock Market For Beginners Lecture 1" },
-    24: { youtubeVideoId: "d_OqWw4J0yQ", youtubeVideoTitle: "5 Questions To Ask Before Investing" }
+    10: { youtubeVideoId: "dFSia1LZI4Y", youtubeVideoTitle: "Graphic Design Basics - Gareth David Studio" },
+    12: { youtubeVideoId: "ZI8Zx2FmAy8", youtubeVideoTitle: "Content Writing Masterclass - Saddam Kassim" },
+    15: { youtubeVideoId: "pr-ly3UJB6w", youtubeVideoTitle: "Business Analyst Course - Edureka Live" },
+    16: { youtubeVideoId: "aozlwC3XwfY", youtubeVideoTitle: "Who Even Is An Entrepreneur - Crash Course Business" },
+    17: { youtubeVideoId: "YBQ_ps6e71k", youtubeVideoTitle: "Learn VR Development in 3 Hours - Valem" },
+    18: { youtubeVideoId: "wfDJAYTMTdk", youtubeVideoTitle: "ROS Tutorial - ROS Noetic Crash Course" },
+    19: { youtubeVideoId: "MuQPRYPHTCM", youtubeVideoTitle: "Beginners guide to UNITY AR Foundation" },
+    21: { youtubeVideoId: "yYX4bvQSqbo", youtubeVideoTitle: "Accounting Basics: a Guide to (Almost) Everything" },
+    22: { youtubeVideoId: "AMXGBH7hoJY", youtubeVideoTitle: "Tax Basics: a Beginner Guide to Everything" },
+    23: { youtubeVideoId: "Xn7KWR9EOGQ", youtubeVideoTitle: "Basics of Stock Market For Beginners - Lecture 1" },
+    24: { youtubeVideoId: "y72iyLPOv8E", youtubeVideoTitle: "5 Questions To Ask Before Investing" }
 };
 
 let needsWrite = false;
@@ -2460,7 +2460,6 @@ if (storedOverridesRaw) {
         console.error("Error migrating courseVideos overrides:", e);
     }
 }
-
 
 // Load custom roadmap data from localStorage if it exists
 const storedRoadmaps = localStorage.getItem('courseRoadmapData');
