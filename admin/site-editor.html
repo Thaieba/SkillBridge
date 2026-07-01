@@ -3,138 +3,397 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin – Site Editor (SkillBridge)</title>
+  <title>Admin – Site Editor | SkillBridge</title>
   <link rel="stylesheet" href="../css/styles.css" />
   <style>
-    .editor-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-    .editor-section { background: var(--light-bg); padding: 1.2rem; border-radius: 1rem; box-shadow: var(--shadow); }
-    html[data-theme="dark"] .editor-section { background: #111827; }
-    .editor-title { font-size: 1.3rem; font-weight: 800; color: var(--text-dark); margin-bottom: .8rem; }
-    html[data-theme="dark"] .editor-title { color: #f3f4f6; }
-    .form-field { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1rem; }
-    .form-field label { font-size:.85rem; font-weight:800; color: var(--text-light); text-transform:uppercase; }
-    .form-field input, .form-field textarea { padding: .7rem .9rem; border-radius: .6rem; border: 1.5px solid var(--border-color); background: white; color: var(--text-dark); outline: none; font-size: .95rem; }
-    html[data-theme="dark"] .form-field input, html[data-theme="dark"] .form-field textarea { background: #111827; color: #f3f4f6; border-color: #374151; }
-    .row-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .editor-actions { display:flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
-    .btn-save { background: linear-gradient(135deg,#10b981,#059669); color:#fff; border:none; padding:.75rem 1.4rem; border-radius:12px; font-weight:800; cursor:pointer; }
-    .btn-reset { background: linear-gradient(135deg,#f59e0b,#d97706); color:#fff; border:none; padding:.75rem 1.4rem; border-radius:12px; font-weight:800; cursor:pointer; }
-    .btn-view { background: rgba(99,102,241,.15); color: var(--primary-color); border:2px solid var(--primary-color); padding:.65rem 1.2rem; border-radius:12px; font-weight:800; cursor:pointer; }
-    .helper { color: var(--text-light); font-size: .95rem; line-height: 1.6; }
-    textarea { resize: vertical; min-height: 90px; }
-    .preview-link { color: var(--primary-color); font-weight: 800; text-decoration:none; }
+    /* Styling overrides */
+    .editor-section { 
+      background: var(--card-bg); 
+      padding: 1.5rem; 
+      border-radius: 14px; 
+      box-shadow: var(--shadow); 
+      border: 1px solid var(--border-color);
+      border-left: 5px solid var(--primary-color);
+      margin-bottom: 1.5rem;
+    }
+    .editor-title { 
+      font-size: 1.2rem; 
+      font-weight: 850; 
+      color: var(--text-dark); 
+      margin-bottom: 1.25rem; 
+    }
+    .form-field { 
+      display:flex; 
+      flex-direction:column; 
+      gap:.4rem; 
+      margin-bottom:1rem; 
+    }
+    .form-field label { 
+      font-size:.8rem; 
+      font-weight:700; 
+      color: var(--text-light); 
+      text-transform:uppercase; 
+      letter-spacing: 0.05em;
+    }
+    .form-field input, .form-field textarea { 
+      padding: .65rem .9rem; 
+      border-radius: 8px; 
+      border: 1.5px solid var(--border-color); 
+      background: var(--bg-secondary); 
+      color: var(--text-dark); 
+      outline: none; 
+      font-size: .95rem; 
+      transition: border-color 0.2s;
+    }
+    .form-field input:focus, .form-field textarea:focus {
+      border-color: var(--primary-color);
+    }
+    .row-2 { 
+      display:grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 1rem; 
+    }
+    @media (max-width: 576px) {
+      .row-2 {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+    }
+    .editor-actions { 
+      display:flex; 
+      gap: 1rem; 
+      flex-wrap: wrap; 
+      margin-top: 1rem; 
+    }
+    .btn-save { 
+      background: linear-gradient(135deg,#10b981,#059669); 
+      color:#fff; 
+      border:none; 
+      padding:.7rem 1.5rem; 
+      border-radius:10px; 
+      font-weight:800; 
+      cursor:pointer; 
+      font-size: 0.92rem;
+      transition: opacity 0.2s;
+    }
+    .btn-save:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .btn-reset { 
+      background: linear-gradient(135deg,#f59e0b,#d97706); 
+      color:#fff; 
+      border:none; 
+      padding:.7rem 1.5rem; 
+      border-radius:10px; 
+      font-weight:800; 
+      cursor:pointer; 
+      font-size: 0.92rem;
+    }
+    .btn-view { 
+      background: var(--bg-secondary); 
+      color: var(--text-dark); 
+      border:1px solid var(--border-color); 
+      padding:.65rem 1.25rem; 
+      border-radius:10px; 
+      font-weight:700; 
+      cursor:pointer; 
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    .btn-view:hover {
+      border-color: var(--primary-color);
+      transform: translateY(-1px);
+    }
+    textarea { 
+      resize: vertical; 
+      min-height: 90px; 
+    }
+
+    /* Tab Layout settings system mapping */
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 2rem;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .settings-layout {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+    .settings-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .settings-tab-btn {
+      text-align: left;
+      padding: 0.85rem 1.1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-dark);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .settings-tab-btn:hover, .settings-tab-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+      box-shadow: var(--shadow);
+    }
+
+    .tab-content-pane {
+      display: none;
+    }
+    .tab-content-pane.active {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* JSON code editors inside forms */
+    .json-editor {
+      font-family: monospace;
+      font-size: 0.85rem;
+      background: #0f172a !important;
+      color: #f8fafc !important;
+      border-color: #334155 !important;
+    }
+    .json-control-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+    }
+    .json-validation-msg {
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-top: 0.25rem;
+    }
+
+    /* Scrollbar customizing */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-color);
+    }
   </style>
 </head>
 <body>
   <nav>
     <div class="container">
       <a href="../index.html" class="logo">SkillBridge</a>
-      <ul class="nav-links">
-        <li><a href="dashboard.html">Dashboard</a></li>
-        <li><a href="students.html">Students</a></li>
-        <li><a href="courses.html">Courses</a></li>
-        <li><a href="reports.html">Reports</a></li>
-        <li><a href="settings.html">Settings</a></li>
-        <li><a href="site-editor.html" class="active">Site Editor</a></li>
-        <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
-      </ul>
+      <ul class="nav-links"></ul>
       <div class="hamburger"><span></span><span></span><span></span></div>
     </div>
   </nav>
 
   <section class="section" style="padding: 2.5rem 1rem;">
     <div class="container" style="max-width: 1100px;">
-      <h1 class="section-title" style="margin-bottom: 1rem;">🖊️ Admin Site Editor</h1>
-      <p class="helper" style="margin-bottom: 1.5rem;">
-        Admin login pannina udane index/home (public website) content render aagum.
-        Intha page-la edit pannina data <strong>localStorage</strong> la save aagum.
-      </p>
+      
+      <!-- Back Header -->
+      <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <a href="dashboard.html" style="text-decoration: none; font-size: 1.4rem;" title="Back to Dashboard">⬅️</a>
+        <h1 class="section-title" style="margin: 0;">🖊️ Homepage Builder</h1>
+      </div>
+      <p style="color: var(--text-light); margin-top: -1rem; margin-bottom: 2rem;">Modify banner text, about statements, home features, and navigation links of the public website.</p>
 
-      <div class="editor-grid">
-        <div class="editor-section">
-          <div class="editor-title">1) Hero Section</div>
-          <div class="row-2">
-            <div class="form-field"><label>Hero Title</label><input id="heroTitle" type="text" /></div>
-            <div class="form-field"><label>Hero Subtitle</label><input id="heroSubtitle" type="text" /></div>
+      <div id="validationAlert" style="color: #ef4444; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15); padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1.5rem; display: none;"></div>
+
+      <div class="settings-layout">
+        
+        <!-- SIDEBAR: Navigation Tabs -->
+        <div class="settings-sidebar">
+          <button class="settings-tab-btn active" onclick="switchTab('pane-banner')">🌅 Banner & Story</button>
+          <button class="settings-tab-btn" onclick="switchTab('pane-cards')">🗂 Homepage Cards</button>
+          <button class="settings-tab-btn" onclick="switchTab('pane-footer')">📞 Contact & Footers</button>
+        </div>
+
+        <!-- CONTENT: Editor Panels -->
+        <div>
+          
+          <!-- Tab 1: Banner & Story -->
+          <div class="tab-content-pane active" id="pane-banner">
+            
+            <!-- Hero Section -->
+            <div class="editor-section">
+              <div class="editor-title">1) Hero Section</div>
+              <div class="row-2">
+                <div class="form-field"><label>Hero Title</label><input id="heroTitle" type="text" /></div>
+                <div class="form-field"><label>Hero Subtitle</label><input id="heroSubtitle" type="text" /></div>
+              </div>
+              <div class="row-2">
+                <div class="form-field">
+                  <label>Background Path / URL</label>
+                  <input id="heroBgImage" type="text" placeholder="e.g. images/hero.jpeg" />
+                </div>
+                <div class="form-field">
+                  <label>Upload Background Image</label>
+                  <input type="file" id="heroBgFile" accept="image/*" />
+                </div>
+              </div>
+              <div style="background: var(--bg-secondary); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid var(--border-color);">
+                <small style="color: var(--text-light);">📁 Current Background Path:</small>
+                <div id="heroBgImageVal" style="color: var(--primary-color); font-weight: 600; font-size: 0.9rem; word-break: break-all; margin-top: 0.3rem;">None</div>
+              </div>
+              <div id="heroBgPreview" style="margin-top: 0.5rem; max-width: 250px;"></div>
+            </div>
+
+            <!-- About / Mission / Vision -->
+            <div class="editor-section">
+              <div class="editor-title">2) About / Mission / Vision</div>
+              <div class="form-field"><label>About Title</label><input id="aboutTitle" type="text" /></div>
+              <div class="form-field"><label>Intro Heading (H3)</label><input id="aboutIntroH3" type="text" /></div>
+              <div class="form-field"><label>Intro Paragraph</label><textarea id="aboutIntroP"></textarea></div>
+
+              <div class="row-2">
+                <div class="form-field"><label>Mission Header</label><input id="missionTitle" type="text" /></div>
+                <div class="form-field"><label>Vision Header</label><input id="visionTitle" type="text" /></div>
+              </div>
+              <div class="row-2">
+                <div class="form-field"><label>Mission Statement</label><textarea id="missionP"></textarea></div>
+                <div class="form-field"><label>Vision Statement</label><textarea id="visionP"></textarea></div>
+              </div>
+            </div>
+
           </div>
-          <div class="editor-actions">
-            <button class="btn-view" type="button" onclick="applyToPreview()">Preview Apply</button>
+
+          <!-- Tab 2: Homepage Cards -->
+          <div class="tab-content-pane" id="pane-cards">
+            
+            <!-- Featured Section Settings -->
+            <div class="editor-section" style="border-left-color: #6366f1;">
+              <div class="editor-title">3) Featured Skills Title</div>
+              <div class="row-2">
+                <div class="form-field"><label>Featured Header</label><input id="featuredHeader" type="text" /></div>
+                <div class="form-field"><label>Featured Limit</label><input id="featuredLimit" type="number" min="0" step="1" /></div>
+              </div>
+            </div>
+
+            <!-- Featured Courses JSON -->
+            <div class="editor-section" style="border-left-color: #6366f1;">
+              <div class="json-control-row">
+                <div class="editor-title" style="margin-bottom: 0;">4) Featured Courses JSON</div>
+                <button type="button" class="btn" style="padding: 0.25rem 0.65rem; font-size: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-dark);" onclick="formatJSONField('featuredCoursesJson', 'featuredValMsg', 'Featured Courses')">Format JSON</button>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.5rem;">Enter an array of Course IDs to display on the home screen.</p>
+              <div class="form-field">
+                <textarea id="featuredCoursesJson" class="json-editor"></textarea>
+                <div id="featuredValMsg" class="json-validation-msg"></div>
+              </div>
+            </div>
+
+            <!-- Why Choose Us cards -->
+            <div class="editor-section" style="border-left-color: #6366f1;">
+              <div class="json-control-row">
+                <div class="editor-title" style="margin-bottom: 0;">5) Why Choose SkillBridge Cards (JSON)</div>
+                <button type="button" class="btn" style="padding: 0.25rem 0.65rem; font-size: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-dark);" onclick="formatJSONField('whyCardsJson', 'whyValMsg', 'Why cards')">Format JSON</button>
+              </div>
+              <div class="form-field" style="margin-top: 0.5rem;">
+                <textarea id="whyCardsJson" class="json-editor"></textarea>
+                <div id="whyValMsg" class="json-validation-msg"></div>
+              </div>
+            </div>
+
           </div>
-        </div>
 
-        <div class="editor-section">
-          <div class="editor-title">2) Featured Courses Manager</div>
-          <div class="form-field"><label>Featured Courses JSON (course IDs to display)</label><textarea id="featuredCoursesJson"></textarea></div>
-          <div class="helper">Example: [1, 2, 3] - Enter course IDs to show on home page. Leave empty to show all courses.</div>
-        </div>
+          <!-- Tab 3: Contact & Footers -->
+          <div class="tab-content-pane" id="pane-footer">
+            
+            <!-- Contact Us -->
+            <div class="editor-section" style="border-left-color: #8b5cf6;">
+              <div class="editor-title">6) Contact Us</div>
+              <div class="row-2">
+                <div class="form-field"><label>Contact Section Header</label><input id="contactTitle" type="text" /></div>
+                <div class="form-field"><label>Contact Form Title</label><input id="contactFormTitle" type="text" /></div>
+              </div>
+              <div class="json-control-row" style="margin-top: 0.5rem;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Contact Info Cards JSON</label>
+                <button type="button" class="btn" style="padding: 0.25rem 0.65rem; font-size: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-dark);" onclick="formatJSONField('contactInfoJson', 'contactValMsg', 'Contact info')">Format JSON</button>
+              </div>
+              <div class="form-field">
+                <textarea id="contactInfoJson" class="json-editor"></textarea>
+                <div id="contactValMsg" class="json-validation-msg"></div>
+              </div>
+            </div>
 
-        <div class="editor-section">
-          <div class="editor-title">3) Featured Skills Title</div>
-          <div class="row-2">
-            <div class="form-field"><label>Featured Header</label><input id="featuredHeader" type="text" /></div>
-            <div class="form-field"><label>Featured Limit</label><input id="featuredLimit" type="number" min="0" step="1" /></div>
+            <!-- Social Media -->
+            <div class="editor-section" style="border-left-color: #8b5cf6;">
+              <div class="json-control-row">
+                <div class="editor-title" style="margin-bottom: 0;">7) Social Media Links JSON</div>
+                <button type="button" class="btn" style="padding: 0.25rem 0.65rem; font-size: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-dark);" onclick="formatJSONField('socialJson', 'socialValMsg', 'Social')">Format JSON</button>
+              </div>
+              <div class="form-field" style="margin-top: 0.5rem;">
+                <textarea id="socialJson" class="json-editor"></textarea>
+                <div id="socialValMsg" class="json-validation-msg"></div>
+              </div>
+            </div>
+
+            <!-- Footer Columns -->
+            <div class="editor-section" style="border-left-color: #8b5cf6;">
+              <div class="json-control-row">
+                <div class="editor-title" style="margin-bottom: 0;">8) Footer Columns JSON</div>
+                <button type="button" class="btn" style="padding: 0.25rem 0.65rem; font-size: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-dark);" onclick="formatJSONField('footerJson', 'footerValMsg', 'Footer')">Format JSON</button>
+              </div>
+              <div class="form-field" style="margin-top: 0.5rem;">
+                <textarea id="footerJson" class="json-editor"></textarea>
+                <div id="footerValMsg" class="json-validation-msg"></div>
+              </div>
+              <div class="form-field">
+                <label>Footer Copyright bottom text</label>
+                <input id="footerBottom" type="text" />
+              </div>
+            </div>
+
           </div>
-        </div>
 
-        <div class="editor-section">
-          <div class="editor-title">4) About / Mission / Vision</div>
-          <div class="form-field"><label>About H2</label><input id="aboutTitle" type="text" /></div>
-          <div class="form-field"><label>Intro H3</label><input id="aboutIntroH3" type="text" /></div>
-          <div class="form-field"><label>Intro Paragraph</label><textarea id="aboutIntroP"></textarea></div>
-
-          <div class="row-2">
-            <div class="form-field"><label>Mission H3</label><input id="missionTitle" type="text" /></div>
-            <div class="form-field"><label>Vision H3</label><input id="visionTitle" type="text" /></div>
+          <!-- Bottom Action Buttons -->
+          <div class="editor-actions" style="margin-bottom: 3rem;">
+            <button class="btn-save" id="btnSaveAll" type="button" onclick="saveAll()">💾 Save & Update Home</button>
+            <button class="btn-reset" type="button" onclick="resetToDefaults()">↩️ Reset Defaults</button>
+            <a class="btn-view" style="display:inline-flex; align-items:center; text-decoration:none;" href="../index.html" target="_blank">👁️ View Live Website</a>
           </div>
-          <div class="row-2">
-            <div class="form-field"><label>Mission Paragraph</label><textarea id="missionP"></textarea></div>
-            <div class="form-field"><label>Vision Paragraph</label><textarea id="visionP"></textarea></div>
-          </div>
+
         </div>
 
-        <div class="editor-section">
-          <div class="editor-title">5) Why Choose SkillBridge (Cards)</div>
-          <div class="form-field"><label>Cards JSON (array of {icon,title,paragraph})</label><textarea id="whyCardsJson"></textarea></div>
-          <div class="helper">Example: [{"icon":"📚","title":"Expert-Led Courses","paragraph":"..."}]</div>
-        </div>
-
-        <div class="editor-section">
-          <div class="editor-title">6) Contact Us</div>
-          <div class="row-2">
-            <div class="form-field"><label>Contact H2</label><input id="contactTitle" type="text" /></div>
-            <div class="form-field"><label>Contact Form Heading</label><input id="contactFormTitle" type="text" /></div>
-          </div>
-          <div class="form-field"><label>Contact Info JSON (array of {icon,title,lines[]})</label><textarea id="contactInfoJson"></textarea></div>
-        </div>
-
-        <div class="editor-section">
-          <div class="editor-title">7) Social Media</div>
-          <div class="form-field"><label>Social Links JSON (array of {label,url,emoji})</label><textarea id="socialJson"></textarea></div>
-        </div>
-
-        <div class="editor-section">
-          <div class="editor-title">8) Footer Links</div>
-          <div class="form-field"><label>Footer Sections JSON (array of {title,links[]})</label><textarea id="footerJson"></textarea></div>
-          <div class="form-field"><label>Footer Bottom Text</label><input id="footerBottom" type="text" /></div>
-        </div>
       </div>
 
-      <div class="editor-actions">
-        <button class="btn-save" type="button" onclick="saveAll()">💾 Save & Update Home</button>
-        <button class="btn-reset" type="button" onclick="resetToDefaults()">↩️ Reset Defaults</button>
-        <a class="btn-view" style="display:inline-flex; align-items:center; text-decoration:none;" href="../index.html" target="_blank">👁️ View Home</a>
-      </div>
     </div>
   </section>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-section"><h4>SkillBridge</h4></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 SkillBridge.</p></div>
+  </footer>
 
   <script src="../js/data.js"></script>
   <script src="../js/main.js"></script>
   <script>
     (function(){
-      function requireAdmin(){
-        try{ requireRole('admin'); } catch(e) {}
-      }
-      requireAdmin();
+      try{ requireRole('admin'); } catch(e) {}
     })();
 
     const STORAGE_KEY = 'adminSiteContent';
@@ -142,7 +401,8 @@
     const DEFAULTS = {
       heroTitle: 'Welcome to SkillBridge',
       heroSubtitle: 'Your Gateway to Professional Excellence and Career Success',
-      featuredCourses: [1, 2, 3],
+      heroBgImage: 'images/hero.jpeg',
+      featuredCourses: [1, 4, 6, 8],
       featuredHeader: 'Featured Skills & Courses',
       featuredLimit: 3,
       aboutTitle: 'About SkillBridge',
@@ -163,10 +423,9 @@
       contactTitle: 'Get In Touch',
       contactFormTitle: 'Send us a Message',
       contactInfo: [
-        { icon:'📧', title:'Email', lines:['support@skillbridge.com','info@skillbridge.com'] },
-        { icon:'📞', title:'Phone', lines:['+1 (234) 567-890','+1 (987) 654-321'] },
-        { icon:'📍', title:'Location', lines:['Tech Park Building, Suite 500','San Francisco, CA 94105','United States'] },
-        { icon:'⏰', title:'Business Hours', lines:['Monday - Friday: 9:00 AM - 6:00 PM PST','Saturday - Sunday: Closed'] }
+        { icon:'✉️', title:'Email', lines:['support@skillbridge.com'] },
+        { icon:'📞', title:'Phone', lines:['+91 9876543210'] },
+        { icon:'📍', title:'Location', lines:['No.123, Tech Park Building','Anna Nagar','Chennai-600002','Tamil Nadu, India'] }
       ],
       social: [
         { label:'Facebook', url:'#', emoji:'f' },
@@ -175,17 +434,10 @@
         { label:'Instagram', url:'#', emoji:'📷' },
         { label:'YouTube', url:'#', emoji:'▶' }
       ],
-      contactInfo: [
-        { icon:'✉️', title:'Email', lines:['support@skillbridge.com'] },
-        { icon:'📞', title:'Phone', lines:['+91 9876543210'] },
-        { icon:'📍', title:'Location', lines:['No.123, Tech Park Building','Anna Nagar','Chennai-600002','Tamil Nadu, India'] }
-      ],
-      social: [],
       footer: [
-        { title:'About SkillBridge', links:[{text:'About Us',href:'#'},{text:'Our Mission',href:'#'},{text:'Team',href:'#'},{text:'Blog',href:'#'}] },
-        { title:'Courses', links:[{text:'All Courses',href:'#'},{text:'Categories',href:'#'},{text:'Trending',href:'#'},{text:'Free Courses',href:'#'}] },
-        { title:'Support', links:[{text:'Help Center',href:'#'},{text:'Contact Us',href:'#'},{text:'FAQ',href:'#'},{text:'Feedback',href:'#'}] },
-        { title:'Legal', links:[{text:'Privacy Policy',href:'#'},{text:'Terms of Service',href:'#'},{text:'Cookie Policy',href:'#'},{text:'Disclaimer',href:'#'}] }
+        { title:'About SkillBridge', links:[{text:'About Us',href:'index.html#about-us'}] },
+        { title:'Courses', links:[{text:'All Courses',href:'skills.html'},{text:'Categories',href:'skills.html#categories'},{text:'Career Roadmap',href:'roadmap.html'}] },
+        { title:'Support & Portal', links:[{text:'Help Center & FAQ',href:'feedback.html'},{text:'Contact Us',href:'index.html#contact-us'},{text:'Your Progress',href:'progress.html'},{text:'Certificates',href:'certificate.html'}] }
       ],
       footerBottom: '© 2026 SkillBridge. All rights reserved. | Empowering careers through education'
     };
@@ -209,13 +461,28 @@
 
     function setVal(id, val){ $(id).value = val ?? ''; }
 
+    function switchTab(paneId) {
+      document.querySelectorAll('.settings-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content-pane').forEach(pane => pane.classList.remove('active'));
+
+      const buttons = document.querySelectorAll('.settings-tab-btn');
+      if (paneId === 'pane-banner') buttons[0].classList.add('active');
+      else if (paneId === 'pane-cards') buttons[1].classList.add('active');
+      else if (paneId === 'pane-footer') buttons[2].classList.add('active');
+
+      document.getElementById(paneId).classList.add('active');
+    }
+
     function fillForm(){
       const c = load();
       setVal('heroTitle', c.heroTitle);
       setVal('heroSubtitle', c.heroSubtitle);
+      setVal('heroBgImage', c.heroBgImage);
       
+      // Update background path and preview image
+      updateHeroPreview(c.heroBgImage);
+
       $("featuredCoursesJson").value = JSON.stringify(c.featuredCourses, null, 2);
-      
       setVal('featuredHeader', c.featuredHeader);
       setVal('featuredLimit', c.featuredLimit);
 
@@ -235,10 +502,77 @@
       $("contactInfoJson").value = JSON.stringify(c.contactInfo, null, 2);
 
       $("socialJson").value = JSON.stringify(c.social, null, 2);
-
       $("footerJson").value = JSON.stringify(c.footer, null, 2);
       setVal('footerBottom', c.footerBottom);
+
+      validateAllJSON();
     }
+
+    function updateHeroPreview(src) {
+        const preview = $('heroBgPreview');
+        if (src) {
+            preview.innerHTML = `<img src="${src.startsWith('data:') || src.startsWith('images/') ? src : '../' + src}" style="width: 100%; border-radius: 8px; border: 1.5px solid var(--border-color);" />`;
+            $('heroBgImageVal').textContent = src.substring(0, 80) + (src.length > 80 ? '...' : '');
+        } else {
+            preview.innerHTML = '';
+            $('heroBgImageVal').textContent = 'None';
+        }
+    }
+
+    // ── JSON Validation ──────────────────────────────────────────
+    function validateJSONField(id, valMsgId, label) {
+      const textarea = $(id);
+      const valMsg = $(valMsgId);
+      const text = textarea.value.trim();
+
+      try {
+        JSON.parse(text);
+        valMsg.textContent = '✅ Valid JSON';
+        valMsg.style.color = '#10b981';
+        return true;
+      } catch (e) {
+        valMsg.textContent = `❌ Invalid JSON: ${e.message}`;
+        valMsg.style.color = '#ef4444';
+        return false;
+      }
+    }
+
+    function validateAllJSON() {
+      const v1 = validateJSONField('featuredCoursesJson', 'featuredValMsg', 'Featured Courses');
+      const v2 = validateJSONField('whyCardsJson', 'whyValMsg', 'Why cards');
+      const v3 = validateJSONField('contactInfoJson', 'contactValMsg', 'Contact info');
+      const v4 = validateJSONField('socialJson', 'socialValMsg', 'Social');
+      const v5 = validateJSONField('footerJson', 'footerValMsg', 'Footer');
+
+      const saveBtn = $('btnSaveAll');
+      const alertBox = $('validationAlert');
+
+      if (!v1 || !v2 || !v3 || !v4 || !v5) {
+        saveBtn.disabled = true;
+        alertBox.textContent = '⚠️ Please fix the invalid JSON configurations before saving.';
+        alertBox.style.display = 'block';
+      } else {
+        saveBtn.disabled = false;
+        alertBox.style.display = 'none';
+      }
+    }
+
+    function formatJSONField(id, valMsgId, label) {
+      const textarea = $(id);
+      try {
+        const parsed = JSON.parse(textarea.value);
+        textarea.value = JSON.stringify(parsed, null, 2);
+        validateAllJSON();
+        showToast('✨ Formatted JSON successfully.');
+      } catch (e) {
+        alert('⚠️ Unable to format: JSON is invalid.');
+      }
+    }
+
+    // Register textareas inputs listeners
+    ['featuredCoursesJson', 'whyCardsJson', 'contactInfoJson', 'socialJson', 'footerJson'].forEach(id => {
+      $(id).addEventListener('input', validateAllJSON);
+    });
 
     function parseJsonOrAlert(text, label){
       try{ return JSON.parse(text); } catch(e){ alert('Invalid JSON for ' + label); throw e; }
@@ -248,6 +582,7 @@
       const base = load();
       base.heroTitle = $('heroTitle').value.trim();
       base.heroSubtitle = $('heroSubtitle').value.trim();
+      base.heroBgImage = $('heroBgImage').value.trim();
       base.featuredCourses = parseJsonOrAlert($("featuredCoursesJson").value, 'Featured Courses');
       base.featuredHeader = $('featuredHeader').value.trim();
       base.featuredLimit = parseInt($('featuredLimit').value, 10) || 0;
@@ -274,28 +609,56 @@
     }
 
     function saveAll(){
-      const obj = collect();
-      save(obj);
-      alert('✅ Saved! Open/refresh index.html to see updates.');
-      // optional apply preview in same window not needed
+      try {
+        const obj = collect();
+        save(obj);
+        showToast('✅ Saved! Home page updated.');
+        alert('✅ Saved! Open/refresh index.html to see updates.');
+      } catch(e) {
+        // alert already shown in collect
+      }
     }
 
     function resetToDefaults(){
-      if(!confirm('Reset to default home content?')) return;
+      if(!confirm('Reset to default homepage content? All custom site changes will be lost.')) return;
       save(structuredClone(DEFAULTS));
       fillForm();
-      alert('↩️ Defaults restored.');
+      showToast('↩️ Defaults restored.');
     }
 
-    function applyToPreview(){
-      // no-op: index is separate page. just save quickly
-      const obj = collect();
-      save(obj);
-      alert('Preview saved. Refresh index.html to view.');
+    function setupHeroBgUpload() {
+      const fileInput = document.getElementById('heroBgFile');
+      if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+              alert('File size exceeds 5MB limit');
+              return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(event) {
+              document.getElementById('heroBgImage').value = event.target.result;
+              updateHeroPreview(event.target.result);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
     }
 
-    document.addEventListener('DOMContentLoaded', fillForm);
+    function showToast(msg) {
+      const el = document.createElement('div');
+      el.textContent = msg;
+      el.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#10b981;color:#fff;padding:.75rem 1.5rem;border-radius:10px;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,.2);z-index:9999;';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 2500);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fillForm();
+      setupHeroBgUpload();
+    });
   </script>
 </body>
 </html>
-
