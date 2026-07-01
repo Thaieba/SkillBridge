@@ -417,8 +417,8 @@
     let selectedQuestionIndex = null;
     let currentCorrectAnswer = null;
 
-    // Load all quiz data from quizData
-    let quizEditorData = JSON.parse(JSON.stringify(quizData));
+    // Load all quiz data from customQuizzes or fallback to quizData
+    let quizEditorData = JSON.parse(localStorage.getItem('customQuizzes') || 'null') || JSON.parse(JSON.stringify(quizData));
 
     function loadCourses() {
       const selector = document.getElementById('courseSelector');
@@ -554,7 +554,7 @@
       }
 
       // Save to localStorage
-      localStorage.setItem('quizEditorData', JSON.stringify(quizEditorData));
+      localStorage.setItem('customQuizzes', JSON.stringify(quizEditorData));
       
       showSuccess(`✓ Question saved successfully`, 'successMsg2');
       setTimeout(() => {
@@ -577,7 +577,7 @@
       };
 
       quizEditorData[selectedCourseId].questions.push(newQuestion);
-      localStorage.setItem('quizEditorData', JSON.stringify(quizEditorData));
+      localStorage.setItem('customQuizzes', JSON.stringify(quizEditorData));
 
       loadQuestions(selectedCourseId);
       selectQuestion(selectedCourseId, quizEditorData[selectedCourseId].questions.length - 1);
@@ -589,7 +589,7 @@
 
       if (confirm('Are you sure you want to delete this question?')) {
         quizEditorData[selectedCourseId].questions.splice(selectedQuestionIndex, 1);
-        localStorage.setItem('quizEditorData', JSON.stringify(quizEditorData));
+        localStorage.setItem('customQuizzes', JSON.stringify(quizEditorData));
         
         selectedQuestionIndex = null;
         loadQuestions(selectedCourseId);
