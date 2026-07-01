@@ -6,33 +6,237 @@
   <title>Admin – Settings | SkillBridge</title>
   <link rel="stylesheet" href="../css/styles.css" />
   <style>
-    .settings-card { background:var(--card-bg); border-radius:16px; padding:2rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(0,0,0,.08); border-left:5px solid var(--primary-color); }
-    .settings-card h2 { font-size:1.2rem; margin-bottom:1.25rem; display:flex; align-items:center; gap:.5rem; }
-    .form-field { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1rem; }
-    .form-field label { font-size:.85rem; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:.04em; }
-    .form-field input,.form-field select,.form-field textarea { background:var(--bg-secondary,#f8fafc); border:1.5px solid var(--border-color); border-radius:8px; padding:.65rem .9rem; color:var(--text-dark); font-size:.95rem; outline:none; transition:border-color .2s; }
-    .form-field input:focus,.form-field select:focus,.form-field textarea:focus { border-color:var(--primary-color); }
-    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-    .btn-save   { background:linear-gradient(135deg,#10b981,#059669); color:#fff; border:none; padding:.6rem 1.5rem; border-radius:10px; font-weight:700; cursor:pointer; font-size:.95rem; transition:opacity .2s; }
-    .btn-save:hover { opacity:.85; }
-    .btn-danger { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; border:none; padding:.6rem 1.5rem; border-radius:10px; font-weight:700; cursor:pointer; font-size:.95rem; }
-    .btn-danger:hover { opacity:.85; }
-    .saved-tag { display:inline-block; background:#10b981; color:#fff; padding:.2rem .7rem; border-radius:6px; font-size:.8rem; font-weight:700; margin-left:.75rem; opacity:0; transition:opacity .3s; }
-    .saved-tag.show { opacity:1; }
-    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:.75rem 0; border-bottom:1px solid var(--border-color); }
-    .toggle-row:last-child { border-bottom:none; }
-    .toggle-label { font-weight:600; color:var(--text-dark); }
-    .toggle-desc  { font-size:.85rem; color:var(--text-light); margin-top:.15rem; }
-    .toggle { position:relative; width:48px; height:26px; flex-shrink:0; }
-    .toggle input { opacity:0; width:0; height:0; }
-    .slider { position:absolute; inset:0; border-radius:26px; background:#ccc; cursor:pointer; transition:.3s; }
-    .slider:before { content:''; position:absolute; width:20px; height:20px; left:3px; bottom:3px; border-radius:50%; background:#fff; transition:.3s; }
-    input:checked + .slider { background:linear-gradient(135deg,#6366f1,#8b5cf6); }
-    input:checked + .slider:before { transform:translateX(22px); }
-    .data-stat { display:flex; justify-content:space-between; align-items:center; padding:.6rem 0; border-bottom:1px solid var(--border-color); }
-    .data-stat:last-child { border-bottom:none; }
-    .data-key { font-size:.9rem; color:var(--text-dark); font-weight:600; }
-    .data-val { font-size:.9rem; color:var(--primary-color); font-weight:700; }
+    /* Styling enhancements */
+    .settings-card { 
+      background:var(--card-bg); 
+      border-radius:16px; 
+      padding:2rem; 
+      margin-bottom:1.5rem; 
+      box-shadow:0 4px 20px rgba(0,0,0,.04); 
+      border: 1px solid var(--border-color);
+      border-left:5px solid var(--primary-color); 
+    }
+    .settings-card h2 { 
+      font-size:1.2rem; 
+      margin-bottom:1.25rem; 
+      display:flex; 
+      align-items:center; 
+      gap:.5rem; 
+      color: var(--text-dark);
+    }
+    .form-field { 
+      display:flex; 
+      flex-direction:column; 
+      gap:.4rem; 
+      margin-bottom:1rem; 
+    }
+    .form-field label { 
+      font-size:.8rem; 
+      font-weight:700; 
+      color:var(--text-light); 
+      text-transform:uppercase; 
+      letter-spacing:.04em; 
+    }
+    .form-field input, .form-field select, .form-field textarea { 
+      background:var(--bg-secondary); 
+      border:1.5px solid var(--border-color); 
+      border-radius:8px; 
+      padding:.65rem .9rem; 
+      color:var(--text-dark); 
+      font-size:.95rem; 
+      outline:none; 
+      transition:border-color .2s; 
+    }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus { 
+      border-color:var(--primary-color); 
+    }
+    .form-row { 
+      display:grid; 
+      grid-template-columns:1fr 1fr; 
+      gap:1rem; 
+    }
+    @media (max-width: 576px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+    }
+    .btn-save { 
+      background:linear-gradient(135deg,#10b981,#059669); 
+      color:#fff; 
+      border:none; 
+      padding:.6rem 1.5rem; 
+      border-radius:10px; 
+      font-weight:700; 
+      cursor:pointer; 
+      font-size:.95rem; 
+      transition:opacity .2s; 
+    }
+    .btn-save:hover { 
+      opacity:.85; 
+    }
+    .btn-danger { 
+      background:linear-gradient(135deg,#ef4444,#dc2626); 
+      color:#fff; 
+      border:none; 
+      padding:.6rem 1.5rem; 
+      border-radius:10px; 
+      font-weight:700; 
+      cursor:pointer; 
+      font-size:.92rem; 
+      transition: opacity 0.2s;
+    }
+    .btn-danger:hover { 
+      opacity:.85; 
+    }
+    
+    .saved-tag { 
+      display:inline-block; 
+      background:#10b981; 
+      color:#fff; 
+      padding:.2rem .7rem; 
+      border-radius:6px; 
+      font-size:.8rem; 
+      font-weight:700; 
+      margin-left:.75rem; 
+      opacity:0; 
+      transition:opacity .3s; 
+    }
+    .saved-tag.show { 
+      opacity:1; 
+    }
+    
+    /* Toggle switch design */
+    .toggle-row { 
+      display:flex; 
+      align-items:center; 
+      justify-content:space-between; 
+      padding:.85rem 0; 
+      border-bottom:1px solid var(--border-color); 
+    }
+    .toggle-row:last-child { 
+      border-bottom:none; 
+    }
+    .toggle-label { 
+      font-weight:700; 
+      color:var(--text-dark); 
+      font-size: 0.95rem;
+    }
+    .toggle-desc { 
+      font-size:.8rem; 
+      color:var(--text-light); 
+      margin-top:.15rem; 
+    }
+    .toggle { 
+      position:relative; 
+      width:48px; 
+      height:26px; 
+      flex-shrink:0; 
+    }
+    .toggle input { 
+      opacity:0; 
+      width:0; 
+      height:0; 
+    }
+    .slider { 
+      position:absolute; 
+      inset:0; 
+      border-radius:26px; 
+      background:#ccc; 
+      cursor:pointer; 
+      transition:.3s; 
+    }
+    .slider:before { 
+      content:''; 
+      position:absolute; 
+      width:20px; 
+      height:20px; 
+      left:3px; 
+      bottom:3px; 
+      border-radius:50%; 
+      background:#fff; 
+      transition:.3s; 
+    }
+    input:checked + .slider { 
+      background:linear-gradient(135deg,#10b981,#059669); 
+    }
+    input:checked + .slider:before { 
+      transform:translateX(22px); 
+    }
+
+    /* Database stats list */
+    .data-stat { 
+      display:flex; 
+      justify-content:space-between; 
+      align-items:center; 
+      padding:.75rem 0; 
+      border-bottom:1px solid var(--border-color); 
+    }
+    .data-stat:last-child { 
+      border-bottom:none; 
+    }
+    .data-key { 
+      font-size:.9rem; 
+      color:var(--text-dark); 
+      font-weight:600; 
+    }
+    .data-val { 
+      font-size:.9rem; 
+      color:var(--primary-color); 
+      font-weight:800; 
+    }
+
+    /* Tab Layout inside settings workspace */
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 2rem;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .settings-layout {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+    .settings-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .settings-tab-btn {
+      text-align: left;
+      padding: 0.85rem 1.1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-dark);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .settings-tab-btn:hover, .settings-tab-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+      box-shadow: var(--shadow);
+    }
+
+    .tab-content-pane {
+      display: none;
+    }
+    .tab-content-pane.active {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -44,99 +248,181 @@
     </div>
   </nav>
 
-  <section class="section" style="padding:2.5rem 1rem;">
-    <div class="container" style="max-width:900px;">
-      <h1 class="section-title" style="margin-bottom:2rem;">⚙️ Admin Settings</h1>
+  <section class="section" style="padding: 2.5rem 1rem;">
+    <div class="container" style="max-width: 1000px;">
+      
+      <!-- Back Header -->
+      <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <a href="dashboard.html" style="text-decoration: none; font-size: 1.4rem;" title="Back to Dashboard">⬅️</a>
+        <h1 class="section-title" style="margin: 0;">⚙️ System Settings</h1>
+      </div>
+      <p style="color: var(--text-light); margin-top: -1rem; margin-bottom: 2rem;">Manage site metadata settings, feature configurations, passwords, and backups.</p>
 
-      <!-- Site Identity -->
-      <div class="settings-card" style="border-left-color:var(--primary-color);">
-        <h2>🌐 Site Identity <span class="saved-tag" id="identityTag">Saved!</span></h2>
-        <div class="form-row">
-          <div class="form-field">
-            <label>Site Name</label>
-            <input id="siteName" placeholder="SkillBridge" />
-          </div>
-          <div class="form-field">
-            <label>Tagline</label>
-            <input id="siteTagline" placeholder="Learn. Grow. Succeed." />
-          </div>
+      <div class="settings-layout">
+        
+        <!-- SIDEBAR: Navigation Tabs -->
+        <div class="settings-sidebar">
+          <button class="settings-tab-btn active" onclick="switchSettingsTab('general-pane')">🌐 General Settings</button>
+          <button class="settings-tab-btn" onclick="switchSettingsTab('security-pane')">🔐 Admin Password</button>
+          <button class="settings-tab-btn" onclick="switchSettingsTab('backup-pane')">📦 Backup & Restore</button>
+          <button class="settings-tab-btn" onclick="switchSettingsTab('danger-pane')" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.15);">⚠️ Danger Zone</button>
         </div>
-        <div class="form-field">
-          <label>Site Description (shown in footer/meta)</label>
-          <textarea id="siteDesc" rows="2" placeholder="A modern skill-building platform…"></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-field">
-            <label>Contact Email</label>
-            <input id="contactEmail" type="email" placeholder="admin@skillbridge.com" />
+
+        <!-- CONTENT: Settings Panes -->
+        <div>
+          <!-- Tab 1: General Site Settings -->
+          <div class="tab-content-pane active" id="general-pane">
+            
+            <!-- Site Identity -->
+            <div class="settings-card" style="border-left-color:var(--primary-color);">
+              <h2>🌐 Site Identity <span class="saved-tag" id="identityTag">Saved!</span></h2>
+              <div class="form-row">
+                <div class="form-field">
+                  <label>Site Name</label>
+                  <input id="siteName" placeholder="SkillBridge" />
+                </div>
+                <div class="form-field">
+                  <label>Tagline</label>
+                  <input id="siteTagline" placeholder="Learn. Grow. Succeed." />
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Site Description (shown in footer/meta)</label>
+                <textarea id="siteDesc" rows="2" placeholder="A modern skill-building platform…"></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label>Contact Email</label>
+                  <input id="contactEmail" type="email" placeholder="admin@skillbridge.com" />
+                </div>
+                <div class="form-field">
+                  <label>Support Phone</label>
+                  <input id="contactPhone" placeholder="+1 (555) 000-0000" />
+                </div>
+              </div>
+              <button class="btn-save" onclick="saveSiteIdentity()">💾 Save Site Identity</button>
+            </div>
+
+            <!-- Feature Toggles -->
+            <div class="settings-card" style="border-left-color:#10b981;">
+              <h2>🎛 Feature Toggles <span class="saved-tag" id="toggleTag">Saved!</span></h2>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">🏆 Certificate System</div>
+                  <div class="toggle-desc">Enable course completion certificates for students.</div>
+                </div>
+                <label class="toggle"><input type="checkbox" id="tCerts" /><span class="slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">📝 Quiz Module</div>
+                  <div class="toggle-desc">Allow students to take quizzes after courses.</div>
+                </div>
+                <label class="toggle"><input type="checkbox" id="tQuiz" /><span class="slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">📊 Progress Tracking</div>
+                  <div class="toggle-desc">Show learning progress bars and stats to students.</div>
+                </div>
+                <label class="toggle"><input type="checkbox" id="tProgress" /><span class="slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">🌙 Dark Mode Toggle</div>
+                  <div class="toggle-desc">Show the dark/light mode switcher in the navbar.</div>
+                </div>
+                <label class="toggle"><input type="checkbox" id="tDark" /><span class="slider"></span></label>
+              </div>
+              <button class="btn-save" onclick="saveToggles()" style="margin-top:1rem;">💾 Save Toggles</button>
+            </div>
           </div>
-          <div class="form-field">
-            <label>Support Phone</label>
-            <input id="contactPhone" placeholder="+1 (555) 000-0000" />
+
+          <!-- Tab 2: Security Pane -->
+          <div class="tab-content-pane" id="security-pane">
+            <div class="settings-card" style="border-left-color:#6366f1;">
+              <h2>🔐 Change Admin Password <span class="saved-tag" id="pwdTag">Saved!</span></h2>
+              <div class="form-row">
+                <div class="form-field">
+                  <label>Current Password</label>
+                  <input id="curPwd" type="password" placeholder="Current password" />
+                </div>
+                <div class="form-field">
+                  <label>New Password</label>
+                  <input id="newPwd" type="password" placeholder="Min 6 characters" />
+                </div>
+              </div>
+              <div class="form-field" style="max-width:340px;">
+                <label>Confirm New Password</label>
+                <input id="confirmPwd" type="password" placeholder="Repeat new password" />
+              </div>
+              <button class="btn-save" onclick="changeAdminPassword()">🔑 Update Admin Password</button>
+            </div>
           </div>
+
+          <!-- Tab 3: Backup & Restore Pane -->
+          <div class="tab-content-pane" id="backup-pane">
+            
+            <!-- Data Overview -->
+            <div class="settings-card" style="border-left-color:#f59e0b;">
+              <h2>📊 LocalStorage Data Stats</h2>
+              <div id="dataOverview"></div>
+            </div>
+
+            <!-- Importer Restore -->
+            <div class="settings-card" style="border-left-color:#06b6d4;">
+              <h2>📦 Database Import / Restore</h2>
+              <p style="color: var(--text-light); font-size: 0.88rem; margin-bottom: 1.25rem;">Restore site configurations, student lists, certificates, and grades from a downloaded SkillBridge backup JSON file.</p>
+              
+              <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                  <input type="file" id="backupFileInput" accept=".json" style="flex: 1; padding: 0.4rem; font-size: 0.88rem; border: 1px dashed var(--border-color); border-radius: 6px; background: var(--card-bg); color: var(--text-dark);" />
+                  <button class="btn-save" onclick="importBackupSnapshot()" style="padding: 0.6rem 1.2rem; font-size: 0.88rem;">Restore Backup</button>
+                </div>
+              </div>
+              <small style="color: #ef4444; font-weight: 700; display: block;">⚠️ Warning: Importing a snapshot overwrites all local records on this browser.</small>
+            </div>
+          </div>
+
+          <!-- Tab 4: Danger Zone Pane -->
+          <div class="tab-content-pane" id="danger-pane">
+            <div class="settings-card" style="border-left-color:#ef4444;">
+              <h2 style="color:#ef4444;">⚠️ Danger Zone</h2>
+              <p style="color:var(--text-light);margin-bottom:1.5rem; font-size:0.9rem;">These actions are permanent and cannot be undone. Execute with absolute care.</p>
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+                
+                <div style="border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 10px; background: var(--bg-secondary);">
+                  <h4 style="font-weight: 700; margin-bottom: 0.4rem; color: var(--text-dark);">Reset Courses</h4>
+                  <p style="font-size: 0.78rem; color: var(--text-light); margin-bottom: 1rem;">Wipe custom-added courses and restore default courses.</p>
+                  <button class="btn-danger" style="width: 100%; padding: 0.5rem 1rem;" onclick="resetCourses()">↩ Reset Courses</button>
+                </div>
+
+                <div style="border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 10px; background: var(--bg-secondary);">
+                  <h4 style="font-weight: 700; margin-bottom: 0.4rem; color: var(--text-dark);">Reset Quizzes</h4>
+                  <p style="font-size: 0.78rem; color: var(--text-light); margin-bottom: 1rem;">Restore quiz questions to factory defaults.</p>
+                  <button class="btn-danger" style="width: 100%; padding: 0.5rem 1rem;" onclick="resetQuizzes()">↩ Reset Quizzes</button>
+                </div>
+
+                <div style="border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 10px; background: var(--bg-secondary);">
+                  <h4 style="font-weight: 700; margin-bottom: 0.4rem; color: var(--text-dark);">Wipe Progress logs</h4>
+                  <p style="font-size: 0.78rem; color: var(--text-light); margin-bottom: 1rem;">Delete student quiz attempts, course completions, and certs.</p>
+                  <button class="btn-danger" style="width: 100%; padding: 0.5rem 1rem;" onclick="clearProgress()">🗑 Clear progress</button>
+                </div>
+
+                <div style="border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 10px; background: var(--bg-secondary);">
+                  <h4 style="font-weight: 700; margin-bottom: 0.4rem; color: var(--text-dark);">Wipe Student accounts</h4>
+                  <p style="font-size: 0.78rem; color: var(--text-light); margin-bottom: 1rem;">Delete all registered accounts except default demo accounts.</p>
+                  <button class="btn-danger" style="width: 100%; padding: 0.5rem 1rem;" onclick="clearAllUsers()">🗑 Clear accounts</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
         </div>
-        <button class="btn-save" onclick="saveSiteIdentity()">💾 Save Identity</button>
+
       </div>
 
-      <!-- Admin Credentials -->
-      <div class="settings-card" style="border-left-color:#6366f1;">
-        <h2>🔐 Change Admin Password <span class="saved-tag" id="pwdTag">Saved!</span></h2>
-        <div class="form-row">
-          <div class="form-field">
-            <label>Current Password</label>
-            <input id="curPwd" type="password" placeholder="Current password" />
-          </div>
-          <div class="form-field">
-            <label>New Password</label>
-            <input id="newPwd" type="password" placeholder="Min 6 characters" />
-          </div>
-        </div>
-        <div class="form-field" style="max-width:320px;">
-          <label>Confirm New Password</label>
-          <input id="confirmPwd" type="password" placeholder="Repeat new password" />
-        </div>
-        <button class="btn-save" onclick="changeAdminPassword()">🔑 Update Password</button>
-      </div>
-
-      <!-- Feature Toggles -->
-      <div class="settings-card" style="border-left-color:#10b981;">
-        <h2>🎛 Feature Toggles <span class="saved-tag" id="toggleTag">Saved!</span></h2>
-        <div class="toggle-row">
-          <div><div class="toggle-label">🏆 Certificate System</div><div class="toggle-desc">Enable course completion certificates for students.</div></div>
-          <label class="toggle"><input type="checkbox" id="tCerts" /><span class="slider"></span></label>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-label">📝 Quiz Module</div><div class="toggle-desc">Allow students to take quizzes after courses.</div></div>
-          <label class="toggle"><input type="checkbox" id="tQuiz" /><span class="slider"></span></label>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-label">📊 Progress Tracking</div><div class="toggle-desc">Show learning progress bars and stats to students.</div></div>
-          <label class="toggle"><input type="checkbox" id="tProgress" /><span class="slider"></span></label>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-label">🌙 Dark Mode Toggle</div><div class="toggle-desc">Show the dark/light mode switcher in the navbar.</div></div>
-          <label class="toggle"><input type="checkbox" id="tDark" /><span class="slider"></span></label>
-        </div>
-        <button class="btn-save" onclick="saveToggles()" style="margin-top:1rem;">💾 Save Toggles</button>
-      </div>
-
-      <!-- Data Overview & Reset -->
-      <div class="settings-card" style="border-left-color:#f59e0b;">
-        <h2>📦 LocalStorage Data Overview</h2>
-        <div id="dataOverview"></div>
-      </div>
-
-      <!-- Danger Zone -->
-      <div class="settings-card" style="border-left-color:#ef4444;">
-        <h2 style="color:#ef4444;">⚠️ Danger Zone</h2>
-        <p style="color:var(--text-light);margin-bottom:1.25rem;">These actions are <strong>irreversible</strong>. Use with caution.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:1rem;">
-          <button class="btn-danger" onclick="resetCourses()">↩ Reset Courses to Default</button>
-          <button class="btn-danger" onclick="resetQuizzes()">↩ Reset Quizzes to Default</button>
-          <button class="btn-danger" onclick="clearProgress()">🗑 Clear All Student Progress</button>
-          <button class="btn-danger" onclick="clearAllUsers()">🗑 Clear All Accounts (except demo)</button>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -168,6 +454,20 @@
       renderDataOverview();
     }
 
+    function switchSettingsTab(paneId) {
+      document.querySelectorAll('.settings-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content-pane').forEach(pane => pane.classList.remove('active'));
+
+      // Highlight active sidebar button
+      const buttons = document.querySelectorAll('.settings-tab-btn');
+      if (paneId === 'general-pane') buttons[0].classList.add('active');
+      else if (paneId === 'security-pane') buttons[1].classList.add('active');
+      else if (paneId === 'backup-pane') buttons[2].classList.add('active');
+      else if (paneId === 'danger-pane') buttons[3].classList.add('active');
+
+      document.getElementById(paneId).classList.add('active');
+    }
+
     function saveSiteIdentity() {
       const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
       s.siteName     = document.getElementById('siteName').value.trim();
@@ -177,6 +477,7 @@
       s.contactPhone = document.getElementById('contactPhone').value.trim();
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
       flashTag('identityTag');
+      showToast('✅ Site Identity saved.');
     }
 
     function saveToggles() {
@@ -189,6 +490,7 @@
       };
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
       flashTag('toggleTag');
+      showToast('✅ Feature Toggles saved.');
     }
 
     function changeAdminPassword() {
@@ -210,6 +512,7 @@
       localStorage.setItem('users', JSON.stringify(users));
       ['curPwd','newPwd','confirmPwd'].forEach(id => document.getElementById(id).value = '');
       flashTag('pwdTag');
+      showToast('✅ Password changed successfully.');
     }
 
     function renderDataOverview() {
@@ -226,7 +529,10 @@
       el.innerHTML = keys.map(({key,label})=>{
         const val = localStorage.getItem(key);
         let count = '–';
-        try { const parsed = JSON.parse(val); count = Array.isArray(parsed) ? parsed.length : (parsed ? 'Set' : 'Not set'); } catch{}
+        try { 
+          const parsed = JSON.parse(val); 
+          count = Array.isArray(parsed) ? parsed.length : (parsed ? 'Set' : 'Not set'); 
+        } catch(e){}
         return `<div class="data-stat"><span class="data-key">${label}</span><span class="data-val">${count}</span></div>`;
       }).join('');
     }
@@ -237,32 +543,68 @@
       setTimeout(()=>el.classList.remove('show'), 2000);
     }
 
+    function importBackupSnapshot() {
+      const fileInput = document.getElementById('backupFileInput');
+      const file = fileInput.files[0];
+      if (!file) { alert('Please select a JSON snapshot file first.'); return; }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const snapshot = JSON.parse(e.target.result);
+          
+          // Basic validation checks
+          if (!snapshot.users || !Array.isArray(snapshot.users)) {
+            alert('⚠️ Invalid backup format: Missing registered users dataset.');
+            return;
+          }
+
+          if (confirm('Importing this snapshot will wipe all current browser data logs, custom roadmaps, and students grades. Proceed?')) {
+            if (snapshot.users) localStorage.setItem('users', JSON.stringify(snapshot.users));
+            if (snapshot.completedCourses) localStorage.setItem('completedCourses', JSON.stringify(snapshot.completedCourses));
+            if (snapshot.quizScores) localStorage.setItem('quizScores', JSON.stringify(snapshot.quizScores));
+            if (snapshot.certificates) localStorage.setItem('certificates', JSON.stringify(snapshot.certificates));
+            if (snapshot.feedbackList) localStorage.setItem('feedbackList', JSON.stringify(snapshot.feedbackList));
+            if (snapshot.siteSettings) localStorage.setItem('siteSettings', JSON.stringify(snapshot.siteSettings));
+
+            showToast('✅ Database restored successfully!');
+            setTimeout(() => window.location.reload(), 1500);
+          }
+        } catch(err) {
+          alert('⚠️ Failed to load database file. Verify it is a valid snapshot JSON.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
     // Danger zone actions
     function resetCourses()  {
-      if (!confirm('Reset all courses to built-in defaults? Custom courses will be lost.')) return;
+      if (!confirm('Wipe all custom courses? Default curriculum will reload.')) return;
       localStorage.removeItem('customCourses');
       showToast('↩ Courses reset to default.');
       renderDataOverview();
     }
+    
     function resetQuizzes()  {
-      if (!confirm('Reset all quizzes to built-in defaults?')) return;
+      if (!confirm('Wipe all custom quiz questions? Default questions will reload.')) return;
       localStorage.removeItem('customQuizzes');
       showToast('↩ Quizzes reset to default.');
       renderDataOverview();
     }
+    
     function clearProgress() {
-      if (!confirm('Clear all student progress (completions, quiz scores, certificates)?')) return;
-      ['completedCourses','quizScores','certificates'].forEach(k=>localStorage.removeItem(k));
-      showToast('🗑 Progress cleared.');
+      if (!confirm('Wipe all student grades, quiz logs, and certificates? This is permanent.')) return;
+      ['completedCourses','quizScores','certificates','watchedVideos','enrolledCourses'].forEach(k=>localStorage.removeItem(k));
+      showToast('🧹 Progress logs cleared.');
       renderDataOverview();
     }
+    
     function clearAllUsers() {
-      if (!confirm('Delete all non-demo accounts?')) return;
-      const DEMO = ['student','admin'];
-      const users = JSON.parse(localStorage.getItem('users')||'[]').filter(u=>DEMO.includes(u.username));
-      localStorage.setItem('users', JSON.stringify(users));
-      showToast('🗑 Non-demo accounts removed.');
-      renderDataOverview();
+      if (!confirm('Wipe all student accounts? Demo student and demo admin will remain.')) return;
+      // seedDemoUsers will reload them automatically on main.js initializeApp
+      localStorage.removeItem('users');
+      showToast('🧹 Student roster accounts cleared.');
+      setTimeout(() => window.location.reload(), 1000);
     }
 
     function showToast(msg) {
