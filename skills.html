@@ -33,29 +33,101 @@
         <img src="images/our-courses.jpeg" alt="Explore Our Courses" style="width: 100%; height: auto; display: block;">
     </section>
 
+    <style>
+        .folder-card {
+            border: 2.5px solid var(--border-color) !important;
+            background: var(--bg-card) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        .folder-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08) !important;
+            border-color: var(--primary-color) !important;
+        }
+        .folder-card.active {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15) !important;
+            background: var(--bg-secondary) !important;
+        }
+        .folder-card.active[data-category="CS-IT"] {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15) !important;
+        }
+        .folder-card.active[data-category="Creative-Design"] {
+            border-color: #ec4899 !important;
+            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.15) !important;
+        }
+        .folder-card.active[data-category="Business-Management"] {
+            border-color: #f97316 !important;
+            box-shadow: 0 8px 24px rgba(249, 115, 22, 0.15) !important;
+        }
+        .folder-card.active[data-category="Emerging-Technologies"] {
+            border-color: #a855f7 !important;
+            box-shadow: 0 8px 24px rgba(168, 85, 247, 0.15) !important;
+        }
+    </style>
+
     <!-- SEARCH & FILTER SECTION -->
-    <section class="search-filter-section" id="categories" style="padding: 2rem;">
+    <section class="search-filter-section" id="categories" style="padding: 2.5rem 0 1rem 0;">
         <div class="container">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
-                <!-- Search -->
-                <div>
-                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-dark);">🔍 Search Courses</label>
-                    <input type="text" id="skillSearch" class="search-input" placeholder="Search by skill name...">
+            <div style="margin-bottom: 2.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-dark); font-size: 1.1rem;">🔍 Search Courses</label>
+                <input type="text" id="skillSearch" class="search-input" placeholder="Search by course title or description..." style="width: 100%; max-width: 600px; padding: 0.8rem 1.2rem; border-radius: 8px; border: 1.5px solid var(--border-color); background: var(--bg-card); color: var(--text-dark);">
+            </div>
+            
+            <label style="display: block; font-weight: 600; margin-bottom: 1rem; color: var(--text-dark); font-size: 1.1rem;">📂 Filter by Category Folder</label>
+            <div class="category-folders" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <!-- Folder 1: All -->
+                <div class="folder-card active" data-category="All" style="cursor: pointer; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1.2rem; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <div class="folder-icon" style="font-size: 3rem; background: rgba(16, 185, 129, 0.1); width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: var(--primary-color);">📚</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-dark); font-weight: 700;">All Categories</h3>
+                        <p style="margin: 0.2rem 0 0 0; font-size: 0.88rem; color: var(--text-muted);">View all 20 courses</p>
+                    </div>
                 </div>
 
-                <!-- Category Filter -->
-                <div>
-                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-dark);">📂 Filter by Category</label>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <button class="category-btn active" data-category="All">All</button>
-                        <button class="category-btn" data-category="Frontend">Frontend</button>
-                        <button class="category-btn" data-category="Backend">Backend</button>
-                        <button class="category-btn" data-category="Data">Data</button>
-                        <button class="category-btn" data-category="Infrastructure">Infrastructure</button>
-                        <button class="category-btn" data-category="Security">Security</button>
-                        <button class="category-btn" data-category="Design">Design</button>
-                        <button class="category-btn" data-category="Mobile">Mobile</button>
-                        <button class="category-btn" data-category="AI/ML">AI/ML</button>
+                <!-- Folder 2: Computer Science & IT -->
+                <div class="folder-card" data-category="CS-IT" style="cursor: pointer; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1.2rem; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <div class="folder-icon" style="font-size: 3rem; background: rgba(59, 130, 246, 0.1); width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #3b82f6;">💻</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-dark); font-weight: 700;">Computer Science & IT</h3>
+                        <p style="margin: 0.2rem 0 0 0; font-size: 0.88rem; color: var(--text-muted);">Web Dev, Cloud, UI/UX, ML</p>
+                    </div>
+                </div>
+
+                <!-- Folder 3: Creative & Design -->
+                <div class="folder-card" data-category="Creative-Design" style="cursor: pointer; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1.2rem; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <div class="folder-icon" style="font-size: 3rem; background: rgba(236, 72, 153, 0.1); width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #ec4899;">🎨</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-dark); font-weight: 700;">Creative & Design</h3>
+                        <p style="margin: 0.2rem 0 0 0; font-size: 0.88rem; color: var(--text-muted);">Video, Graphics, Photo, Writing</p>
+                    </div>
+                </div>
+
+                <!-- Folder 4: Business Management -->
+                <div class="folder-card" data-category="Business-Management" style="cursor: pointer; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1.2rem; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <div class="folder-icon" style="font-size: 3rem; background: rgba(249, 115, 22, 0.1); width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #f97316;">📈</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-dark); font-weight: 700;">Business Management</h3>
+                        <p style="margin: 0.2rem 0 0 0; font-size: 0.88rem; color: var(--text-muted);">Marketing, PM, Analytics, Startup</p>
+                    </div>
+                </div>
+
+                <!-- Folder 5: Emerging Technologies -->
+                <div class="folder-card" data-category="Emerging-Technologies" style="cursor: pointer; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1.2rem; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <div class="folder-icon" style="font-size: 3rem; background: rgba(168, 85, 247, 0.1); width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #a855f7;">🔬</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-dark); font-weight: 700;">Emerging Technologies</h3>
+                        <p style="margin: 0.2rem 0 0 0; font-size: 0.88rem; color: var(--text-muted);">VR, Robotics, AR, Quantum</p>
+                    </div>
+                </div>
+
+                <!-- Folder 6: Finance -->
+                <div class="folder-card" data-category="Finance" style="cursor: pointer; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1.2rem; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <div class="folder-icon" style="font-size: 3rem; background: rgba(234, 179, 8, 0.1); width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #eab308;">💵</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-dark); font-weight: 700;">Finance</h3>
+                        <p style="margin: 0.2rem 0 0 0; font-size: 0.88rem; color: var(--text-muted);">Accounting, Tax, Stock, Invest</p>
                     </div>
                 </div>
             </div>
@@ -63,7 +135,7 @@
     </section>
 
     <!-- COURSES SECTION -->
-    <section class="section" id="courses">
+    <section class="section" id="courses" style="padding: 1rem 0 4rem 0;">
         <div class="container">
             <div class="skills-grid"></div>
         </div>
@@ -106,23 +178,55 @@
     <script src="js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            renderSkillCards(coursesData);
-            setupSearch();
-            setupCategoryFilter();
+            // Update All Categories count dynamically
+            const allCountText = document.querySelector('[data-category="All"] p');
+            if (allCountText && typeof coursesData !== 'undefined') {
+                allCountText.textContent = `View all ${coursesData.length} courses`;
+            }
 
-            // Add event listener for category buttons
-            const categoryBtns = document.querySelectorAll('.category-btn');
-            categoryBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    categoryBtns.forEach(b => {
-                        b.classList.remove('active');
-                    });
+            renderSkillCards(coursesData);
+            
+            const folderCards = document.querySelectorAll('.folder-card');
+            const searchInput = document.getElementById('skillSearch');
+            
+            function applyFilters() {
+                const activeCard = document.querySelector('.folder-card.active');
+                const category = activeCard ? activeCard.getAttribute('data-category') : 'All';
+                const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+                
+                let filtered = coursesData;
+                if (category === 'CS-IT') {
+                    filtered = coursesData.filter(course => [1, 4, 6, 8].includes(course.id));
+                } else if (category === 'Creative-Design') {
+                    filtered = coursesData.filter(course => [9, 10, 11, 12].includes(course.id));
+                } else if (category === 'Business-Management') {
+                    filtered = coursesData.filter(course => course.category === 'Business Management');
+                } else if (category === 'Emerging-Technologies') {
+                    filtered = coursesData.filter(course => course.category === 'Emerging Technologies');
+                } else if (category === 'Finance') {
+                    filtered = coursesData.filter(course => course.category === 'Finance');
+                }
+                
+                if (searchTerm) {
+                    filtered = filtered.filter(course =>
+                        course.title.toLowerCase().includes(searchTerm) ||
+                        course.description.toLowerCase().includes(searchTerm)
+                    );
+                }
+                renderSkillCards(filtered);
+            }
+            
+            folderCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    folderCards.forEach(c => c.classList.remove('active'));
                     this.classList.add('active');
-                    
-                    const category = this.getAttribute('data-category');
-                    filterByCategory(category);
+                    applyFilters();
                 });
             });
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', applyFilters);
+            }
         });
     </script>
 </body>
