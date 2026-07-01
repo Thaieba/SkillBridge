@@ -5,15 +5,312 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - SkillBridge</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --chart-grid: rgba(0, 0, 0, 0.05);
+            --chart-text: #64748b;
+            --timeline-line: #e2e8f0;
+        }
+        html[data-theme="dark"] {
+            --chart-grid: rgba(255, 255, 255, 0.08);
+            --chart-text: #94a3b8;
+            --timeline-line: #334155;
+        }
+
+        /* Dashboard styles */
+        .dashboard-header {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(30, 41, 59, 0.05));
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .dashboard-welcome h1 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .dashboard-welcome p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.25rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .kpi-icon {
+            position: absolute;
+            right: 0.75rem;
+            bottom: 0.5rem;
+            font-size: 3rem;
+            opacity: 0.08;
+            pointer-events: none;
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover .kpi-icon {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .kpi-val {
+            font-size: 2.2rem;
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+            color: var(--text-dark);
+        }
+
+        .kpi-lbl {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dashboard-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-card-title {
+            font-size: 1.15rem;
+            font-weight: 850;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 260px;
+            width: 100%;
+        }
+
+        /* Activity Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 0.5rem;
+            bottom: 0.5rem;
+            width: 2px;
+            background: var(--timeline-line);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.25rem;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -1.25rem;
+            top: 0.25rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 2px solid var(--card-bg);
+            z-index: 1;
+        }
+
+        .timeline-content {
+            background: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.88rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .timeline-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.4rem;
+            display: block;
+        }
+
+        /* Table styles */
+        .dashboard-table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .dashboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        .dashboard-table th {
+            background: var(--light-bg);
+            padding: 0.85rem 1rem;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .dashboard-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-dark);
+            vertical-align: middle;
+        }
+
+        .dashboard-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .dashboard-table tr:hover td {
+            background: rgba(16, 185, 129, 0.04);
+        }
+
+        /* Quick Actions */
+        .actions-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1.1rem;
+            background: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+        }
+
+        .action-item:hover {
+            transform: translateX(4px);
+            background: var(--card-bg);
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .action-icon {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--card-bg);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+        }
+
+        .action-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .action-title {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .action-desc {
+            font-size: 0.78rem;
+            color: var(--text-light);
+        }
+
+        /* Scrollbar customizing */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+    </style>
 </head>
 <body>
     <nav>
         <div class="container">
             <a href="../index.html" class="logo">SkillBridge</a>
             <ul class="nav-links">
-                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="dashboard.html" class="active">Dashboard</a></li>
                 <li><a href="students.html">Students</a></li>
                 <li><a href="courses.html">Courses</a></li>
+                <li><a href="roadmap-editor.html">Roadmaps</a></li>
                 <li><a href="reports.html">Reports</a></li>
                 <li><a href="feedback.html">Feedback</a></li>
                 <li><a href="settings.html">Settings</a></li>
@@ -27,77 +324,165 @@
         </div>
     </nav>
 
-    <section class="section" style="padding: 3rem 1rem;">
-        <div class="container" style="max-width: 1100px;">
-            <h1 class="section-title" style="margin-bottom: 1.5rem;">🛠️ Admin Dashboard</h1>
-
-            <div class="progress-stat-box" style="border-left: 6px solid var(--accent-color); margin-bottom: 2rem;">
-                <div style="display:flex; justify-content:space-between; gap: 1rem; flex-wrap: wrap; align-items:center;">
-                    <div>
-                        <div style="font-size: 1.2rem; font-weight: 800;">Admin: <span id="adminName">Admin</span></div>
-                        <div style="color: var(--text-light); margin-top: 0.25rem;">Role: <span id="adminRole">admin</span></div>
+    <section class="section" style="padding: 2.5rem 1rem;">
+        <div class="container" style="max-width: 1200px;">
+            
+            <!-- Dashboard Header Banner -->
+            <div class="dashboard-header">
+                <div class="dashboard-welcome">
+                    <h1 id="welcomeText">Welcome back, Admin!</h1>
+                    <p>SkillBridge School Control Center & Real-time Analytics Dashboard</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="text-align: right; display: block;">
+                        <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-dark);" id="adminName">Admin</div>
+                        <div style="font-size: 0.75rem; color: var(--text-light); text-transform: uppercase;" id="adminRole">Administrator</div>
                     </div>
-                    <button class="btn btn-clear" onclick="logoutAndRedirect()">Logout</button>
+                    <button class="btn btn-clear" onclick="logoutAndRedirect()" style="padding: 0.5rem 1.1rem; font-size: 0.9rem;">Logout</button>
                 </div>
             </div>
 
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                <div class="progress-stat-box" style="border-left: 4px solid var(--primary-color);">
-                    <div style="font-size:2rem; font-weight:800; color: var(--primary-color);" id="statUsers">0</div>
-                    <div class="progress-stat-label">Registered Users (Local)</div>
+            <!-- KPI Summary Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card" style="border-left: 4px solid #3b82f6;">
+                    <div class="kpi-val" id="statUsers">0</div>
+                    <div class="kpi-lbl">Total Registered</div>
+                    <div class="kpi-icon">👥</div>
                 </div>
-                <div class="progress-stat-box" style="border-left: 4px solid var(--secondary-color);">
-                    <div style="font-size:2rem; font-weight:800; color: var(--secondary-color);" id="statCourses">0</div>
-                    <div class="progress-stat-label">Total Course Completions</div>
+                <div class="kpi-card" style="border-left: 4px solid #10b981;">
+                    <div class="kpi-val" id="statStudents">0</div>
+                    <div class="kpi-lbl">Active Students</div>
+                    <div class="kpi-icon">🎓</div>
                 </div>
-                <div class="progress-stat-box" style="border-left: 4px solid var(--accent-color);">
-                    <div style="font-size:2rem; font-weight:800; color: var(--accent-color);" id="statQuizzes">0</div>
-                    <div class="progress-stat-label">Total Quiz Attempts</div>
+                <div class="kpi-card" style="border-left: 4px solid #6366f1;">
+                    <div class="kpi-val" id="statAdmins">0</div>
+                    <div class="kpi-lbl">Admins</div>
+                    <div class="kpi-icon">🛡️</div>
+                </div>
+                <div class="kpi-card" style="border-left: 4px solid #06b6d4;">
+                    <div class="kpi-val" id="statCourses">0</div>
+                    <div class="kpi-lbl">Course Completions</div>
+                    <div class="kpi-icon">🏆</div>
+                </div>
+                <div class="kpi-card" style="border-left: 4px solid #f59e0b;">
+                    <div class="kpi-val" id="statQuizzes">0</div>
+                    <div class="kpi-lbl">Quiz Attempts</div>
+                    <div class="kpi-icon">📝</div>
+                </div>
+                <div class="kpi-card" style="border-left: 4px solid #8b5cf6;">
+                    <div class="kpi-val" id="statAvgScore">0%</div>
+                    <div class="kpi-lbl">Average Score</div>
+                    <div class="kpi-icon">📈</div>
                 </div>
             </div>
 
-            <div style="margin-top: 2.5rem;">
-                <h2 class="progress-section-title">Quick Analytics</h2>
-                <div class="progress-stat-box" style="margin-top: 1rem;">
-                    <div id="adminQuickText" style="color: var(--text-light); line-height: 1.8;">
-                        Loading...
+            <!-- Dashboard Analytics & Details Grid -->
+            <div class="dashboard-grid">
+                
+                <!-- Left Side Columns: Charts and Tables -->
+                <div>
+                    <!-- Charts Box -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                        <div class="dashboard-card">
+                            <h3 class="dashboard-card-title">📊 Course Completion Leaderboard</h3>
+                            <div class="chart-container">
+                                <canvas id="courseChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3 class="dashboard-card-title">📝 Quiz Score Distribution</h3>
+                            <div class="chart-container">
+                                <canvas id="quizChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Registered Students Table -->
+                    <div class="dashboard-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                            <h3 class="dashboard-card-title" style="margin-bottom: 0;">👥 Recent Registered Students</h3>
+                            <a href="students.html" style="font-size: 0.85rem; color: var(--primary-color); font-weight: 700; text-decoration: none;">View All →</a>
+                        </div>
+                        <div class="dashboard-table-wrapper">
+                            <table class="dashboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Username</th>
+                                        <th>Date Registered</th>
+                                        <th style="text-align: right;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentStudentsBody">
+                                    <!-- Populated via Javascript -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Right Side Columns: Quick Actions & Timeline -->
+                <div>
+                    <!-- Quick Content Manager Shortcuts -->
+                    <div class="dashboard-card">
+                        <h3 class="dashboard-card-title">🛠️ Content Editors</h3>
+                        <div class="actions-list">
+                            <a href="courses-manager.html" class="action-item">
+                                <div class="action-icon" style="color: #06b6d4;">📚</div>
+                                <div class="action-info">
+                                    <span class="action-title">Course Manager</span>
+                                    <span class="action-desc">Add, remove, or modify study courses</span>
+                                </div>
+                            </a>
+                            <a href="image-editor.html" class="action-item">
+                                <div class="action-icon" style="color: #f59e0b;">🖼️</div>
+                                <div class="action-info">
+                                    <span class="action-title">Image Editor</span>
+                                    <span class="action-desc">Upload and manage course card images</span>
+                                </div>
+                            </a>
+                            <a href="video-editor.html" class="action-item">
+                                <div class="action-icon" style="color: #ec4899;">🎬</div>
+                                <div class="action-info">
+                                    <span class="action-title">Video Editor</span>
+                                    <span class="action-desc">Link study lectures and watch times</span>
+                                </div>
+                            </a>
+                            <a href="quiz-editor.html" class="action-item">
+                                <div class="action-icon" style="color: #8b5cf6;">📝</div>
+                                <div class="action-info">
+                                    <span class="action-title">Quiz Editor</span>
+                                    <span class="action-desc">Modify quiz sheets and question banks</span>
+                                </div>
+                            </a>
+                            <a href="roadmap-editor.html" class="action-item">
+                                <div class="action-icon" style="color: #10b981;">🧭</div>
+                                <div class="action-info">
+                                    <span class="action-title">Roadmap Editor</span>
+                                    <span class="action-desc">Modify student target study paths</span>
+                                </div>
+                            </a>
+                            <a href="feedback.html" class="action-item">
+                                <div class="action-icon" style="color: #f43f5e;">💬</div>
+                                <div class="action-info">
+                                    <span class="action-title">Feedback Manager</span>
+                                    <span class="action-desc">Read bug reports and user requests</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Activity Log Timeline -->
+                    <div class="dashboard-card">
+                        <h3 class="dashboard-card-title">🕒 Real-time System Feed</h3>
+                        <div class="timeline" id="activityTimeline">
+                            <!-- Populated via Javascript -->
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            <div style="margin-top: 2.5rem;">
-                <h2 class="progress-section-title">📚 Content Editors</h2>
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
-                    <a href="courses-manager.html" style="text-decoration: none;">
-                        <div class="progress-stat-box" style="border-left: 4px solid #06b6d4; cursor: pointer; transition: all 0.2s;">
-                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📚</div>
-                            <div style="font-weight: 800; color: var(--text-dark);">Course Manager</div>
-                            <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">Manage all courses</div>
-                        </div>
-                    </a>
-                    <a href="image-editor.html" style="text-decoration: none;">
-                        <div class="progress-stat-box" style="border-left: 4px solid #f59e0b; cursor: pointer; transition: all 0.2s;">
-                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🖼️</div>
-                            <div style="font-weight: 800; color: var(--text-dark);">Image Editor</div>
-                            <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">Edit course images</div>
-                        </div>
-                    </a>
-                    <a href="video-editor.html" style="text-decoration: none;">
-                        <div class="progress-stat-box" style="border-left: 4px solid #ec4899; cursor: pointer; transition: all 0.2s;">
-                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎬</div>
-                            <div style="font-weight: 800; color: var(--text-dark);">Video Editor</div>
-                            <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">Edit course videos</div>
-                        </div>
-                    </a>
-                    <a href="quiz-editor.html" style="text-decoration: none;">
-                        <div class="progress-stat-box" style="border-left: 4px solid #8b5cf6; cursor: pointer; transition: all 0.2s;">
-                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📝</div>
-                            <div style="font-weight: 800; color: var(--text-dark);">Quiz Editor</div>
-                            <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">Edit quiz questions</div>
-                        </div>
-                    </a>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -107,6 +492,7 @@
                 <h4>SkillBridge</h4>
                 <ul>
                     <li><a href="../index.html">Home</a></li>
+                    <li><a href="dashboard.html">Admin Dashboard</a></li>
                 </ul>
             </div>
         </div>
@@ -122,25 +508,309 @@
             requireRole('admin');
             const session = getSession();
 
-            document.getElementById('adminName').textContent = session?.fullName || session?.username || 'Admin';
+            const fullName = session?.fullName || session?.username || 'Admin';
+            document.getElementById('adminName').textContent = fullName;
             document.getElementById('adminRole').textContent = session?.role || 'admin';
+            document.getElementById('welcomeText').textContent = `Welcome back, ${fullName.split(' ')[0]}!`;
 
+            // Load and parse local storage database
             const users = JSON.parse(localStorage.getItem('users')) || [];
             const completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
             const quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
+            const certs = JSON.parse(localStorage.getItem('certificates')) || [];
+            const feedbackList = JSON.parse(localStorage.getItem('feedbackList')) || [];
 
+            // Calculate stats
+            const studentCount = users.filter(u => u.role === 'student').length;
+            const adminCount = users.filter(u => u.role === 'admin').length;
+            const avgQuizScore = quizScores.length ? Math.round(quizScores.reduce((a, b) => a + b.percentage, 0) / quizScores.length) : 0;
+
+            // Fill stats HTML
             document.getElementById('statUsers').textContent = users.length;
+            document.getElementById('statStudents').textContent = studentCount;
+            document.getElementById('statAdmins').textContent = adminCount;
             document.getElementById('statCourses').textContent = completedCourses.length;
             document.getElementById('statQuizzes').textContent = quizScores.length;
+            document.getElementById('statAvgScore').textContent = `${avgQuizScore}%`;
 
-            const avg = quizScores.length ? Math.round(quizScores.reduce((a,b)=>a+b.percentage,0)/quizScores.length) : 0;
-            const certs = JSON.parse(localStorage.getItem('certificates')) || [];
+            // Generate System Activity Log
+            const activities = [];
 
-            document.getElementById('adminQuickText').innerHTML = `
-                <div>✅ Average quiz score: <strong>${avg}%</strong></div>
-                <div>🏆 Certificates issued: <strong>${certs.length}</strong></div>
-                <div>🗓️ Latest activity is stored locally per browser.</div>
-            `;
+            // 1. User Registrations
+            users.forEach(u => {
+                activities.push({
+                    type: 'user_reg',
+                    icon: '👤',
+                    title: 'New Student Registered',
+                    detail: `<strong>${u.fullName}</strong> (@${u.username}) created an account.`,
+                    timestamp: getTimestamp(u.createdAt),
+                    dateStr: u.createdAt
+                });
+            });
+
+            // 2. Course completions
+            certs.forEach(c => {
+                if (c.type === 'course') {
+                    activities.push({
+                        type: 'course_comp',
+                        icon: '🏆',
+                        title: 'Course Completed',
+                        detail: `<strong>${c.userName}</strong> completed the course: <em>${c.courseTitle}</em>.`,
+                        timestamp: getTimestamp(c.timestamp || c.issuedDate),
+                        dateStr: c.issuedDate
+                    });
+                }
+            });
+
+            // 3. Quiz attempts
+            quizScores.forEach(q => {
+                const passed = q.percentage >= 70;
+                activities.push({
+                    type: 'quiz_attempt',
+                    icon: passed ? '🏆' : '✏️',
+                    title: passed ? 'Passed Quiz Assessment' : 'Attempted Quiz Assessment',
+                    detail: `<strong>${q.studentName}</strong> scored <strong>${q.percentage}%</strong> in <em>${q.courseId ? getCourseTitle(q.courseId) : 'Course Quiz'}</em>.`,
+                    timestamp: getTimestamp(q.date),
+                    dateStr: q.date
+                });
+            });
+
+            // 4. Feedback list
+            feedbackList.forEach(fb => {
+                activities.push({
+                    type: 'feedback',
+                    icon: '💬',
+                    title: 'New Feedback Submitted',
+                    detail: `<strong>${fb.name}</strong> submitted feedback (${fb.type}): "${fb.message.substring(0, 50)}${fb.message.length > 50 ? '...' : ''}"`,
+                    timestamp: getTimestamp(fb.timestamp || fb.date),
+                    dateStr: fb.date
+                });
+            });
+
+            // Sort activities by timestamp descending
+            activities.sort((a, b) => b.timestamp - a.timestamp);
+
+            // Format relative time helper
+            function timeAgo(timestamp) {
+                if (!timestamp) return 'some time ago';
+                const seconds = Math.floor((Date.now() - timestamp) / 1000);
+                if (seconds < 5) return 'just now';
+                if (seconds < 60) return `${seconds}s ago`;
+                const minutes = Math.floor(seconds / 60);
+                if (minutes < 60) return `${minutes}m ago`;
+                const hours = Math.floor(minutes / 60);
+                if (hours < 24) return `${hours}h ago`;
+                const days = Math.floor(hours / 24);
+                if (days === 1) return 'yesterday';
+                return `${days} days ago`;
+            }
+
+            function getTimestamp(dateVal) {
+                if (!dateVal) return 0;
+                if (typeof dateVal === 'number') return dateVal;
+                const parsed = Date.parse(dateVal);
+                if (!isNaN(parsed)) return parsed;
+                try {
+                    return new Date(dateVal).getTime() || 0;
+                } catch(e) {
+                    return 0;
+                }
+            }
+
+            function getCourseTitle(courseId) {
+                if (typeof coursesData !== 'undefined') {
+                    const course = coursesData.find(c => String(c.id) === String(courseId));
+                    if (course) return course.title;
+                }
+                return 'Course';
+            }
+
+            // Render Timeline
+            const timelineContainer = document.getElementById('activityTimeline');
+            if (activities.length === 0) {
+                timelineContainer.innerHTML = '<div style="color: var(--text-light); text-align: center; padding: 1.5rem 0;">No system activity recorded yet.</div>';
+            } else {
+                const recentActivities = activities.slice(0, 6);
+                timelineContainer.innerHTML = recentActivities.map(act => `
+                    <div class="timeline-item">
+                        <div class="timeline-marker" style="background: ${getMarkerColor(act.type)}; box-shadow: 0 0 0 2px ${getMarkerColor(act.type)}44;"></div>
+                        <div class="timeline-content">
+                            <div style="font-weight: 700; display: flex; align-items: center; gap: 0.4rem; color: var(--text-dark);">
+                                <span>${act.icon}</span> ${act.title}
+                            </div>
+                            <div style="margin-top: 0.25rem; font-size: 0.8rem; color: var(--text-light); line-height: 1.4;">${act.detail}</div>
+                            <span class="timeline-time" title="${act.dateStr}">🕒 ${timeAgo(act.timestamp)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function getMarkerColor(type) {
+                switch(type) {
+                    case 'user_reg': return '#3b82f6'; // Blue
+                    case 'course_comp': return '#10b981'; // Green
+                    case 'quiz_attempt': return '#f59e0b'; // Amber
+                    case 'feedback': return '#ec4899'; // Pink
+                    default: return 'var(--primary-color)';
+                }
+            }
+
+            // Render Recent Students
+            const studentTableBody = document.getElementById('recentStudentsBody');
+            const studentsList = users.filter(u => u.role === 'student');
+            studentsList.sort((a, b) => getTimestamp(b.createdAt) - getTimestamp(a.createdAt));
+
+            if (studentsList.length === 0) {
+                studentTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light); padding: 1.5rem 0;">No students registered yet.</td></tr>';
+            } else {
+                const topStudents = studentsList.slice(0, 5);
+                studentTableBody.innerHTML = topStudents.map(s => `
+                    <tr>
+                        <td style="font-weight: 700;">${s.fullName}</td>
+                        <td style="font-family: monospace; font-size: 0.85rem;">@${s.username}</td>
+                        <td style="font-size: 0.8rem; color: var(--text-light);">${s.createdAt || 'Unknown'}</td>
+                        <td style="text-align: right;">
+                            <a href="students.html" class="btn" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-dark);">Manage</a>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // --- Chart.js Configurations ---
+            // 1. Course Completion Leaderboard
+            const courseLabels = typeof coursesData !== 'undefined' ? coursesData.map(c => c.title) : [];
+            const courseCompletionData = typeof coursesData !== 'undefined' ? coursesData.map(c => {
+                // Count completions (matching either course ID or Title)
+                const courseIdMatch = completedCourses.filter(comp => Number(comp.id) === Number(c.id)).length;
+                const courseTitleMatch = completedCourses.filter(comp => comp.title === c.title).length;
+                const certMatch = certs.filter(cert => cert.courseId === c.id || cert.courseTitle === c.title).length;
+                return Math.max(courseIdMatch, courseTitleMatch, certMatch);
+            }) : [];
+
+            // 2. Quiz Score Distribution
+            let excelCount = 0;
+            let goodCount = 0;
+            let passCount = 0;
+            let lowCount = 0;
+
+            quizScores.forEach(q => {
+                const pct = q.percentage;
+                if (pct >= 90) excelCount++;
+                else if (pct >= 75) goodCount++;
+                else if (pct >= 50) passCount++;
+                else lowCount++;
+            });
+
+            let courseChart, quizChart;
+
+            function initCharts() {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                const textColor = isDark ? '#94a3b8' : '#64748b';
+                const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+
+                const ctxCourse = document.getElementById('courseChart').getContext('2d');
+                courseChart = new Chart(ctxCourse, {
+                    type: 'bar',
+                    data: {
+                        labels: courseLabels,
+                        datasets: [{
+                            label: 'Completions',
+                            data: courseCompletionData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                            borderColor: '#10b981',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { padding: 10 }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: gridColor },
+                                ticks: { color: textColor, stepSize: 1, precision: 0 }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: textColor }
+                            }
+                        }
+                    }
+                });
+
+                const ctxQuiz = document.getElementById('quizChart').getContext('2d');
+                quizChart = new Chart(ctxQuiz, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Excellent (90-100%)', 'Good (75-89%)', 'Passing (50-74%)', 'Needs Improvement (<50%)'],
+                        datasets: [{
+                            data: [excelCount, goodCount, passCount, lowCount],
+                            backgroundColor: [
+                                'rgba(16, 185, 129, 0.85)', // Green
+                                'rgba(59, 130, 246, 0.85)', // Blue
+                                'rgba(245, 158, 11, 0.85)', // Amber
+                                'rgba(239, 68, 68, 0.85)'   // Red
+                            ],
+                            borderWidth: isDark ? 2 : 1,
+                            borderColor: isDark ? '#1e293b' : '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: textColor,
+                                    padding: 15,
+                                    boxWidth: 12,
+                                    font: { size: 11, family: 'Inter, sans-serif' }
+                                }
+                            },
+                            tooltip: { padding: 10 }
+                        },
+                        cutout: '62%'
+                    }
+                });
+            }
+
+            function updateChartsTheme() {
+                if (!courseChart || !quizChart) return;
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                const textColor = isDark ? '#94a3b8' : '#64748b';
+                const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+
+                // Update Course Chart scales
+                courseChart.options.scales.x.grid.color = gridColor;
+                courseChart.options.scales.x.ticks.color = textColor;
+                courseChart.options.scales.y.ticks.color = textColor;
+                courseChart.update();
+
+                // Update Quiz Chart legend
+                quizChart.options.plugins.legend.labels.color = textColor;
+                quizChart.data.datasets[0].borderWidth = isDark ? 2 : 1;
+                quizChart.data.datasets[0].borderColor = isDark ? '#1e293b' : '#ffffff';
+                quizChart.update();
+            }
+
+            // Initialize Charts
+            initCharts();
+
+            // Set up MutationObserver to automatically adjust Chart colors when theme toggle is pressed
+            const themeObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'data-theme') {
+                        updateChartsTheme();
+                    }
+                });
+            });
+            themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
         });
 
         function logoutAndRedirect(){
@@ -150,4 +820,3 @@
     </script>
 </body>
 </html>
-
