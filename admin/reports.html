@@ -3,107 +3,726 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin - Reports</title>
+  <title>Admin – Reports & Analytics | SkillBridge</title>
   <link rel="stylesheet" href="../css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Premium layout design */
+    :root {
+        --chart-grid: rgba(0, 0, 0, 0.05);
+        --chart-text: #64748b;
+    }
+    html[data-theme="dark"] {
+        --chart-grid: rgba(255, 255, 255, 0.08);
+        --chart-text: #94a3b8;
+    }
+
+    .stats-row { 
+      display:grid; 
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); 
+      gap:1.25rem; 
+      margin-bottom:2rem; 
+    }
+    .stat-card { 
+      background:var(--card-bg); 
+      border-radius:12px; 
+      padding:1.2rem 1.5rem; 
+      border-left:4px solid var(--primary-color); 
+      box-shadow:0 4px 15px rgba(0,0,0,0.04); 
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stat-val { 
+      font-size:2.2rem; 
+      font-weight:800; 
+      color:var(--text-dark); 
+    }
+    .stat-lbl { 
+      font-size:.8rem; 
+      color:var(--text-light); 
+      margin-top:.2rem; 
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .stat-icon {
+      font-size: 2.2rem;
+      opacity: 0.15;
+    }
+
+    /* Layout Grids */
+    .reports-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    @media (max-width: 992px) {
+      .reports-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .report-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+
+    .report-card-title {
+      font-size: 1.15rem;
+      font-weight: 850;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-dark);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 280px;
+      width: 100%;
+    }
+
+    /* Table styles */
+    .report-table-wrapper {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+    .report-table th {
+      background: var(--light-bg);
+      padding: 0.85rem 1rem;
+      border-bottom: 2px solid var(--border-color);
+      color: var(--text-dark);
+      font-weight: 700;
+    }
+    .report-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-dark);
+      vertical-align: middle;
+    }
+    .report-table tr:last-child td {
+      border-bottom: none;
+    }
+    .report-table tr:hover td {
+      background: rgba(16, 185, 129, 0.04);
+    }
+
+    /* Badge styles */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.65rem;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-success { background: rgba(16,185,129,0.1); color: #059669; }
+    .badge-warning { background: rgba(245,158,11,0.1); color: #d97706; }
+    .badge-danger  { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+    /* Exporter button list */
+    .export-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .btn-export {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-dark);
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      transition: all 0.2s ease;
+    }
+    .btn-export:hover {
+      background: var(--card-bg);
+      border-color: var(--primary-color);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    /* scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-color);
+    }
+  </style>
 </head>
 <body>
   <nav>
     <div class="container">
       <a href="../index.html" class="logo">SkillBridge</a>
-      <ul class="nav-links">
-        <li><a href="dashboard.html">Dashboard</a></li>
-        <li><a href="students.html">Students</a></li>
-        <li><a href="courses.html">Courses</a></li>
-        <li><a href="reports.html" class="active">Reports</a></li>
-        <li><a href="settings.html">Settings</a></li>
-        <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
-      </ul>
-      <div class="hamburger">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+      <ul class="nav-links"></ul>
+      <div class="hamburger"><span></span><span></span><span></span></div>
     </div>
   </nav>
 
-  <section class="section" style="padding: 3rem 1rem;">
-    <div class="container" style="max-width: 1100px;">
-      <h1 class="section-title" style="margin-bottom: 1.5rem;">📈 Reports (Demo)</h1>
+  <section class="section" style="padding: 2.5rem 1rem;">
+    <div class="container" style="max-width: 1200px;">
+      
+      <!-- Back Header -->
+      <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <a href="dashboard.html" style="text-decoration: none; font-size: 1.4rem;" title="Back to Dashboard">⬅️</a>
+        <h1 class="section-title" style="margin: 0;">📈 Reports & Analytics</h1>
+      </div>
+      <p style="color: var(--text-light); margin-top: -1rem; margin-bottom: 2rem;">Overview of student performance metrics, course health directory, and data export sheets.</p>
 
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-        <div class="progress-stat-box" style="border-left: 6px solid var(--primary-color);">
-          <div style="font-size:2rem; font-weight:800; color: var(--primary-color);" id="rTotalUsers">0</div>
-          <div class="progress-stat-label">Users (Local)</div>
+      <!-- KPI Summary Cards -->
+      <div class="stats-row" id="statsRow"></div>
+
+      <!-- Charts Reports row -->
+      <div class="reports-grid">
+        <div class="report-card">
+          <h3 class="report-card-title">📊 Course Engagement Rates</h3>
+          <div class="chart-container">
+            <canvas id="engagementChart"></canvas>
+          </div>
         </div>
-        <div class="progress-stat-box" style="border-left: 6px solid var(--secondary-color);">
-          <div style="font-size:2rem; font-weight:800; color: var(--secondary-color);" id="rTotalCerts">0</div>
-          <div class="progress-stat-label">Certificates</div>
-        </div>
-        <div class="progress-stat-box" style="border-left: 6px solid var(--accent-color);">
-          <div style="font-size:2rem; font-weight:800; color: var(--accent-color);" id="rAvgQuiz">0%</div>
-          <div class="progress-stat-label">Avg Quiz %</div>
+        <div class="report-card">
+          <h3 class="report-card-title">📈 Average Quiz Scores by Subject</h3>
+          <div class="chart-container">
+            <canvas id="quizLineChart"></canvas>
+          </div>
         </div>
       </div>
 
-      <div class="progress-stat-box" style="margin-top: 2rem; border-left: 6px solid var(--primary-color);">
-        <h2 class="progress-section-title" style="margin-bottom: 1rem; font-size: 1.6rem;">Data export (local only)</h2>
-        <p style="color: var(--text-light); margin-bottom: 1rem;">
-          In a real application you would generate server-side reports. For now, you can download a JSON snapshot.
-        </p>
-        <button class="btn btn-primary" onclick="downloadSnapshot()">⬇️ Download Snapshot</button>
+      <!-- Tabular Analysis Directories -->
+      <div class="report-card">
+        <h3 class="report-card-title">📋 Course Health Directory</h3>
+        <div class="report-table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Course Title</th>
+                <th>Category</th>
+                <th style="text-align:center;">Quiz Attempts</th>
+                <th style="text-align:center;">Course Completions</th>
+                <th style="text-align:center;">Completion Rate %</th>
+                <th style="text-align:center;">Avg Score</th>
+              </tr>
+            </thead>
+            <tbody id="courseHealthBody"></tbody>
+          </table>
+        </div>
       </div>
+
+      <div class="reports-grid" style="margin-bottom: 2rem;">
+        
+        <!-- Top Achievers table -->
+        <div class="report-card" style="margin-bottom: 0;">
+          <h3 class="report-card-title">🏆 Top Learning Achievers</h3>
+          <div class="report-table-wrapper">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th style="text-align:center;">Completions</th>
+                  <th style="text-align:center;">Quiz Attempts</th>
+                  <th style="text-align:center;">Avg Quiz %</th>
+                </tr>
+              </thead>
+              <tbody id="topAchieversBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- At-Risk students table -->
+        <div class="report-card" style="margin-bottom: 0;">
+          <h3 class="report-card-title">⚠️ At-Risk Students (Need Help)</h3>
+          <div class="report-table-wrapper">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Topic</th>
+                  <th style="text-align:center;">Low Score</th>
+                  <th style="text-align:center;">Attempts</th>
+                </tr>
+              </thead>
+              <tbody id="atRiskBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exporters section -->
+      <div class="report-card">
+        <h3 class="report-card-title">📥 Data Exporter Control</h3>
+        <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1rem;">Export localized database tables directly to CSV snapshots for import into Excel, Google Sheets, or BI tools.</p>
+        <div class="export-grid">
+          <button class="btn-export" onclick="exportStudentsCSV()">👤 Export Students Roster (CSV)</button>
+          <button class="btn-export" onclick="exportQuizCSV()">📝 Export Quiz Scores logs (CSV)</button>
+          <button class="btn-export" onclick="exportCertificatesCSV()">📜 Export Certificates Issued (CSV)</button>
+          <button class="btn-export" onclick="downloadJSONSnapshot()" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none;">📦 Complete JSON Database Snapshot</button>
+        </div>
+      </div>
+
     </div>
   </section>
 
   <footer>
     <div class="footer-container">
-      <div class="footer-section">
-        <h4>SkillBridge</h4>
-        <ul>
-          <li><a href="../index.html">Home</a></li>
-        </ul>
-      </div>
+      <div class="footer-section"><h4>SkillBridge</h4></div>
     </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 SkillBridge. All rights reserved.</p>
-    </div>
+    <div class="footer-bottom"><p>&copy; 2026 SkillBridge.</p></div>
   </footer>
 
   <script src="../js/data.js"></script>
   <script src="../js/main.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function(){
+    document.addEventListener('DOMContentLoaded', function() {
       requireRole('admin');
+      loadReportsData();
+    });
 
+    function getTimestamp(dateVal) {
+        if (!dateVal) return 0;
+        if (typeof dateVal === 'number') return dateVal;
+        const parsed = Date.parse(dateVal);
+        if (!isNaN(parsed)) return parsed;
+        try {
+            return new Date(dateVal).getTime() || 0;
+        } catch(e) {
+            return 0;
+        }
+    }
+
+    function loadReportsData() {
       const users = JSON.parse(localStorage.getItem('users')) || [];
       const certs = JSON.parse(localStorage.getItem('certificates')) || [];
       const quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
+      const courses = typeof coursesData !== 'undefined' ? coursesData : [];
 
-      document.getElementById('rTotalUsers').textContent = users.length;
-      document.getElementById('rTotalCerts').textContent = certs.length;
+      const totalStudents = users.filter(u => u.role === 'student').length;
+      const totalCerts = certs.filter(c => c.type === 'course').length;
+      const avgQuiz = quizScores.length ? Math.round(quizScores.reduce((a,b)=>a+b.percentage,0)/quizScores.length) : 0;
 
-      const avg = quizScores.length ? Math.round(quizScores.reduce((a,b)=>a+b.percentage,0)/quizScores.length) : 0;
-      document.getElementById('rAvgQuiz').textContent = avg + '%';
-    });
+      // Draw Stats cards
+      document.getElementById('statsRow').innerHTML = `
+        <div class="stat-card">
+          <div>
+            <div class="stat-val">${users.length}</div>
+            <div class="stat-lbl">Active Users</div>
+          </div>
+          <span class="stat-icon">👥</span>
+        </div>
+        <div class="stat-card" style="border-left-color:#10b981;">
+          <div>
+            <div class="stat-val" style="color:#10b981;">${totalCerts}</div>
+            <div class="stat-lbl">Certificates Issued</div>
+          </div>
+          <span class="stat-icon" style="color:#10b981;">📜</span>
+        </div>
+        <div class="stat-card" style="border-left-color:#f59e0b;">
+          <div>
+            <div class="stat-val" style="color:#f59e0b;">${avgQuiz}%</div>
+            <div class="stat-lbl">Average Score</div>
+          </div>
+          <span class="stat-icon" style="color:#f59e0b;">📈</span>
+        </div>
+        <div class="stat-card" style="border-left-color:#8b5cf6;">
+          <div>
+            <div class="stat-val" style="color:#8b5cf6;">${quizScores.length}</div>
+            <div class="stat-lbl">Quizzes Taken</div>
+          </div>
+          <span class="stat-icon" style="color:#8b5cf6;">📝</span>
+        </div>
+      `;
 
-    function downloadSnapshot(){
+      // Compile completions map
+      const compMap = {};
+      certs.forEach(c => {
+        if (c.type === 'course') {
+          compMap[String(c.courseId)] = (compMap[String(c.courseId)] || 0) + 1;
+        }
+      });
+
+      // Compile quiz attempts map & total scores per course
+      const quizAttemptsMap = {};
+      const quizTotalScoresMap = {};
+      quizScores.forEach(q => {
+        const cid = String(q.courseId);
+        quizAttemptsMap[cid] = (quizAttemptsMap[cid] || 0) + 1;
+        quizTotalScoresMap[cid] = (quizTotalScoresMap[cid] || 0) + q.percentage;
+      });
+
+      // 1. Build Course Health Directory Table
+      const courseHealthBody = document.getElementById('courseHealthBody');
+      if (courses.length === 0) {
+        courseHealthBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem 0;">No courses loaded.</td></tr>';
+      } else {
+        courseHealthBody.innerHTML = courses.map(c => {
+          const cid = String(c.id);
+          const completions = compMap[cid] || 0;
+          const attempts = quizAttemptsMap[cid] || 0;
+          
+          // Completion Rate: completions vs quiz attempts
+          const rate = attempts > 0 ? Math.round((completions / attempts) * 100) : 0;
+          
+          const avgScore = attempts > 0 ? Math.round(quizTotalScoresMap[cid] / attempts) : 0;
+
+          return `
+            <tr>
+              <td style="font-weight: 700;">${c.title}</td>
+              <td><span class="tag" style="padding: 0.15rem 0.5rem; font-size: 0.75rem;">${c.category}</span></td>
+              <td style="text-align:center; font-weight:700;">${attempts}</td>
+              <td style="text-align:center; font-weight:700; color:var(--primary-color);">${completions}</td>
+              <td style="text-align:center;">
+                <span class="badge ${rate >= 75 ? 'badge-success' : (rate >= 40 ? 'badge-warning' : 'badge-danger')}">${rate}%</span>
+              </td>
+              <td style="text-align:center; font-weight:700; color:#f59e0b;">${avgScore ? avgScore + '%' : '-'}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // 2. Build Top Learning Achievers Table
+      const topAchieversBody = document.getElementById('topAchieversBody');
+      const studentProfiles = users.filter(u => u.role === 'student');
+
+      const achieversList = studentProfiles.map(s => {
+        const completionsCount = certs.filter(c => c.type === 'course' && (c.userName === s.fullName || c.userName === s.username)).length;
+        const attempts = quizScores.filter(q => q.studentUsername === s.username || q.studentName === s.fullName);
+        const avgScore = attempts.length ? Math.round(attempts.reduce((a,b)=>a+b.percentage,0)/attempts.length) : 0;
+
+        return {
+          name: s.fullName,
+          username: s.username,
+          completions: completionsCount,
+          attempts: attempts.length,
+          avgScore: avgScore
+        };
+      });
+
+      // Sort by completions desc, then score desc
+      achieversList.sort((a,b) => b.completions - a.completions || b.avgScore - a.avgScore);
+      
+      const topAchievers = achieversList.slice(0, 5);
+      if (topAchievers.length === 0 || topAchievers[0].attempts === 0 && topAchievers[0].completions === 0) {
+        topAchieversBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1.5rem 0; color: var(--text-light);">No student progress data logged yet.</td></tr>';
+      } else {
+        topAchieversBody.innerHTML = topAchievers.map(ach => `
+          <tr>
+            <td style="font-weight: 700;">${ach.name} <span style="font-family:monospace; font-size:0.75rem; color:var(--text-light); font-weight:normal;">@${ach.username}</span></td>
+            <td style="text-align:center; font-weight:800; color:var(--primary-color);">${ach.completions}</td>
+            <td style="text-align:center; font-weight:700;">${ach.attempts}</td>
+            <td style="text-align:center; font-weight:800; color:#f59e0b;">${ach.avgScore}%</td>
+          </tr>
+        `).join('');
+      }
+
+      // 3. Build At-Risk Students Table
+      // Students who have scored < 70% multiple times on quizzes and haven't passed/completed that course yet.
+      const atRiskBody = document.getElementById('atRiskBody');
+      const atRiskList = [];
+
+      studentProfiles.forEach(s => {
+        const studentScores = quizScores.filter(q => q.studentUsername === s.username || q.studentName === s.fullName);
+        // Group attempts by courseId
+        const courseAttempts = {};
+        studentScores.forEach(q => {
+          const cid = String(q.courseId);
+          if(!courseAttempts[cid]) courseAttempts[cid] = [];
+          courseAttempts[cid].push(q);
+        });
+
+        for (const cid in courseAttempts) {
+          const attempts = courseAttempts[cid];
+          const hasPassed = attempts.some(q => q.percentage >= 70);
+          
+          if (!hasPassed) {
+            // Find lowest score
+            const lowestPct = Math.min(...attempts.map(q => q.percentage));
+            const courseTitle = getCourseTitle(cid);
+            atRiskList.push({
+              name: s.fullName,
+              username: s.username,
+              course: courseTitle,
+              lowScore: lowestPct,
+              attemptsCount: attempts.length
+            });
+          }
+        }
+      });
+
+      // Sort by attempts count desc (highest attempts without pass indicates more struggle)
+      atRiskList.sort((a,b) => b.attemptsCount - a.attemptsCount || a.lowScore - b.lowScore);
+
+      const topAtRisk = atRiskList.slice(0, 5);
+      if (topAtRisk.length === 0) {
+        atRiskBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1.5rem 0; color:#10b981; font-weight:700;">✓ No at-risk students detected. Good job!</td></tr>';
+      } else {
+        atRiskBody.innerHTML = topAtRisk.map(ar => `
+          <tr>
+            <td style="font-weight: 700;">${ar.name}</td>
+            <td style="font-size:0.85rem; font-style:italic;">${ar.course}</td>
+            <td style="text-align:center; font-weight:800; color:#ef4444;">${ar.lowScore}%</td>
+            <td style="text-align:center; font-weight:700; color:var(--text-light);">${ar.attemptsCount}</td>
+          </tr>
+        `).join('');
+      }
+
+      function getCourseTitle(courseId) {
+        const course = courses.find(c => String(c.id) === String(courseId));
+        return course ? course.title : 'Course';
+      }
+
+      // --- Chart.js Draw ---
+      const courseTitles = courses.map(c => c.title);
+      const attemptsData = courses.map(c => quizAttemptsMap[String(c.id)] || 0);
+      const completionsData = courses.map(c => compMap[String(c.id)] || 0);
+      const scoresData = courses.map(c => {
+        const atts = quizAttemptsMap[String(c.id)] || 0;
+        return atts > 0 ? Math.round(quizTotalScoresMap[String(c.id)] / atts) : 0;
+      });
+
+      let engagementChart, quizLineChart;
+
+      function initCharts() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#94a3b8' : '#64748b';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+
+        // Chart 1: grouped bar chart
+        const ctxEng = document.getElementById('engagementChart').getContext('2d');
+        engagementChart = new Chart(ctxEng, {
+          type: 'bar',
+          data: {
+            labels: courseTitles,
+            datasets: [
+              {
+                label: 'Quiz Attempts',
+                data: attemptsData,
+                backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                borderColor: '#3b82f6',
+                borderWidth: 1,
+                borderRadius: 4
+              },
+              {
+                label: 'Course Completions',
+                data: completionsData,
+                backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                borderColor: '#10b981',
+                borderWidth: 1,
+                borderRadius: 4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: { color: textColor, font: { family: 'Inter, sans-serif' } }
+              },
+              tooltip: { padding: 10 }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: textColor }
+              },
+              y: {
+                grid: { color: gridColor },
+                ticks: { color: textColor, stepSize: 1, precision: 0 }
+              }
+            }
+          }
+        });
+
+        // Chart 2: line chart of avg score
+        const ctxLine = document.getElementById('quizLineChart').getContext('2d');
+        quizLineChart = new Chart(ctxLine, {
+          type: 'line',
+          data: {
+            labels: courseTitles,
+            datasets: [{
+              label: 'Average Score %',
+              data: scoresData,
+              fill: true,
+              backgroundColor: 'rgba(139, 92, 246, 0.1)',
+              borderColor: '#8b5cf6',
+              borderWidth: 3,
+              tension: 0.35,
+              pointBackgroundColor: '#8b5cf6',
+              pointRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { padding: 10 }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: textColor }
+              },
+              y: {
+                min: 0,
+                max: 100,
+                grid: { color: gridColor },
+                ticks: { color: textColor }
+              }
+            }
+          }
+        });
+      }
+
+      function updateChartsTheme() {
+        if (!engagementChart || !quizLineChart) return;
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#94a3b8' : '#64748b';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+
+        // Update Engagement Chart
+        engagementChart.options.plugins.legend.labels.color = textColor;
+        engagementChart.options.scales.x.ticks.color = textColor;
+        engagementChart.options.scales.y.grid.color = gridColor;
+        engagementChart.options.scales.y.ticks.color = textColor;
+        engagementChart.update();
+
+        // Update Line Chart
+        quizLineChart.options.scales.x.ticks.color = textColor;
+        quizLineChart.options.scales.y.grid.color = gridColor;
+        quizLineChart.options.scales.y.ticks.color = textColor;
+        quizLineChart.update();
+      }
+
+      // Initialize
+      initCharts();
+
+      // Hook up theme toggle listener
+      const themeObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'data-theme') {
+            updateChartsTheme();
+          }
+        });
+      });
+      themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+
+    // ── CSV Exporters ─────────────────────────────────────────────
+    function downloadCSV(filename, headers, dataArray, mappingFn) {
+        let csvContent = headers.join(',') + '\n';
+        dataArray.forEach(item => {
+            const row = mappingFn(item).map(val => {
+                const str = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
+                return `"${str}"`;
+            });
+            csvContent += row.join(',') + '\n';
+        });
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('📥 Downloaded CSV report successfully.');
+    }
+
+    function exportStudentsCSV() {
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const students = users.filter(u => u.role === 'student');
+      
+      const headers = ['Full Name', 'Username', 'Email Address', 'Date Registered', 'Role'];
+      downloadCSV(
+        'skillbridge-students-roster.csv',
+        headers,
+        students,
+        (u) => [u.fullName, u.username, u.email, u.createdAt, u.role]
+      );
+    }
+
+    function exportQuizCSV() {
+      const quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
+      const headers = ['Course ID', 'Student Name', 'Username', 'Raw Score', 'Total Questions', 'Percentage %', 'Timestamp'];
+      downloadCSV(
+        'skillbridge-quiz-scores-log.csv',
+        headers,
+        quizScores,
+        (q) => [q.courseId, q.studentName, q.studentUsername, q.score, q.total, q.percentage, q.date]
+      );
+    }
+
+    function exportCertificatesCSV() {
+      const certs = JSON.parse(localStorage.getItem('certificates')) || [];
+      const courseCerts = certs.filter(c => c.type === 'course');
+      const headers = ['Certificate ID', 'Course Title', 'Recipient Name', 'Issued Date', 'Status'];
+      
+      downloadCSV(
+        'skillbridge-certificates-issued.csv',
+        headers,
+        courseCerts,
+        (c) => [c.id, c.courseTitle, c.userName, c.issuedDate, c.verified ? 'VERIFIED' : 'PENDING']
+      );
+    }
+
+    function downloadJSONSnapshot(){
       const snapshot = {
         users: JSON.parse(localStorage.getItem('users')) || [],
         session: JSON.parse(localStorage.getItem('session')) || null,
         completedCourses: JSON.parse(localStorage.getItem('completedCourses')) || [],
         quizScores: JSON.parse(localStorage.getItem('quizScores')) || [],
-        certificates: JSON.parse(localStorage.getItem('certificates')) || []
+        certificates: JSON.parse(localStorage.getItem('certificates')) || [],
+        feedbackList: JSON.parse(localStorage.getItem('feedbackList')) || []
       };
 
       const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'skillbridge-report-snapshot.json';
+      a.download = 'skillbridge-database-complete-snapshot.json';
       a.click();
       URL.revokeObjectURL(url);
+      showToast('📥 Downloaded complete JSON database snapshot.');
+    }
+
+    function showToast(msg) {
+      const el = document.createElement('div');
+      el.textContent = msg;
+      el.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#10b981;color:#fff;padding:.75rem 1.5rem;border-radius:10px;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,.2);z-index:9999;';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 2500);
     }
   </script>
 </body>
 </html>
-
