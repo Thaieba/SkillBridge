@@ -2433,6 +2433,34 @@ if (needsWrite) {
     }
 }
 
+// Migrate courseVideos overrides object if it exists
+const storedOverridesRaw = localStorage.getItem('courseVideos');
+if (storedOverridesRaw) {
+    try {
+        const storedOverrides = JSON.parse(storedOverridesRaw);
+        let overridesUpdated = false;
+        
+        Object.keys(videoUpdates).forEach(id => {
+            const courseIdStr = String(id);
+            if (storedOverrides[courseIdStr]) {
+                const currentOverride = storedOverrides[courseIdStr];
+                const correctUpdate = videoUpdates[id];
+                if (currentOverride.videoId !== correctUpdate.youtubeVideoId) {
+                    currentOverride.videoId = correctUpdate.youtubeVideoId;
+                    currentOverride.title = correctUpdate.youtubeVideoTitle;
+                    overridesUpdated = true;
+                }
+            }
+        });
+        
+        if (overridesUpdated) {
+            localStorage.setItem('courseVideos', JSON.stringify(storedOverrides));
+        }
+    } catch(e) {
+        console.error("Error migrating courseVideos overrides:", e);
+    }
+}
+
 
 // Load custom roadmap data from localStorage if it exists
 const storedRoadmaps = localStorage.getItem('courseRoadmapData');
