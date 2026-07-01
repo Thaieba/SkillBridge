@@ -6,34 +6,308 @@
   <title>Admin – Manage Students | SkillBridge</title>
   <link rel="stylesheet" href="../css/styles.css" />
   <style>
-    .admin-table { width:100%; border-collapse:collapse; background:var(--card-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,.08); }
-    .admin-table th { background:linear-gradient(135deg,var(--primary-color),var(--secondary-color)); color:#fff; padding:1rem 1.2rem; text-align:left; font-size:.9rem; }
-    .admin-table td { padding:.9rem 1.2rem; border-bottom:1px solid var(--border-color); color:var(--text-dark); vertical-align:middle; }
-    .admin-table tr:last-child td { border-bottom:none; }
-    .admin-table tr:hover td { background:rgba(99,102,241,.05); }
-    .badge { display:inline-block; padding:.2rem .7rem; border-radius:20px; font-size:.78rem; font-weight:700; }
-    .badge-student { background:rgba(16,185,129,.15); color:#059669; }
-    .badge-admin   { background:rgba(99,102,241,.15); color:#6366f1; }
-    .btn-del  { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; border:none; padding:.4rem .9rem; border-radius:8px; cursor:pointer; font-size:.85rem; font-weight:600; }
-    .btn-del:hover { opacity:.85; }
-    .btn-reset { background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; border:none; padding:.4rem .9rem; border-radius:8px; cursor:pointer; font-size:.85rem; font-weight:600; }
-    .search-bar { width:100%; max-width:360px; padding:.6rem 1rem; border:1.5px solid var(--border-color); border-radius:10px; font-size:.95rem; background:var(--card-bg); color:var(--text-dark); outline:none; }
-    .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:2rem; }
-    .stat-card { background:var(--card-bg); border-radius:12px; padding:1.2rem 1.5rem; border-left:4px solid var(--primary-color); box-shadow:0 2px 10px rgba(0,0,0,.06); }
-    .stat-val { font-size:2rem; font-weight:800; color:var(--primary-color); }
-    .stat-lbl { font-size:.85rem; color:var(--text-light); margin-top:.2rem; }
-    /* Modal */
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); z-index:1000; align-items:center; justify-content:center; }
-    .modal-overlay.open { display:flex; }
-    .modal-box { background:var(--card-bg); border-radius:16px; padding:2rem; width:min(480px,95vw); box-shadow:0 20px 60px rgba(0,0,0,.3); }
-    .modal-box h2 { margin-bottom:1.5rem; font-size:1.3rem; }
-    .form-field { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1rem; }
-    .form-field label { font-size:.85rem; font-weight:700; color:var(--text-light); text-transform:uppercase; }
-    .form-field input,.form-field select { background:var(--bg-secondary,#f8fafc); border:1.5px solid var(--border-color); border-radius:8px; padding:.6rem .9rem; color:var(--text-dark); font-size:.95rem; outline:none; }
-    .form-field input:focus,.form-field select:focus { border-color:var(--primary-color); }
-    .modal-actions { display:flex; gap:1rem; justify-content:flex-end; margin-top:1.5rem; }
-    .btn-save   { background:linear-gradient(135deg,#10b981,#059669); color:#fff; border:none; padding:.6rem 1.5rem; border-radius:10px; font-weight:700; cursor:pointer; }
-    .btn-cancel { background:rgba(100,100,100,.15); color:var(--text-dark); border:none; padding:.6rem 1.5rem; border-radius:10px; font-weight:700; cursor:pointer; }
+    /* Styling enhancements */
+    .admin-table { 
+      width:100%; 
+      border-collapse:collapse; 
+      background:var(--card-bg); 
+      border-radius:12px; 
+      overflow:hidden; 
+      box-shadow:0 4px 20px rgba(0,0,0,.08); 
+    }
+    .admin-table th { 
+      background:linear-gradient(135deg,var(--primary-color),var(--secondary-color)); 
+      color:#fff; 
+      padding:1rem 1.2rem; 
+      text-align:left; 
+      font-size:.9rem; 
+    }
+    .admin-table td { 
+      padding:.9rem 1.2rem; 
+      border-bottom:1px solid var(--border-color); 
+      color:var(--text-dark); 
+      vertical-align:middle; 
+    }
+    .admin-table tr:last-child td { 
+      border-bottom:none; 
+    }
+    .admin-table tr:hover td { 
+      background:rgba(99,102,241,.05); 
+    }
+    .badge { 
+      display:inline-block; 
+      padding:.2rem .7rem; 
+      border-radius:20px; 
+      font-size:.78rem; 
+      font-weight:700; 
+      text-transform: uppercase;
+    }
+    .badge-student { 
+      background:rgba(16,185,129,.15); 
+      color:#059669; 
+    }
+    .badge-admin { 
+      background:rgba(99,102,241,.15); 
+      color:#6366f1; 
+    }
+    
+    .btn-del { 
+      background:linear-gradient(135deg,#ef4444,#dc2626); 
+      color:#fff; 
+      border:none; 
+      padding:.45rem 0.9rem; 
+      border-radius:8px; 
+      cursor:pointer; 
+      font-size:.82rem; 
+      font-weight:600; 
+      transition: opacity 0.2s;
+    }
+    .btn-del:hover { 
+      opacity:.85; 
+    }
+    .btn-reset { 
+      background:linear-gradient(135deg,#f59e0b,#d97706); 
+      color:#fff; 
+      border:none; 
+      padding:.45rem 0.9rem; 
+      border-radius:8px; 
+      cursor:pointer; 
+      font-size:.82rem; 
+      font-weight:600; 
+    }
+    .btn-action {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); 
+      border: none; 
+      padding: .45rem .9rem; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      color: white; 
+      font-size: .82rem; 
+      font-weight: 600;
+    }
+    
+    .search-bar { 
+      width:100%; 
+      padding:.6rem 1rem; 
+      border:1.5px solid var(--border-color); 
+      border-radius:10px; 
+      font-size:.95rem; 
+      background:var(--card-bg); 
+      color:var(--text-dark); 
+      outline:none; 
+    }
+    .search-bar:focus {
+      border-color: var(--primary-color);
+    }
+    
+    .stats-row { 
+      display:grid; 
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); 
+      gap:1rem; 
+      margin-bottom:2rem; 
+    }
+    .stat-card { 
+      background:var(--card-bg); 
+      border-radius:12px; 
+      padding:1.2rem 1.5rem; 
+      border-left:4px solid var(--primary-color); 
+      box-shadow:0 4px 15px rgba(0,0,0,.04); 
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stat-val { 
+      font-size:2.2rem; 
+      font-weight:800; 
+      color:var(--text-dark); 
+    }
+    .stat-lbl { 
+      font-size:.8rem; 
+      color:var(--text-light); 
+      margin-top:.2rem; 
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .stat-icon {
+      font-size: 2.2rem;
+      opacity: 0.15;
+    }
+    
+    /* Control grid layout */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.2fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: center;
+    }
+    @media (max-width: 768px) {
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-control-select {
+      width: 100%;
+      padding:.6rem 1rem;
+      border:1.5px solid var(--border-color);
+      border-radius:10px;
+      background:var(--card-bg);
+      color:var(--text-dark);
+      font-size:.9rem;
+      outline:none;
+    }
+    .form-control-select:focus {
+      border-color: var(--primary-color);
+    }
+
+    /* Modal styles */
+    .modal-overlay { 
+      display:none; 
+      position:fixed; 
+      inset:0; 
+      background:rgba(0,0,0,.6); 
+      backdrop-filter:blur(4px); 
+      z-index:1000; 
+      align-items:center; 
+      justify-content:center; 
+    }
+    .modal-overlay.open { 
+      display:flex; 
+    }
+    .modal-box { 
+      background:var(--card-bg); 
+      border-radius:16px; 
+      padding:2rem; 
+      width:min(500px,95vw); 
+      box-shadow:0 20px 60px rgba(0,0,0,.25); 
+      border: 1px solid var(--border-color);
+    }
+    .modal-box h2 { 
+      margin-bottom:1.25rem; 
+      font-size:1.35rem; 
+      font-weight: 850;
+      color: var(--text-dark);
+    }
+    .form-field { 
+      display:flex; 
+      flex-direction:column; 
+      gap:.4rem; 
+      margin-bottom:1rem; 
+    }
+    .form-field label { 
+      font-size:.8rem; 
+      font-weight:700; 
+      color:var(--text-light); 
+      text-transform:uppercase; 
+    }
+    .form-field input, .form-field select { 
+      background:var(--bg-secondary); 
+      border:1.5px solid var(--border-color); 
+      border-radius:8px; 
+      padding:.6rem .9rem; 
+      color:var(--text-dark); 
+      font-size:.95rem; 
+      outline:none; 
+    }
+    .form-field input:focus, .form-field select:focus { 
+      border-color:var(--primary-color); 
+    }
+    .modal-actions { 
+      display:flex; 
+      gap:1rem; 
+      justify-content:flex-end; 
+      margin-top:1.5rem; 
+    }
+    .btn-save { 
+      background:linear-gradient(135deg,#10b981,#059669); 
+      color:#fff; 
+      border:none; 
+      padding:.6rem 1.5rem; 
+      border-radius:10px; 
+      font-weight:700; 
+      cursor:pointer; 
+    }
+    .btn-cancel { 
+      background:rgba(100,100,100,.15); 
+      color:var(--text-dark); 
+      border:none; 
+      padding:.6rem 1.5rem; 
+      border-radius:10px; 
+      font-weight:700; 
+      cursor:pointer; 
+    }
+
+    /* Modal tabs */
+    .modal-tabs {
+      display: flex;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 1.25rem;
+      gap: 0.5rem;
+    }
+    .modal-tab-btn {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .modal-tab-btn.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+
+    .tab-content-pane {
+      display: none;
+    }
+    .tab-content-pane.active {
+      display: block;
+    }
+
+    .report-card-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 0.6rem;
+    }
+
+    .report-title {
+      font-weight: 700;
+      color: var(--text-dark);
+      font-size: 0.9rem;
+    }
+
+    .report-meta {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-top: 0.15rem;
+    }
+
+    /* Custom Webkit scrollbar for modal details */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-color);
+    }
   </style>
 </head>
 <body>
@@ -47,35 +321,69 @@
 
   <section class="section" style="padding:2.5rem 1rem;">
     <div class="container" style="max-width:1200px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">
-        <h1 class="section-title" style="margin:0;">👥 Manage Students</h1>
-        <button class="btn btn-primary" onclick="openAddStudentModal()" style="padding:.6rem 1.4rem;font-weight:700;">+ Add Student</button>
+      
+      <!-- Back Header -->
+      <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <a href="dashboard.html" style="text-decoration: none; font-size: 1.4rem;" title="Back to Dashboard">⬅️</a>
+          <h1 class="section-title" style="margin:0; font-size: 2rem;">👥 Manage Students</h1>
+        </div>
+        <button class="btn btn-primary" onclick="openAddStudentModal()" style="padding:.6rem 1.4rem;font-weight:700;">+ Add New Account</button>
       </div>
 
+      <!-- Stats Summary -->
       <div class="stats-row" id="statsRow"></div>
 
-      <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;">
-        <input class="search-bar" id="searchInput" placeholder="🔍 Search by name or username…" oninput="filterTable()" />
-        <select id="roleFilter" onchange="filterTable()" style="padding:.6rem 1rem;border:1.5px solid var(--border-color);border-radius:10px;background:var(--card-bg);color:var(--text-dark);font-size:.9rem;outline:none;">
+      <!-- Filter Controls Grid -->
+      <div class="controls-grid">
+        <input class="search-bar" id="searchInput" placeholder="🔍 Search name, username, email…" oninput="filterTable()" />
+        
+        <select class="form-control-select" id="roleFilter" onchange="filterTable()">
           <option value="all">All Roles</option>
           <option value="student">Students Only</option>
           <option value="admin">Admins Only</option>
         </select>
+
+        <select class="form-control-select" id="statusFilter" onchange="filterTable()">
+          <option value="all">All Activity Statuses</option>
+          <option value="completed">Completed Courses</option>
+          <option value="quizzes">Attempted Quizzes</option>
+          <option value="inactive">No Activity (Inactive)</option>
+        </select>
+
+        <select class="form-control-select" id="sortSelect" onchange="filterTable()">
+          <option value="dateNew">Sort: Joined (Newest)</option>
+          <option value="dateOld">Sort: Joined (Oldest)</option>
+          <option value="nameAsc">Sort: Name (A-Z)</option>
+          <option value="nameDesc">Sort: Name (Z-A)</option>
+          <option value="compHigh">Sort: Completed Courses (High)</option>
+          <option value="quizHigh">Sort: Quiz Attempts (High)</option>
+        </select>
       </div>
 
+      <!-- Table View -->
       <div style="overflow-x:auto;">
         <table class="admin-table">
           <thead>
-            <tr><th>Full Name</th><th>Username</th><th>Role</th><th>Registered</th><th>Courses Done</th><th>Quiz Scores</th><th style="text-align:center;">Actions</th></tr>
+            <tr>
+              <th>Full Name</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Registered Date</th>
+              <th style="text-align:center;">Completions</th>
+              <th style="text-align:center;">Quiz Attempts</th>
+              <th style="text-align:center;">Actions</th>
+            </tr>
           </thead>
           <tbody id="studentsTbody"></tbody>
         </table>
       </div>
 
-      <div style="margin-top:2.5rem;padding:1.5rem;background:var(--card-bg);border-radius:12px;border-left:6px solid #ef4444;box-shadow:0 2px 10px rgba(0,0,0,.06);">
+      <!-- Clear Database Zone -->
+      <div style="margin-top:2.5rem;padding:1.5rem;background:var(--card-bg);border-radius:12px;border-left:6px solid #ef4444;box-shadow:0 4px 15px rgba(0,0,0,.04); border: 1px solid var(--border-color); border-left: 6px solid #ef4444;">
         <h3 style="margin-bottom:.5rem;color:#ef4444;">⚠️ Danger Zone</h3>
-        <p style="color:var(--text-light);margin-bottom:1rem;">Permanently clear all progress data from localStorage. This cannot be undone.</p>
-        <button class="btn-del" onclick="clearAllData()" style="padding:.6rem 1.4rem;">🗑 Clear All Progress Data</button>
+        <p style="color:var(--text-light);margin-bottom:1rem;font-size:0.9rem;">Permanently clear all student course progress data, certificates, and quiz history. Accounts will remain.</p>
+        <button class="btn-del" onclick="clearAllData()" style="padding:.6rem 1.4rem;">🗑 Clear All Student progress Data</button>
       </div>
     </div>
   </section>
@@ -83,7 +391,7 @@
   <!-- Add Student Modal -->
   <div class="modal-overlay" id="studentModal">
     <div class="modal-box">
-      <h2>➕ Add Student Account</h2>
+      <h2>➕ Add Account</h2>
       <div class="form-field"><label>Full Name *</label><input id="sName" placeholder="e.g. John Doe" /></div>
       <div class="form-field"><label>Username *</label><input id="sUsername" placeholder="e.g. john_doe" /></div>
       <div class="form-field"><label>Password *</label><input id="sPassword" type="password" placeholder="Min 6 characters" /></div>
@@ -98,6 +406,79 @@
     </div>
   </div>
 
+  <!-- Edit Student Modal -->
+  <div class="modal-overlay" id="editStudentModal">
+    <div class="modal-box">
+      <h2>✏️ Edit Account Profile</h2>
+      <div class="form-field"><label>Full Name *</label><input id="editName" /></div>
+      <div class="form-field"><label>Username (Read-only)</label><input id="editUsername" readonly style="opacity: 0.7; background: var(--bg-secondary);" /></div>
+      <div class="form-field"><label>New Password (Leave blank to keep current)</label><input id="editPassword" type="password" placeholder="Min 6 characters" /></div>
+      <div class="form-field">
+        <label>Role</label>
+        <select id="editRole">
+          <option value="student">Student</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+        <button class="btn-save" onclick="saveEditedStudent()">💾 Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Student Details Modal -->
+  <div class="modal-overlay" id="detailsModal">
+    <div class="modal-box" style="width: min(600px, 95vw); max-height: 90vh; display: flex; flex-direction: column;">
+      <div style="border-bottom: 1.5px solid var(--border-color); padding-bottom: 0.8rem; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="margin: 0; color: var(--text-dark); font-weight: 850;">📋 Student Profile details</h2>
+        <button id="exportProfileBtn" class="btn" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-dark); font-size: 0.8rem; padding: 0.35rem 0.8rem;" onclick="exportCurrentStudentProfile()">📥 Export Data</button>
+      </div>
+      
+      <div class="modal-tabs" style="margin-top: 1rem;">
+        <button class="modal-tab-btn active" onclick="switchModalTab('personal-info-tab')">Personal Details</button>
+        <button class="modal-tab-btn" id="performanceTabBtn" onclick="switchModalTab('performance-history-tab')">Performance Summary</button>
+      </div>
+
+      <div style="flex: 1; overflow-y: auto; padding-right: 0.25rem; margin-top: 0.5rem;" id="detailsContainer">
+        <!-- Personal Details Pane -->
+        <div class="tab-content-pane active" id="personal-info-tab">
+          <div id="detailsContent" style="display:flex; flex-direction:column; gap: 1rem; text-align: left;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Performance History Pane -->
+        <div class="tab-content-pane" id="performance-history-tab">
+          <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 0.75rem; color: var(--text-dark);">🏆 Completed Courses</h3>
+          <div id="completionsList" style="margin-bottom: 1.5rem;">
+            <!-- completions listing -->
+          </div>
+
+          <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 0.75rem; color: var(--text-dark);">📝 Quiz Scores Report</h3>
+          <div id="quizList">
+            <!-- quiz score list -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+        <button class="btn-cancel" onclick="closeDetailsModal()">Close Window</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Certificate Preview Modal -->
+  <div class="modal-overlay" id="certPreviewModal" style="z-index: 1100;">
+    <div class="modal-box" style="width: min(550px, 95vw); max-height: 85vh; overflow-y: auto; padding: 1.5rem;">
+      <h2 style="margin: 0 0 1rem 0; font-size: 1.2rem;">Certificate View</h2>
+      <div id="certPreviewContent"></div>
+      <div class="modal-actions" style="margin-top: 1.5rem;">
+        <button class="btn-cancel" onclick="closeCertPreviewModal()">Close Preview</button>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <div class="footer-container"><div class="footer-section"><h4>SkillBridge</h4></div></div>
     <div class="footer-bottom"><p>&copy; 2026 SkillBridge.</p></div>
@@ -107,60 +488,150 @@
   <script src="../js/main.js"></script>
   <script>
     let allUsers = [];
+    let activeDetailsUsername = '';
+    let currentEditUsername = '';
 
     function loadUsers() {
       requireRole('admin');
       allUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      const completed = JSON.parse(localStorage.getItem('completedCourses') || '[]');
+      const certs = JSON.parse(localStorage.getItem('certificates') || '[]');
       const quizScores = JSON.parse(localStorage.getItem('quizScores') || '[]');
 
-      // Stats
+      // Calculate aggregated metrics
       const students = allUsers.filter(u=>u.role==='student').length;
       const admins   = allUsers.filter(u=>u.role==='admin').length;
+      const courseCompletions = certs.filter(c => c.type === 'course').length;
+
       document.getElementById('statsRow').innerHTML = `
-        <div class="stat-card"><div class="stat-val">${allUsers.length}</div><div class="stat-lbl">Total Accounts</div></div>
-        <div class="stat-card" style="border-left-color:#10b981;"><div class="stat-val" style="color:#10b981;">${students}</div><div class="stat-lbl">Students</div></div>
-        <div class="stat-card" style="border-left-color:#6366f1;"><div class="stat-val" style="color:#6366f1;">${admins}</div><div class="stat-lbl">Admins</div></div>
-        <div class="stat-card" style="border-left-color:#f59e0b;"><div class="stat-val" style="color:#f59e0b;">${completed.length}</div><div class="stat-lbl">Course Completions</div></div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-val">${allUsers.length}</div>
+            <div class="stat-lbl">Accounts</div>
+          </div>
+          <span class="stat-icon">👥</span>
+        </div>
+        <div class="stat-card" style="border-left-color:#10b981;">
+          <div>
+            <div class="stat-val" style="color:#10b981;">${students}</div>
+            <div class="stat-lbl">Active Students</div>
+          </div>
+          <span class="stat-icon" style="color:#10b981;">🎓</span>
+        </div>
+        <div class="stat-card" style="border-left-color:#6366f1;">
+          <div>
+            <div class="stat-val" style="color:#6366f1;">${admins}</div>
+            <div class="stat-lbl">Administrators</div>
+          </div>
+          <span class="stat-icon" style="color:#6366f1;">🛡️</span>
+        </div>
+        <div class="stat-card" style="border-left-color:#06b6d4;">
+          <div>
+            <div class="stat-val" style="color:#06b6d4;">${courseCompletions}</div>
+            <div class="stat-lbl">Completions</div>
+          </div>
+          <span class="stat-icon" style="color:#06b6d4;">🏆</span>
+        </div>
       `;
       filterTable();
+    }
+
+    function getTimestamp(dateVal) {
+        if (!dateVal) return 0;
+        if (typeof dateVal === 'number') return dateVal;
+        const parsed = Date.parse(dateVal);
+        if (!isNaN(parsed)) return parsed;
+        try {
+            return new Date(dateVal).getTime() || 0;
+        } catch(e) {
+            return 0;
+        }
     }
 
     function filterTable() {
       const search = (document.getElementById('searchInput').value||'').toLowerCase();
       const role   = document.getElementById('roleFilter').value;
-      const completed = JSON.parse(localStorage.getItem('completedCourses') || '[]');
-      const quizScores = JSON.parse(localStorage.getItem('quizScores') || '[]');
+      const status = document.getElementById('statusFilter').value;
+      const sortBy = document.getElementById('sortSelect').value;
 
-      const filtered = allUsers.filter(u => {
-        const matchSearch = (u.fullName||'').toLowerCase().includes(search) || (u.username||'').toLowerCase().includes(search);
+      const quizScores = JSON.parse(localStorage.getItem('quizScores') || '[]');
+      const certs = JSON.parse(localStorage.getItem('certificates') || '[]');
+
+      // 1. Filter elements
+      let filtered = allUsers.filter(u => {
+        const emailMatch = u.email ? u.email.toLowerCase().includes(search) : false;
+        const matchSearch = (u.fullName||'').toLowerCase().includes(search) || 
+                            (u.username||'').toLowerCase().includes(search) || 
+                            emailMatch;
+        
         const matchRole = role === 'all' || u.role === role;
-        return matchSearch && matchRole;
+
+        let matchStatus = true;
+        if (status !== 'all') {
+            const hasCompletions = certs.some(c => c.type === 'course' && (c.userName === u.fullName || c.userName === u.username));
+            const hasQuizzes = quizScores.some(q => q.studentUsername === u.username || q.studentName === u.fullName);
+
+            if (status === 'completed') {
+                matchStatus = hasCompletions;
+            } else if (status === 'quizzes') {
+                matchStatus = hasQuizzes;
+            } else if (status === 'inactive') {
+                matchStatus = !hasCompletions && !hasQuizzes;
+            }
+        }
+
+        return matchSearch && matchRole && matchStatus;
       });
 
+      // 2. Sort elements
+      filtered.sort((a, b) => {
+        if (sortBy === 'nameAsc') {
+            return (a.fullName || '').localeCompare(b.fullName || '');
+        } else if (sortBy === 'nameDesc') {
+            return (b.fullName || '').localeCompare(a.fullName || '');
+        } else if (sortBy === 'dateNew') {
+            return getTimestamp(b.createdAt) - getTimestamp(a.createdAt);
+        } else if (sortBy === 'dateOld') {
+            return getTimestamp(a.createdAt) - getTimestamp(b.createdAt);
+        } else if (sortBy === 'compHigh') {
+            const countA = certs.filter(c => c.type === 'course' && (c.userName === a.fullName || c.userName === a.username)).length;
+            const countB = certs.filter(c => c.type === 'course' && (c.userName === b.fullName || c.userName === b.username)).length;
+            return countB - countA;
+        } else if (sortBy === 'quizHigh') {
+            const countA = quizScores.filter(q => q.studentUsername === a.username || q.studentName === a.fullName).length;
+            const countB = quizScores.filter(q => q.studentUsername === b.username || q.studentName === b.fullName).length;
+            return countB - countA;
+        }
+        return 0;
+      });
+
+      // 3. Render elements in body
       const tbody = document.getElementById('studentsTbody');
       if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-light);">No accounts found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2.5rem;color:var(--text-light);font-weight:600;">No accounts matching filters found.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = filtered.map(u => {
-        const done  = completed.filter(c=>c.username===u.username).length;
-        const quizC = quizScores.filter(q=>q.username===u.username).length;
+        const done = certs.filter(c => c.type === 'course' && (c.userName === u.fullName || c.userName === u.username)).length;
+        const quizC = quizScores.filter(q => q.studentUsername === u.username || q.studentName === u.fullName).length;
         const badgeClass = u.role==='admin'?'badge-admin':'badge-student';
         const isDemoUser = u.username==='student'||u.username==='admin';
         return `
           <tr>
             <td style="font-weight:700;">${u.fullName||'-'}</td>
-            <td style="font-family:monospace;">@${u.username}</td>
+            <td style="font-family:monospace; font-size: 0.88rem;">@${u.username}</td>
             <td><span class="badge ${badgeClass}">${u.role||'student'}</span></td>
             <td style="font-size:.85rem;color:var(--text-light);">${u.createdAt||'-'}</td>
-            <td style="text-align:center;font-weight:700;color:var(--primary-color);">${done}</td>
-            <td style="text-align:center;font-weight:700;color:#f59e0b;">${quizC}</td>
+            <td style="text-align:center;font-weight:800;color:var(--primary-color);">${done}</td>
+            <td style="text-align:center;font-weight:800;color:#f59e0b;">${quizC}</td>
             <td style="text-align:center;white-space:nowrap;">
-              ${isDemoUser
-                ? `<span style="font-size:.8rem;color:var(--text-light);">(demo – protected)</span>`
-                : `<button class="btn-del" onclick="deleteStudent('${u.username}')">🗑 Delete</button>`}
+              <div style="display:flex;gap:0.4rem;justify-content:center;align-items:center;">
+                <button class="btn-action" onclick="viewStudentDetails('${u.username}')">👁 View Info</button>
+                <button class="btn-reset" onclick="openEditModal('${u.username}')">✏️ Edit</button>
+                ${isDemoUser
+                  ? `<span style="font-size:.78rem;color:var(--text-light);font-style:italic;">(demo)</span>`
+                  : `<button class="btn-del" onclick="deleteStudent('${u.username}')">🗑 Delete</button>`}
+              </div>
             </td>
           </tr>
         `;
@@ -169,6 +640,250 @@
 
     function openAddStudentModal() { document.getElementById('studentModal').classList.add('open'); }
     function closeStudentModal()   { document.getElementById('studentModal').classList.remove('open'); }
+
+    // Tab switching inside Student Details Modal
+    function switchModalTab(tabId) {
+      document.querySelectorAll('.modal-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content-pane').forEach(pane => pane.classList.remove('active'));
+
+      // Highlight active button
+      if (tabId === 'personal-info-tab') {
+        document.querySelector('.modal-tabs button:first-child').classList.add('active');
+      } else {
+        document.getElementById('performanceTabBtn').classList.add('active');
+      }
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function viewStudentDetails(username) {
+      activeDetailsUsername = username;
+      const user = allUsers.find(u => u.username === username);
+      if (!user) return;
+
+      const detailsKey = 'profileDetails_' + username;
+      const details = JSON.parse(localStorage.getItem(detailsKey) || 'null');
+
+      const certs = JSON.parse(localStorage.getItem('certificates') || '[]');
+      const quizScores = JSON.parse(localStorage.getItem('quizScores') || '[]');
+
+      // Reset to first tab
+      switchModalTab('personal-info-tab');
+
+      // Populate personal info pane
+      const contentEl = document.getElementById('detailsContent');
+      if (!details) {
+        contentEl.innerHTML = `
+          <div style="text-align:center; padding: 2rem 1rem; color: var(--text-light);">
+            <span style="font-size: 3rem;">📝</span>
+            <p style="margin-top:1rem; font-weight:700;">No personal profile details filled by this student yet.</p>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.25rem;">(Email: ${user.email || 'N/A'})</p>
+          </div>
+        `;
+      } else {
+        const skillsArray = (details.skills || '').split(',').map(s => s.trim()).filter(s => s);
+        const skillsHtml = skillsArray.length 
+          ? skillsArray.map(s => `<span style="background: rgba(16,185,129,0.08); color: var(--primary-color); padding: 0.25rem 0.65rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(16,185,129,0.15); display: inline-block;">${s}</span>`).join(' ')
+          : `<span style="color:var(--text-light); font-style: italic;">No skills specified</span>`;
+          
+        contentEl.innerHTML = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: var(--bg-secondary); padding: 1.2rem; border-radius: 12px; border: 1px solid var(--border-color);">
+            <div><strong>Full Name:</strong><br>${user.fullName}</div>
+            <div><strong>Username:</strong><br>@${user.username}</div>
+            <div><strong>Email Address:</strong><br>${user.email || 'N/A'}</div>
+            <div><strong>Phone Number:</strong><br>${details.phone || '-'}</div>
+            <div><strong>Date of Birth:</strong><br>${details.dob || '-'}</div>
+            <div><strong>Gender:</strong><br>${details.gender || '-'}</div>
+            <div><strong>Current Status:</strong><br>${details.currentStatus || '-'}</div>
+            <div><strong>Highest Education:</strong><br>${details.education || '-'}</div>
+            <div style="grid-column: 1 / -1;"><strong>City / Country:</strong><br>${details.location || '-'}</div>
+          </div>
+          <div>
+            <strong>Learning Goal / Bio:</strong>
+            <p style="margin: 0.4rem 0 0; font-style: italic; line-height: 1.5; color: var(--text-dark); background: var(--bg-secondary); padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border-color);">${details.bio || 'No bio submitted yet.'}</p>
+          </div>
+          <div>
+            <strong>Skills & Interests:</strong>
+            <div style="display:flex; flex-wrap:wrap; gap: 0.4rem; margin-top:0.4rem;">${skillsHtml}</div>
+          </div>
+        `;
+      }
+
+      // Populate performance completions pane
+      const userCerts = certs.filter(c => c.type === 'course' && (c.userName === user.fullName || c.userName === user.username));
+      const completionsList = document.getElementById('completionsList');
+      if (userCerts.length === 0) {
+        completionsList.innerHTML = `<div style="padding: 0.75rem; color: var(--text-light); font-style: italic; font-size: 0.9rem;">No courses completed yet.</div>`;
+      } else {
+        completionsList.innerHTML = userCerts.map(c => `
+          <div class="report-card-item">
+            <div>
+              <div class="report-title">${c.courseTitle}</div>
+              <div class="report-meta">Issued on ${c.issuedDate}</div>
+            </div>
+            <button class="btn" style="padding: 0.3rem 0.7rem; font-size: 0.78rem; background: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="previewCertificate('${c.id}')">📜 View</button>
+          </div>
+        `).join('');
+      }
+
+      // Populate quiz scores pane
+      const userQuizzes = quizScores.filter(q => q.studentUsername === user.username || q.studentName === user.fullName);
+      const quizList = document.getElementById('quizList');
+      if (userQuizzes.length === 0) {
+        quizList.innerHTML = `<div style="padding: 0.75rem; color: var(--text-light); font-style: italic; font-size: 0.9rem;">No quizzes attempted yet.</div>`;
+      } else {
+        // Sort newest attempts first
+        userQuizzes.sort((a,b) => getTimestamp(b.date) - getTimestamp(a.date));
+        quizList.innerHTML = userQuizzes.map(q => {
+          const pass = q.percentage >= 70;
+          const labelColor = pass ? '#059669' : '#d97706';
+          const labelBg = pass ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)';
+          
+          return `
+            <div class="report-card-item">
+              <div>
+                <div class="report-title">${q.courseId ? getCourseTitle(q.courseId) : 'Assessment Quiz'}</div>
+                <div class="report-meta">Taken: ${q.date}</div>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-weight: 800; font-size: 0.95rem; color: ${labelColor};">${q.percentage}%</span>
+                <div style="font-size: 0.7rem; color: var(--text-light); margin-top: 0.1rem;">score: ${q.score}/${q.total}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('detailsModal').classList.add('open');
+    }
+
+    function getCourseTitle(courseId) {
+      if (typeof coursesData !== 'undefined') {
+        const course = coursesData.find(c => String(c.id) === String(courseId));
+        if (course) return course.title;
+      }
+      return 'Course Quiz';
+    }
+
+    function closeDetailsModal() {
+      document.getElementById('detailsModal').classList.remove('open');
+    }
+
+    function previewCertificate(certId) {
+      const certs = JSON.parse(localStorage.getItem('certificates') || '[]');
+      const cert = certs.find(c => c.id === certId);
+      if (!cert) return;
+
+      const certPreviewContent = document.getElementById('certPreviewContent');
+      certPreviewContent.innerHTML = `
+        <div style="border: 5px double #d4af37; padding: 2rem 1.5rem; background: #fffdf9; color: #1e293b; text-align: center; font-family: Georgia, serif; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+          <div style="font-size: 1.5rem; color: var(--primary-color); font-weight: bold; margin-bottom: 0.25rem; font-family: sans-serif; letter-spacing: 1px;">SkillBridge</div>
+          <div style="font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: #64748b; font-weight: 700;">Certificate of Achievement</div>
+          <div style="margin: 1.5rem 0 0.75rem; font-size: 0.85rem; font-style: italic; color: #475569;">This certifies that</div>
+          <div style="font-size: 1.7rem; font-weight: bold; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.4rem; margin: 0.25rem auto 1.25rem; width: 85%; color: #0f172a;">${cert.userName}</div>
+          <div style="margin: 0.75rem 0; font-size: 0.85rem; font-style: italic; color: #475569;">has successfully completed the study course</div>
+          <div style="font-size: 1.25rem; font-weight: bold; color: var(--primary-color); margin: 0.5rem 0 1.5rem;">${cert.courseTitle}</div>
+          <div style="border-top: 1px dashed #cbd5e1; padding-top: 1rem; display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; font-family: sans-serif;">
+            <div><strong>DATE:</strong><br>${cert.issuedDate}</div>
+            <div><strong>VERIFICATION ID:</strong><br><span style="font-family: monospace;">${cert.id}</span></div>
+          </div>
+        </div>
+      `;
+      document.getElementById('certPreviewModal').classList.add('open');
+    }
+
+    function closeCertPreviewModal() {
+      document.getElementById('certPreviewModal').classList.remove('open');
+    }
+
+    function exportCurrentStudentProfile() {
+      if (!activeDetailsUsername) return;
+      
+      const user = allUsers.find(u => u.username === activeDetailsUsername);
+      if (!user) return;
+
+      const detailsKey = 'profileDetails_' + activeDetailsUsername;
+      const details = JSON.parse(localStorage.getItem(detailsKey) || 'null');
+      
+      const certs = JSON.parse(localStorage.getItem('certificates') || '[]');
+      const userCerts = certs.filter(c => c.type === 'course' && (c.userName === user.fullName || c.userName === user.username));
+
+      const quizScores = JSON.parse(localStorage.getItem('quizScores') || '[]');
+      const userScores = quizScores.filter(q => q.studentUsername === user.username || q.studentName === user.fullName);
+
+      const exportData = {
+          profile: {
+              fullName: user.fullName,
+              username: user.username,
+              email: user.email,
+              role: user.role,
+              registeredAt: user.createdAt
+          },
+          personalDetails: details,
+          certificates: userCerts,
+          quizScores: userScores
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `skillbridge-student-${activeDetailsUsername}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('📥 Exported student JSON snapshot');
+    }
+
+    // Edit Modal Open & Save
+    function openEditModal(username) {
+        const user = allUsers.find(u => u.username === username);
+        if (!user) return;
+        
+        currentEditUsername = username;
+        document.getElementById('editName').value = user.fullName || '';
+        document.getElementById('editUsername').value = user.username || '';
+        document.getElementById('editPassword').value = '';
+        document.getElementById('editRole').value = user.role || 'student';
+        
+        // Guard demo accounts from role modification
+        const isDemo = username === 'student' || username === 'admin';
+        document.getElementById('editRole').disabled = isDemo;
+        
+        document.getElementById('editStudentModal').classList.add('open');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editStudentModal').classList.remove('open');
+    }
+
+    function saveEditedStudent() {
+        const name = document.getElementById('editName').value.trim();
+        const password = document.getElementById('editPassword').value;
+        const role = document.getElementById('editRole').value;
+        
+        if (!name) { alert('Full name is required.'); return; }
+        
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const index = users.findIndex(u => u.username === currentEditUsername);
+        if (index === -1) { alert('Account not found.'); return; }
+        
+        users[index].fullName = name;
+        if (password) {
+            if (password.length < 6) { alert('Password must be at least 6 characters.'); return; }
+            users[index].password = password;
+        }
+        
+        // Block role modification of demo accounts
+        if (currentEditUsername !== 'student' && currentEditUsername !== 'admin') {
+            users[index].role = role;
+        }
+        
+        localStorage.setItem('users', JSON.stringify(users));
+        allUsers = users;
+        filterTable();
+        closeEditModal();
+        showToast('✅ Account modified successfully.');
+        loadUsers();
+    }
 
     function addStudent() {
       const name     = document.getElementById('sName').value.trim();
@@ -189,6 +904,7 @@
       allUsers = users;
       filterTable();
       showToast('✅ Account created!');
+      loadUsers();
     }
 
     function deleteStudent(username) {
@@ -198,6 +914,7 @@
       allUsers = users;
       filterTable();
       showToast('🗑 Account deleted.');
+      loadUsers();
     }
 
     function clearAllData() {
@@ -215,7 +932,12 @@
       setTimeout(()=>el.remove(), 2500);
     }
 
+    // Modal background clicks closing
     document.getElementById('studentModal').addEventListener('click',function(e){ if(e.target===this) closeStudentModal(); });
+    document.getElementById('editStudentModal').addEventListener('click',function(e){ if(e.target===this) closeEditModal(); });
+    document.getElementById('detailsModal').addEventListener('click',function(e){ if(e.target===this) closeDetailsModal(); });
+    document.getElementById('certPreviewModal').addEventListener('click',function(e){ if(e.target===this) closeCertPreviewModal(); });
+
     document.addEventListener('DOMContentLoaded', loadUsers);
   </script>
 </body>
