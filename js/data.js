@@ -2400,12 +2400,12 @@ if (storedCourses) {
 // Migration: Update youtubeVideoId for specific courses (both in defaults and in localStorage)
 const videoUpdates = {
     10: { youtubeVideoId: "dFSia1LZI4Y", youtubeVideoTitle: "Graphic Design Basics - Gareth David Studio" },
-    12: { youtubeVideoId: "ZI8Zx2FmAy8", youtubeVideoTitle: "Content Writing Masterclass - Saddam Kassim" },
+    12: { youtubeVideoId: "-kOT39l0omU", youtubeVideoTitle: "How to Write a Blog Post That Actually Gets Traffic" },
     15: { youtubeVideoId: "pr-ly3UJB6w", youtubeVideoTitle: "Business Analyst Course - Edureka Live" },
     16: { youtubeVideoId: "aozlwC3XwfY", youtubeVideoTitle: "Who Even Is An Entrepreneur - Crash Course Business" },
     17: { youtubeVideoId: "YBQ_ps6e71k", youtubeVideoTitle: "Learn VR Development in 3 Hours - Valem" },
     18: { youtubeVideoId: "wfDJAYTMTdk", youtubeVideoTitle: "ROS Tutorial - ROS Noetic Crash Course" },
-    19: { youtubeVideoId: "MuQPRYPHTCM", youtubeVideoTitle: "Beginners guide to UNITY AR Foundation" },
+    19: { youtubeVideoId: "Ml2UakwRxjk", youtubeVideoTitle: "Getting Started With ARFoundation in Unity (ARKit, ARCore)" },
     21: { youtubeVideoId: "yYX4bvQSqbo", youtubeVideoTitle: "Accounting Basics: a Guide to (Almost) Everything" },
     22: { youtubeVideoId: "AMXGBH7hoJY", youtubeVideoTitle: "Tax Basics: a Beginner Guide to Everything" },
     23: { youtubeVideoId: "Xn7KWR9EOGQ", youtubeVideoTitle: "Basics of Stock Market For Beginners - Lecture 1" },
