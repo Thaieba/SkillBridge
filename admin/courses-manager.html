@@ -461,6 +461,20 @@
         </div>
       </div>
 
+      <div class="form-group full">
+        <div class="form-field">
+          <label>Roadmap Stages (JSON Format)</label>
+          <textarea id="editRoadmap" rows="5" placeholder='[{"icon": "🌱", "stage": "Beginner", "duration": "Weeks 1-4", "topics": ["HTML"], "tools": ["VS Code"], "outcome": "Learn HTML"}]'></textarea>
+        </div>
+      </div>
+
+      <div class="form-group full">
+        <div class="form-field">
+          <label>Career Growth Opportunities (JSON Format)</label>
+          <textarea id="editOpportunities" rows="5" placeholder='{"growthPaths": [{"title": "Web Developer", "salary": "$80K - $120K", "demand": "High", "skills": ["HTML"], "growth": "Dev -> Senior"}], "industryInsights": ["Market is growing"]}'></textarea>
+        </div>
+      </div>
+
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
         <button class="btn-save" onclick="saveCourse()">💾 Save Course</button>
@@ -483,6 +497,11 @@
     function loadCoursesGrid() {
       const grid = document.getElementById('coursesGrid');
       grid.innerHTML = '';
+
+      const countEl = document.getElementById('coursesCount');
+      if (countEl) {
+        countEl.textContent = `${coursesData.length} Courses`;
+      }
 
       coursesData.forEach(course => {
         const courseCard = document.createElement('div');
@@ -535,6 +554,14 @@
       document.getElementById('editSkills').value = course.skillsGained ? course.skillsGained.join(', ') : '';
       document.getElementById('editCurriculum').value = course.curriculumTopics ? course.curriculumTopics.join(', ') : '';
       document.getElementById('editCareerPaths').value = course.careerPaths ? course.careerPaths.join(', ') : '';
+
+      // Load current roadmap data
+      const roadmapData = courseRoadmapData && courseRoadmapData[courseId] ? courseRoadmapData[courseId].stages : [];
+      document.getElementById('editRoadmap').value = JSON.stringify(roadmapData, null, 2);
+
+      // Load current career opportunities data
+      const opportunitiesData = futureOpportunitiesData && futureOpportunitiesData[courseId] ? futureOpportunitiesData[courseId] : { growthPaths: [], industryInsights: [] };
+      document.getElementById('editOpportunities').value = JSON.stringify(opportunitiesData, null, 2);
 
       loadImagePreview(course.image);
       document.getElementById('editModal').classList.add('active');
@@ -631,8 +658,27 @@
         course.image = base64ImageData;
       }
 
+      // Save roadmap data
+      try {
+        const stages = JSON.parse(document.getElementById('editRoadmap').value);
+        courseRoadmapData[course.id] = { stages };
+        localStorage.setItem('courseRoadmapData', JSON.stringify(courseRoadmapData));
+      } catch (e) {
+        showError('⚠️ Invalid JSON in Roadmap Stages. Course details saved, but roadmap was not updated.');
+      }
+
+      // Save career opportunities data
+      try {
+        const opportunities = JSON.parse(document.getElementById('editOpportunities').value);
+        futureOpportunitiesData[course.id] = opportunities;
+        localStorage.setItem('futureOpportunitiesData', JSON.stringify(futureOpportunitiesData));
+      } catch (e) {
+        showError('⚠️ Invalid JSON in Career Growth. Course details saved, but career opportunities were not updated.');
+      }
+
       // Save to localStorage
       localStorage.setItem('coursesData', JSON.stringify(coursesData));
+      localStorage.setItem('customCourses', JSON.stringify(coursesData));
 
       showSuccess(`✓ ${course.title} updated successfully!`);
       setTimeout(() => {
