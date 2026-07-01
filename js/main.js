@@ -2240,16 +2240,32 @@ function checkOnboardingRedirect() {
 function setupLogoDblClick() {
     const logos = document.querySelectorAll('.logo');
     logos.forEach(logo => {
-        logo.addEventListener('dblclick', function(e) {
+        let clickTimeout = null;
+        let clicks = 0;
+
+        logo.addEventListener('click', function(e) {
             e.preventDefault();
-            const path = window.location.pathname.replace(/\\/g, '/');
-            let target = 'admin/admin-login.html';
-            if (path.includes('/student/')) {
-                target = '../admin/admin-login.html';
-            } else if (path.includes('/admin/')) {
-                target = 'admin-login.html';
+            clicks++;
+
+            if (clicks === 1) {
+                clickTimeout = setTimeout(function() {
+                    const href = logo.getAttribute('href') || 'index.html';
+                    window.location.href = href;
+                    clicks = 0;
+                }, 280);
+            } else if (clicks === 2) {
+                clearTimeout(clickTimeout);
+                clicks = 0;
+
+                const path = window.location.pathname.replace(/\\/g, '/');
+                let target = 'admin/admin-login.html';
+                if (path.includes('/student/')) {
+                    target = '../admin/admin-login.html';
+                } else if (path.includes('/admin/')) {
+                    target = 'admin-login.html';
+                }
+                window.location.href = target;
             }
-            window.location.href = target;
         });
     });
 }
