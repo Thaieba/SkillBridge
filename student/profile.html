@@ -32,24 +32,133 @@
         <div class="container" style="max-width: 900px;">
             <h1 class="section-title" style="margin-bottom: 1.5rem;">🧾 My Profile</h1>
 
-            <div class="progress-stat-box" style="border-left: 6px solid var(--secondary-color);">
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    <div>
-                        <div style="color: var(--text-light); font-weight: 700;">Full Name</div>
-                        <div id="profileFullName" style="font-size: 1.25rem; font-weight: 800; margin-top: 0.25rem;">-</div>
-                    </div>
-                    <div>
-                        <div style="color: var(--text-light); font-weight: 700;">Username</div>
-                        <div id="profileUsername" style="font-size: 1.25rem; font-weight: 800; margin-top: 0.25rem;">-</div>
-                    </div>
-                    <div>
-                        <div style="color: var(--text-light); font-weight: 700;">Role</div>
-                        <div id="profileRole" style="font-size: 1.25rem; font-weight: 800; margin-top: 0.25rem;">-</div>
+            <!-- Main Profile Header Card -->
+            <div class="progress-stat-box" style="border-left: 6px solid var(--primary-color); display: flex; align-items: center; gap: 1.5rem; padding: 2rem; margin-bottom: 2rem; border-radius: 12px; background: var(--card-bg);">
+                <div style="width: 70px; height: 70px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 800; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-shrink: 0;" id="profileAvatar">
+                    U
+                </div>
+                <div>
+                    <h2 id="profileFullName" style="margin: 0; color: var(--text-dark); font-weight: 800; font-size: 1.6rem;">-</h2>
+                    <div style="display: flex; gap: 0.8rem; margin-top: 0.4rem; flex-wrap: wrap;">
+                        <span style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; color: var(--text-light); font-weight: 600;">👤 @<span id="profileUsername">-</span></span>
+                        <span style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.15); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; color: var(--primary-color); font-weight: 700; text-transform: uppercase;"><span id="profileRole">-</span></span>
                     </div>
                 </div>
             </div>
+
+            <!-- Personal Details Card -->
+            <div class="progress-stat-box" style="border-left: 6px solid var(--secondary-color); margin-top: 1.5rem;">
+                <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--text-dark); display: flex; align-items: center; gap: 0.5rem;">📋 Personal Details</h3>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
+                    <div>
+                        <div style="color: var(--text-light); font-weight: 700;">Phone Number</div>
+                        <div id="profilePhone" style="font-size: 1.1rem; font-weight: 600; margin-top: 0.25rem; color: var(--text-dark);">-</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-light); font-weight: 700;">Date of Birth</div>
+                        <div id="profileDob" style="font-size: 1.1rem; font-weight: 600; margin-top: 0.25rem; color: var(--text-dark);">-</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-light); font-weight: 700;">Highest Education</div>
+                        <div id="profileEducation" style="font-size: 1.1rem; font-weight: 600; margin-top: 0.25rem; color: var(--text-dark);">-</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-light); font-weight: 700;">Gender</div>
+                        <div id="profileGender" style="font-size: 1.1rem; font-weight: 600; margin-top: 0.25rem; color: var(--text-dark);">-</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-light); font-weight: 700;">Current Status</div>
+                        <div id="profileStatus" style="font-size: 1.1rem; font-weight: 600; margin-top: 0.25rem; color: var(--text-dark);">-</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-light); font-weight: 700;">City / Country</div>
+                        <div id="profileLocation" style="font-size: 1.1rem; font-weight: 600; margin-top: 0.25rem; color: var(--text-dark);">-</div>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <div style="color: var(--text-light); font-weight: 700; margin-bottom: 0.25rem;">Learning Goal / Bio</div>
+                    <div id="profileBio" style="font-size: 1.05rem; line-height: 1.5; color: var(--text-dark); font-style: italic;">-</div>
+                </div>
+                <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <div style="color: var(--text-light); font-weight: 700; margin-bottom: 0.5rem;">Skills & Interests</div>
+                    <div id="profileSkills" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">-</div>
+                </div>
+                <button class="btn btn-outline" onclick="openEditProfileModal()" style="margin-top: 1.5rem; font-size: 0.9rem; font-weight: 700;">✏️ Edit Profile Details</button>
+            </div>
         </div>
     </section>
+
+    <!-- EDIT PROFILE MODAL -->
+    <div id="editProfileModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem;">
+        <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; max-width: 550px; width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,0.25); text-align: left; max-height: 90vh; overflow-y: auto;">
+            <h3 style="margin-top: 0; margin-bottom: 1.2rem; color: var(--text-dark); font-weight: 800;">Edit Profile Details</h3>
+            
+            <form id="editProfileForm" onsubmit="saveEditedProfile(event)" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 0.3rem; font-size: 0.85rem; color: var(--text-dark);">Full Name</label>
+                    <input type="text" id="editFullName" required style="width: 100%; padding: 0.7rem; border: 1.5px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-dark);">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.3rem; font-size: 0.85rem; color: var(--text-dark);">Gender</label>
+                        <select id="editGender" required style="width: 100%; padding: 0.7rem; border: 1.5px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-dark);">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.3rem; font-size: 0.85rem; color: var(--text-dark);">Date of Birth</label>
+                        <input type="date" id="editDob" required style="width: 100%; padding: 0.7rem; border: 1.5px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-dark);">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.3rem; font-size: 0.85rem; color: var(--text-dark);">Phone Number</label>
+                        <input type="tel" id="editPhone" required style="width: 100%; padding: 0.7rem; border: 1.5px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-dark);">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.3rem; font-size: 0.85rem; color: var(--text-dark);">City / Country</label>
+                        <input type="text" id="editLocation" required style="width: 100%; padding: 0.7rem; border: 1.5px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-dark);">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.3rem; font-size: 0.85rem; color: var(--text-dark);">Current Status</label>
+                        <select id="editStatus" required style="width: 100%; padding: 0.7rem; border: 1.5px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-dark);">
+                            <option value="School Student">School Student</option>
+                            <option value="College Student">College Student</option>
+                            <option value="Working Professional">Working Professional</option>
+                            <option value="Job Seeker">Job Seeker</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.3rem; font-size: 0.85rem; color: var(--text-dark);">Highest Education</label>
+                        <select id="editEducation" required style="width: 100%; padding: 0.7rem; border: 1.5px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-dark);">
+                            <option value="High School">High School</option>
+                            <option value="Undergraduate">Undergraduate Degree (UG)</option>
+                            <option value="Postgraduate">Postgraduate Degree (PG)</option>
+                            <option value="Doctorate">Doctorate (Ph.D.)</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 0.3rem; font-size: 0.85rem; color: var(--text-dark);">Learning Goal / Bio</label>
+                    <textarea id="editBio" rows="2" required style="width: 100%; padding: 0.7rem; border: 1.5px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-dark); resize: none;"></textarea>
+                </div>
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 0.3rem; font-size: 0.85rem; color: var(--text-dark);">Skills / Interests (comma separated)</label>
+                    <input type="text" id="editSkills" required style="width: 100%; padding: 0.7rem; border: 1.5px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-dark);">
+                </div>
+                
+                <div style="display: flex; gap: 0.8rem; margin-top: 1rem;">
+                    <button type="button" class="btn btn-outline" onclick="closeEditProfileModal()" style="flex: 1;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <footer>
         <div class="footer-container">
@@ -78,7 +187,143 @@
             document.getElementById('profileFullName').textContent = fullName;
             document.getElementById('profileUsername').textContent = username;
             document.getElementById('profileRole').textContent = session?.role || 'student';
+
+            // Set avatar initial letter
+            document.getElementById('profileAvatar').textContent = fullName.trim().charAt(0).toUpperCase();
+
+            // Load extra personal details
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userInDb = users.find(u => u.username === username) || {};
+
+            const profileKey = 'profileDetails_' + username;
+            const details = JSON.parse(localStorage.getItem(profileKey) || 'null') || {};
+            
+            const merged = {
+                phone: details.phone || userInDb.phone || '-',
+                dob: details.dob || userInDb.dob || '-',
+                education: details.education || userInDb.education || '-',
+                bio: details.bio || userInDb.bio || '-',
+                gender: details.gender || userInDb.gender || '-',
+                currentStatus: details.currentStatus || userInDb.currentStatus || '-',
+                location: details.location || userInDb.location || '-',
+                skills: details.skills || userInDb.skills || ''
+            };
+
+            document.getElementById('profilePhone').textContent = merged.phone;
+            document.getElementById('profileDob').textContent = merged.dob;
+            document.getElementById('profileEducation').textContent = merged.education;
+            document.getElementById('profileBio').textContent = merged.bio;
+            document.getElementById('profileGender').textContent = merged.gender;
+            document.getElementById('profileStatus').textContent = merged.currentStatus;
+            document.getElementById('profileLocation').textContent = merged.location;
+            renderSkillsPills(merged.skills);
         });
+
+        function renderSkillsPills(skillsString) {
+            const container = document.getElementById('profileSkills');
+            container.innerHTML = '';
+            const skillsArray = (skillsString || '').split(',').map(s => s.trim()).filter(s => s);
+            if (!skillsArray.length) {
+                container.textContent = '-';
+                return;
+            }
+            skillsArray.forEach(skill => {
+                const pill = document.createElement('span');
+                pill.style.background = 'rgba(16,185,129,0.08)';
+                pill.style.color = 'var(--primary-color)';
+                pill.style.padding = '0.35rem 0.75rem';
+                pill.style.borderRadius = '20px';
+                pill.style.fontSize = '0.85rem';
+                pill.style.fontWeight = '700';
+                pill.style.border = '1px solid rgba(16,185,129,0.15)';
+                pill.style.display = 'inline-block';
+                pill.textContent = skill;
+                container.appendChild(pill);
+            });
+        }
+
+        window.openEditProfileModal = function() {
+            const session = getSession();
+            if (!session) return;
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userInDb = users.find(u => u.username === session.username) || {};
+
+            const profileKey = 'profileDetails_' + session.username;
+            const details = JSON.parse(localStorage.getItem(profileKey) || 'null') || {};
+
+            document.getElementById('editFullName').value = session.fullName || '';
+            document.getElementById('editPhone').value = details.phone || userInDb.phone || '';
+            document.getElementById('editDob').value = details.dob || userInDb.dob || '';
+            document.getElementById('editEducation').value = details.education || userInDb.education || 'Undergraduate';
+            document.getElementById('editBio').value = details.bio || userInDb.bio || '';
+            document.getElementById('editSkills').value = details.skills || userInDb.skills || '';
+            document.getElementById('editGender').value = details.gender || userInDb.gender || 'Male';
+            document.getElementById('editStatus').value = details.currentStatus || userInDb.currentStatus || 'College Student';
+            document.getElementById('editLocation').value = details.location || userInDb.location || '';
+
+            document.getElementById('editProfileModal').style.display = 'flex';
+        };
+
+        window.closeEditProfileModal = function() {
+            document.getElementById('editProfileModal').style.display = 'none';
+        };
+
+        window.saveEditedProfile = function(event) {
+            event.preventDefault();
+            const session = getSession();
+            if (!session) return;
+
+            const fullName = document.getElementById('editFullName').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            const dob = document.getElementById('editDob').value;
+            const education = document.getElementById('editEducation').value;
+            const bio = document.getElementById('editBio').value.trim();
+            const skills = document.getElementById('editSkills').value.trim();
+            const gender = document.getElementById('editGender').value;
+            const currentStatus = document.getElementById('editStatus').value;
+            const location = document.getElementById('editLocation').value.trim();
+
+            if (fullName) {
+                session.fullName = fullName;
+                localStorage.setItem('session', JSON.stringify(session));
+                localStorage.setItem('userFullName', fullName);
+
+                document.getElementById('profileFullName').textContent = fullName;
+                document.getElementById('profileAvatar').textContent = fullName.trim().charAt(0).toUpperCase();
+            }
+
+            // Update in persistent registration DB
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const uidx = users.findIndex(u => u.username === session.username);
+            if (uidx !== -1) {
+                if (fullName) users[uidx].fullName = fullName;
+                users[uidx].phone = phone;
+                users[uidx].dob = dob;
+                users[uidx].education = education;
+                users[uidx].bio = bio;
+                users[uidx].skills = skills;
+                users[uidx].gender = gender;
+                users[uidx].currentStatus = currentStatus;
+                users[uidx].location = location;
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+
+            const profileDetails = { phone, dob, education, bio, skills, gender, currentStatus, location };
+            localStorage.setItem('profileDetails_' + session.username, JSON.stringify(profileDetails));
+
+            document.getElementById('profilePhone').textContent = phone;
+            document.getElementById('profileDob').textContent = dob;
+            document.getElementById('profileEducation').textContent = education;
+            document.getElementById('profileBio').textContent = bio;
+            document.getElementById('profileGender').textContent = gender;
+            document.getElementById('profileStatus').textContent = currentStatus;
+            document.getElementById('profileLocation').textContent = location;
+            renderSkillsPills(skills);
+
+            closeEditProfileModal();
+            alert('✓ Profile details updated successfully!');
+        };
     </script>
 </body>
 </html>
