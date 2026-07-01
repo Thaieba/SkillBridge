@@ -4,9 +4,130 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Career Roadmap - SkillBridge</title>
+  <meta name="description" content="Explore step-by-step career roadmaps for all 20 courses on SkillBridge — from Beginner to Career Ready." />
   <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* ── Category Tabs ── */
+    .rm-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 2.5rem;
+      justify-content: center;
+    }
+    .rm-tab {
+      padding: 0.55rem 1.3rem;
+      border-radius: 999px;
+      border: 2px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .rm-tab:hover { border-color: var(--primary-color); color: var(--primary-color); }
+    .rm-tab.active {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: white;
+    }
+
+    /* ── Course accordion wrapper ── */
+    .rm-course-block {
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 1.2rem;
+      background: var(--bg-card);
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .rm-course-block:hover { border-color: var(--primary-color); box-shadow: 0 4px 20px rgba(16,185,129,0.1); }
+
+    /* ── Course header (click to open) ── */
+    .rm-course-header {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      padding: 1.2rem 1.5rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .rm-course-icon {
+      font-size: 2.2rem;
+      width: 56px; height: 56px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+    .rm-course-header-text { flex: 1; }
+    .rm-course-header-text h3 { margin: 0; font-size: 1.1rem; color: var(--text-dark); }
+    .rm-course-header-text p  { margin: 0.15rem 0 0; font-size: 0.85rem; color: var(--text-muted); }
+    .rm-course-arrow { font-size: 1rem; color: var(--text-muted); transition: transform 0.25s; }
+
+    /* ── Course body ── */
+    .rm-course-body { display: none; border-top: 1px solid var(--border-color); padding: 0; }
+    .rm-course-body.open { display: block; }
+
+    /* ── Stage card inside course ── */
+    .rm-stage-item {
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+    }
+    .rm-stage-item:last-child { border-bottom: none; }
+    .rm-stage-item-header {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      user-select: none;
+    }
+    .rm-stage-item-header span.icon { font-size: 1.6rem; flex-shrink: 0; }
+    .rm-stage-item-header .info { flex: 1; }
+    .rm-stage-item-header .info strong { display: block; font-size: 0.98rem; font-weight: 700; }
+    .rm-stage-item-header .info small { font-size: 0.82rem; opacity: 0.85; }
+    .rm-stage-item-header .sarrow { font-size: 0.9rem; transition: transform 0.25s; }
+
+    .rm-stage-item-body {
+      display: none;
+      padding: 1.2rem 1.5rem;
+      background: var(--bg-secondary);
+      animation: rmFadeIn 0.2s ease;
+    }
+    .rm-stage-item-body.open { display: block; }
+    @keyframes rmFadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .rm-chip {
+      display: inline-block;
+      padding: 0.28rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin: 0.2rem;
+      background: linear-gradient(135deg,rgba(59,130,246,0.12),rgba(168,85,247,0.12));
+      border: 1px solid rgba(59,130,246,0.25);
+      color: var(--text-dark);
+    }
+
+    /* ── Category sections ── */
+    .rm-category-section { display: none; }
+    .rm-category-section.active { display: block; }
+
+    /* ── Hero ── */
+    .rm-hero {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+    }
+    .rm-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 0.8rem; }
+    .rm-hero p  { color: var(--text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto 2.5rem; }
+  </style>
 </head>
 <body>
+
+  <!-- NAV -->
   <nav>
     <div class="container">
       <a href="index.html" class="logo">SkillBridge</a>
@@ -15,90 +136,42 @@
         <li><a href="skills.html">Skills</a></li>
         <li><a href="progress.html">Progress</a></li>
         <li><a href="certificate.html">Certificates</a></li>
-
         <li><a href="index.html#about-us">About Us</a></li>
         <li><a href="index.html#contact-us">Contact Us</a></li>
         <li><a href="roadmap.html">Roadmap</a></li>
-        <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
+        <li><button id="themeToggle" class="btn" style="background:rgba(255,255,255,0.2);border:1px solid white;color:white;">🌙</button></li>
       </ul>
-      <div class="hamburger">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+      <div class="hamburger"><span></span><span></span><span></span></div>
     </div>
   </nav>
 
-  <section class="section" style="padding: 3rem 1rem;">
-    <div class="container" style="max-width: 1100px;">
-      <h1 class="section-title" style="margin-bottom: 1.5rem;">🧭 Career Roadmap</h1>
-      <p style="text-align:center; color: var(--text-light); margin-bottom: 2rem; font-size: 1.1rem;">
-        A 6-stage journey: Beginner → Career Ready.
-      </p>
+  <!-- HERO -->
+  <div class="rm-hero">
+    <h1>🧭 Career Roadmap</h1>
+    <p>Choose a course and explore every stage — from Beginner to Career Ready. Click any stage to see what to learn, which tools to use, and what you'll achieve.</p>
+  </div>
 
-      <div class="roadmap-container">
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 2rem;">
-          <div style="flex: 1; min-width: 150px;">
-            <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 0.5rem; color: white;">
-              <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌱</div>
-              <h4 style="margin-bottom: 0.5rem;">Beginner</h4>
-              <p style="font-size: 0.9rem; opacity: 0.9;">Weeks 1-4</p>
-            </div>
-            <div style="text-align: center; margin-top: 1rem; font-size: 1.5rem;">→</div>
-          </div>
+  <div class="container" style="max-width:980px; padding-bottom:4rem;">
 
-          <div style="flex: 1; min-width: 150px;">
-            <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 0.5rem; color: white;">
-              <div style="font-size: 2rem; margin-bottom: 0.5rem;">📚</div>
-              <h4 style="margin-bottom: 0.5rem;">Fundamentals</h4>
-              <p style="font-size: 0.9rem; opacity: 0.9;">Weeks 5-8</p>
-            </div>
-            <div style="text-align: center; margin-top: 1rem; font-size: 1.5rem;">→</div>
-          </div>
-
-          <div style="flex: 1; min-width: 150px;">
-            <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 0.5rem; color: white;">
-              <div style="font-size: 2rem; margin-bottom: 0.5rem;">🛠️</div>
-              <h4 style="margin-bottom: 0.5rem;">Projects</h4>
-              <p style="font-size: 0.9rem; opacity: 0.9;">Weeks 9-10</p>
-            </div>
-            <div style="text-align: center; margin-top: 1rem; font-size: 1.5rem;">→</div>
-          </div>
-
-          <div style="flex: 1; min-width: 150px;">
-            <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 0.5rem; color: white;">
-              <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚙️</div>
-              <h4 style="margin-bottom: 0.5rem;">Intermediate</h4>
-              <p style="font-size: 0.9rem; opacity: 0.9;">Weeks 11-12</p>
-            </div>
-            <div style="text-align: center; margin-top: 1rem; font-size: 1.5rem;">→</div>
-          </div>
-
-          <div style="flex: 1; min-width: 150px;">
-            <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 0.5rem; color: white;">
-              <div style="font-size: 2rem; margin-bottom: 0.5rem;">🚀</div>
-              <h4 style="margin-bottom: 0.5rem;">Advanced</h4>
-              <p style="font-size: 0.9rem; opacity: 0.9;">Weeks 13-14</p>
-            </div>
-            <div style="text-align: center; margin-top: 1rem; font-size: 1.5rem;">→</div>
-          </div>
-
-          <div style="flex: 1; min-width: 150px;">
-            <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 0.5rem; color: white;">
-              <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
-              <h4 style="margin-bottom: 0.5rem;">Career Ready</h4>
-              <p style="font-size: 0.9rem; opacity: 0.9;">Week 15+</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top: 2.5rem; display:flex; justify-content:center;">
-        <a href="skills.html" class="btn btn-primary">Explore Courses</a>
-      </div>
+    <!-- CATEGORY TABS -->
+    <div class="rm-tabs">
+      <button class="rm-tab active" data-cat="all">📚 All Courses</button>
+      <button class="rm-tab" data-cat="cs">💻 Computer Science & IT</button>
+      <button class="rm-tab" data-cat="creative">🎨 Creative & Design</button>
+      <button class="rm-tab" data-cat="business">📈 Business Management</button>
+      <button class="rm-tab" data-cat="emerging">🔬 Emerging Technologies</button>
+      <button class="rm-tab" data-cat="finance">💵 Finance</button>
     </div>
-  </section>
 
+    <!-- COURSES CONTAINER -->
+    <div id="rmCoursesContainer"></div>
+
+    <div style="margin-top:2.5rem;display:flex;justify-content:center;">
+      <a href="skills.html" class="btn btn-primary">Explore & Enroll in Courses</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
   <footer>
     <div class="footer-container">
       <div class="footer-section">
@@ -133,5 +206,149 @@
   <script src="js/data.js"></script>
   <script src="quiz-data.js"></script>
   <script src="js/main.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    // Category mapping: which courseIds belong to each tab
+    const catMap = {
+      cs:       [1, 4, 6, 8],
+      creative: [9, 10, 11, 12],
+      business: [13, 14, 15, 16],
+      emerging: [17, 18, 19, 20],
+      finance:  [21, 22, 23, 24]
+    };
+
+    // Icon bg colours per category
+    const catColors = {
+      cs:       'rgba(59,130,246,0.12)',
+      creative: 'rgba(236,72,153,0.12)',
+      business: 'rgba(249,115,22,0.12)',
+      emerging: 'rgba(168,85,247,0.12)',
+      finance:  'rgba(234,179,8,0.12)'
+    };
+
+    function getCatForCourse(id) {
+      for (const [cat, ids] of Object.entries(catMap)) {
+        if (ids.includes(id)) return cat;
+      }
+      return 'all';
+    }
+
+    // Build HTML for one stage inside a course
+    function buildStageHTML(courseId, stageIdx, stage) {
+      const sid = `rm_c${courseId}_s${stageIdx}`;
+      return `
+        <div class="rm-stage-item" id="${sid}_wrap">
+          <div class="rm-stage-item-header" onclick="rmStageToggle('${sid}')">
+            <span class="icon">${stage.icon}</span>
+            <div class="info">
+              <strong>${stage.stage}</strong>
+              <small>${stage.duration}</small>
+            </div>
+            <span class="sarrow" id="${sid}_arr">▼</span>
+          </div>
+          <div class="rm-stage-item-body" id="${sid}_body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.1rem;">
+              <div>
+                <p style="font-weight:700;margin:0 0 0.55rem;font-size:0.92rem;color:var(--text-dark);">📚 What to Learn</p>
+                <div style="display:flex;flex-direction:column;gap:0.4rem;">
+                  ${(stage.topics||[]).map(t=>`
+                    <div style="display:flex;align-items:flex-start;gap:0.5rem;padding:0.45rem 0.8rem;background:var(--bg-card);border-radius:8px;border-left:3px solid var(--primary-color);">
+                      <span style="color:var(--primary-color);flex-shrink:0;">›</span>
+                      <span style="font-size:0.85rem;color:var(--text-muted);">${t}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+              <div>
+                <p style="font-weight:700;margin:0 0 0.55rem;font-size:0.92rem;color:var(--text-dark);">🔧 Tools & Resources</p>
+                <div style="display:flex;flex-wrap:wrap;gap:0.3rem;">
+                  ${(stage.tools||[]).map(t=>`<span class="rm-chip">🔧 ${t}</span>`).join('')}
+                </div>
+              </div>
+            </div>
+            ${stage.outcome ? `
+            <div style="background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(59,130,246,0.08));border:1.5px solid var(--primary-color);border-radius:10px;padding:0.85rem 1rem;display:flex;align-items:flex-start;gap:0.7rem;">
+              <span style="font-size:1.2rem;flex-shrink:0;">🎯</span>
+              <div>
+                <p style="font-weight:700;margin:0 0 0.15rem;font-size:0.85rem;color:var(--primary-color);">Stage Outcome</p>
+                <p style="margin:0;font-size:0.85rem;color:var(--text-muted);">${stage.outcome}</p>
+              </div>
+            </div>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // Build HTML for one course accordion
+    function buildCourseHTML(course) {
+      const rmData = courseRoadmapData && courseRoadmapData[course.id];
+      const stages = rmData ? rmData.stages : [];
+      const cat    = getCatForCourse(course.id);
+      const color  = catColors[cat] || 'rgba(16,185,129,0.1)';
+      const cid    = `rmcourse_${course.id}`;
+
+      return `
+        <div class="rm-course-block" data-cat="${cat}">
+          <div class="rm-course-header" onclick="rmCourseToggle('${cid}')">
+            <div class="rm-course-icon" style="background:${color};">${course.icon}</div>
+            <div class="rm-course-header-text">
+              <h3>${course.title}</h3>
+              <p>${course.category} · ${course.level} · ${course.duration}</p>
+            </div>
+            <span class="rm-course-arrow" id="${cid}_arr">▼</span>
+          </div>
+          <div class="rm-course-body" id="${cid}_body">
+            ${stages.length
+              ? stages.map((s,i) => buildStageHTML(course.id, i, s)).join('')
+              : '<p style="padding:1.2rem 1.5rem;color:var(--text-muted);">Roadmap coming soon.</p>'
+            }
+          </div>
+        </div>
+      `;
+    }
+
+    // Render all courses
+    const container = document.getElementById('rmCoursesContainer');
+    const allCourses = coursesData.filter(c => courseRoadmapData && courseRoadmapData[c.id]);
+    container.innerHTML = allCourses.map(buildCourseHTML).join('');
+
+    // ── Category Tabs ──
+    const tabs = document.querySelectorAll('.rm-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function () {
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        const cat = this.dataset.cat;
+        const blocks = container.querySelectorAll('.rm-course-block');
+        blocks.forEach(b => {
+          if (cat === 'all' || b.dataset.cat === cat) {
+            b.style.display = '';
+          } else {
+            b.style.display = 'none';
+          }
+        });
+      });
+    });
+
+  });
+
+  // Global toggle functions (so they are immediately available for inline onclick attributes)
+  window.rmCourseToggle = function(cid) {
+    const body  = document.getElementById(cid + '_body');
+    const arr   = document.getElementById(cid + '_arr');
+    if (!body || !arr) return;
+    const open  = body.classList.toggle('open');
+    arr.style.transform = open ? 'rotate(180deg)' : '';
+  };
+
+  window.rmStageToggle = function(sid) {
+    const body = document.getElementById(sid + '_body');
+    const arr  = document.getElementById(sid + '_arr');
+    if (!body || !arr) return;
+    const open = body.classList.toggle('open');
+    arr.style.transform = open ? 'rotate(180deg)' : '';
+  };
+  </script>
 </body>
 </html>
