@@ -916,38 +916,78 @@ html[data-theme="dark"] .rating-btn {
 }
 
 .certificate-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 1.5rem;
+    background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.04), transparent), var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 1.8rem;
     display: flex;
-    gap: 1.2rem;
+    gap: 1.5rem;
     align-items: flex-start;
-    box-shadow: var(--shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     position: relative;
     overflow: hidden;
 }
 
+.certificate-card.quiz-type {
+    background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.05), transparent), var(--card-bg);
+}
+
 .certificate-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.08);
     border-color: var(--primary-color);
 }
 
+.certificate-card.quiz-type:hover {
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.08);
+    border-color: #3b82f6;
+}
+
+.certificate-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 45%,
+        rgba(255, 255, 255, 0.03) 50%,
+        transparent 55%
+    );
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+    pointer-events: none;
+}
+
+.certificate-card:hover::after {
+    left: 100%;
+}
+
 .certificate-badge {
-    background: rgba(16, 185, 129, 0.12);
-    border-radius: 12px;
-    padding: 0.8rem;
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(202, 138, 4, 0.05));
+    border: 1px solid rgba(234, 179, 8, 0.25);
+    border-radius: 16px;
+    padding: 0.9rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 54px;
-    min-height: 54px;
+    min-width: 60px;
+    min-height: 60px;
+    box-shadow: 0 8px 16px rgba(234, 179, 8, 0.05);
+}
+
+.certificate-card.quiz-type .certificate-badge {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.05));
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.05);
 }
 
 .certificate-badge-icon {
-    font-size: 2rem;
+    font-size: 2.2rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
 .certificate-info {
@@ -955,56 +995,88 @@ html[data-theme="dark"] .rating-btn {
 }
 
 .certificate-info h3 {
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     font-weight: 800;
     color: var(--text-dark);
-    margin-bottom: 0.5rem;
+    margin: 0 0 0.4rem 0;
     line-height: 1.3;
+    letter-spacing: -0.02em;
 }
 
-.certificate-info p {
+.certificate-type-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    background: rgba(234, 179, 8, 0.1);
+    color: #ca8a04;
+    margin-bottom: 1rem;
+}
+
+.certificate-card.quiz-type .certificate-type-tag {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+}
+
+.certificate-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.2rem;
+}
+
+.certificate-details p {
     font-size: 0.88rem;
+    color: var(--text-muted);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.certificate-details p span {
+    font-weight: 600;
     color: var(--text-light);
-    margin-bottom: 0.3rem;
+    min-width: 70px;
 }
 
 .certificate-meta {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-top: 1rem;
-    padding-top: 0.8rem;
+    padding-top: 1rem;
     border-top: 1px solid var(--border-color);
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.certificate-id {
-    font-size: 0.75rem;
-    font-family: monospace;
-    color: var(--text-light);
-    background: var(--bg-secondary);
-    padding: 0.25rem 0.6rem;
-    border-radius: 6px;
-    word-break: break-all;
 }
 
 .certificate-action-btn {
     background: linear-gradient(135deg, var(--primary-color), #059669);
     color: #ffffff !important;
     border: none;
-    padding: 0.45rem 1rem;
-    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    transition: all 0.3s ease;
+}
+
+.certificate-card.quiz-type .certificate-action-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
 .certificate-action-btn:hover {
-    opacity: 0.9;
-    transform: scale(1.04);
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
+}
+
+.certificate-card.quiz-type .certificate-action-btn:hover {
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
 }
 
 .certificate-modal {
@@ -1033,25 +1105,27 @@ html[data-theme="dark"] .rating-btn {
 
 .modal-close {
     position: absolute;
-    top: 1rem;
-    right: 1.5rem;
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
     border: none;
-    font-size: 1.8rem;
-    width: 40px;
-    height: 40px;
+    font-size: 2rem;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    z-index: 100000;
 }
 
 .modal-close:hover {
     background: #ef4444;
     color: #ffffff;
+    transform: scale(1.1);
 }
 
 /* ============================================
@@ -1096,4 +1170,459 @@ html[data-theme="dark"] .rating-btn {
     color: #ffffff !important;
     border-color: var(--primary-color);
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+/* Learning Roadmap Card Styles */
+.rm-stage-card {
+    cursor: pointer;
+    border: 2px solid var(--border-color);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    background: var(--card-bg);
+    margin-bottom: 0.9rem;
+}
+.rm-stage-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+}
+.rm-stage-card.rm-active {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 24px rgba(16, 185, 129, 0.2);
+}
+.rm-stage-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.3rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    user-select: none;
+}
+.rm-stage-body {
+    display: none;
+    padding: 1.3rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    animation: rmSlideDown 0.25s ease;
+}
+.rm-stage-body.rm-open {
+    display: block;
+}
+@keyframes rmSlideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.rm-chip {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    margin: 0.2rem;
+}
+
+/* ============================================
+   CERTIFICATE TEMPLATE VIEW STYLES
+   ============================================ */
+.certificate-display {
+    background: #fff9e6; /* Cream/off-white background */
+    border: 8px double #d4af37; /* Double gold border */
+    padding: 3rem 2rem;
+    text-align: center;
+    color: #222222 !important; /* Dark text for certificate always, even in dark mode */
+    position: relative;
+    border-radius: 8px;
+    box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.1);
+    font-family: 'Georgia', serif;
+}
+
+.certificate-display h2,
+.certificate-display h3,
+.certificate-display p,
+.certificate-display div {
+    color: #222222 !important; /* Override theme colors inside the certificate display */
+}
+
+.certificate-header {
+    margin-bottom: 2rem;
+}
+
+.certificate-header h2 {
+    font-size: 2rem;
+    color: #d4af37 !important;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    letter-spacing: 1px;
+}
+
+.certificate-header p {
+    font-size: 0.85rem;
+    color: #666666 !important;
+    letter-spacing: 2px;
+    font-weight: 600;
+}
+
+.certificate-body {
+    margin: 2.5rem 0;
+}
+
+.certificate-body h3 {
+    font-size: 1.15rem;
+    font-weight: normal;
+    color: #555555 !important;
+    margin-bottom: 1.5rem;
+}
+
+.certificate-recipient {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #111111 !important;
+    margin: 1.5rem 0;
+    font-style: italic;
+    border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+    display: inline-block;
+    padding-bottom: 0.5rem;
+    min-width: 250px;
+}
+
+.certificate-body p {
+    font-size: 1.1rem;
+    color: #555555 !important;
+    margin: 1rem 0;
+}
+
+.certificate-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 3.5rem;
+    padding: 0 1.5rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.certificate-signature {
+    text-align: center;
+    flex: 1;
+    min-width: 150px;
+}
+
+.certificate-signature-line {
+    border-top: 2px solid #d4af37;
+    margin-bottom: 0.5rem;
+    width: 100%;
+}
+
+.certificate-signature-text {
+    font-size: 0.85rem;
+    color: #666666 !important;
+    font-weight: 600;
+}
+
+.certificate-seal {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #10b981 !important;
+    border: 2px dashed #10b981;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    background: rgba(16, 185, 129, 0.05);
+    user-select: none;
+    transform: rotate(-3deg);
+}
+
+/* Premium Navigation buttons */
+.theme-toggle-btn {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+    color: #fff !important;
+    border-radius: 50% !important;
+    width: 38px !important;
+    height: 38px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    font-size: 1.15rem !important;
+    padding: 0 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.theme-toggle-btn:hover {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    transform: scale(1.1) rotate(45deg);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+.theme-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+.btn-logout {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1.5px solid rgba(239, 68, 68, 0.25) !important;
+    color: #ef4444 !important;
+    padding: 0.45rem 1rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 750 !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);
+}
+.btn-logout:hover {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    border-color: #ef4444 !important;
+    color: #fff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
+}
+.btn-logout:active {
+    transform: translateY(0);
+}
+
+/* User Profile Dropdown Menu */
+.profile-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-avatar-trigger {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    color: white;
+    font-weight: 850;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    user-select: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.profile-avatar-trigger:hover {
+    background: var(--primary-color);
+    border-color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.profile-dropdown-card {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    width: 240px;
+    padding: 0.75rem 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+    animation: dropdownFade 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dropdownFade {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-dropdown-card.open {
+    display: flex;
+}
+
+.dropdown-user-info {
+    padding: 0.5rem 1.2rem 0.6rem;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.dropdown-user-name {
+    font-weight: 850;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-user-username {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    margin-top: 0.15rem;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 0.4rem 0;
+}
+
+.profile-dropdown-card a {
+    padding: 0.6rem 1.2rem;
+    color: var(--text-dark) !important;
+    font-size: 0.88rem !important;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 700 !important;
+    transition: background 0.2s ease, color 0.2s ease;
+    text-align: left;
+}
+
+.profile-dropdown-card a:hover {
+    background: var(--bg-secondary) !important;
+    color: var(--primary-color) !important;
+}
+
+.profile-dropdown-card a.active {
+    background: rgba(59, 130, 246, 0.05) !important;
+    color: var(--primary-color) !important;
+}
+
+.dropdown-logout-btn {
+    margin: 0.35rem 0.75rem 0.2rem;
+    background: rgba(239, 68, 68, 0.08) !important;
+    border: 1px solid rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+    padding: 0.55rem !important;
+    font-size: 0.88rem !important;
+    font-weight: 750 !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.35rem !important;
+    transition: all 0.25s ease !important;
+}
+
+.dropdown-logout-btn:hover {
+    background: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+@media (max-width: 768px) {
+    .profile-dropdown-container {
+        display: block;
+        width: 100%;
+    }
+    .profile-avatar-trigger {
+        margin: 0.5rem auto;
+    }
+    .profile-dropdown-card {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        background: transparent;
+        padding: 0;
+        margin-top: 0.5rem;
+        display: none;
+    }
+    .profile-dropdown-card.open {
+        display: flex;
+    }
+    .dropdown-user-info {
+        text-align: center;
+        padding: 0.5rem 0;
+    }
+    .dropdown-user-name {
+        color: white !important;
+    }
+    .dropdown-user-username {
+        color: rgba(255, 255, 255, 0.6) !important;
+    }
+    .dropdown-divider {
+        background: rgba(255, 255, 255, 0.15);
+    }
+    .profile-dropdown-card a {
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.85) !important;
+        padding: 0.65rem 0;
+    }
+    .profile-dropdown-card a:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: white !important;
+    }
+    .profile-dropdown-card a.active {
+        background: rgba(255, 255, 255, 0.12) !important;
+        color: white !important;
+    }
+}
+
+/* Global Light Mode Overrides for Student Panels */
+html:not([data-theme="dark"]) body {
+    background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%) !important;
+    color: var(--text-dark) !important;
+}
+
+html:not([data-theme="dark"]) .db-stat-card,
+html:not([data-theme="dark"]) .db-panel,
+html:not([data-theme="dark"]) .summary-chip,
+html:not([data-theme="dark"]) .course-card {
+    background: #ffffff !important;
+    border-color: #d1fae5 !important;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.05) !important;
+}
+
+html:not([data-theme="dark"]) .db-welcome-text h1,
+html:not([data-theme="dark"]) .db-panel-title,
+html:not([data-theme="dark"]) .page-header-left h1,
+html:not([data-theme="dark"]) .course-card-info h3,
+html:not([data-theme="dark"]) .summary-chip-text strong {
+    color: #0f172a !important;
+}
+
+html:not([data-theme="dark"]) .db-welcome-text p,
+html:not([data-theme="dark"]) .db-stat-label,
+html:not([data-theme="dark"]) .summary-chip-text span,
+html:not([data-theme="dark"]) .course-card-info p {
+    color: #64748b !important;
+}
+
+html:not([data-theme="dark"]) .db-hero {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%) !important;
+    border-color: #a7f3d0 !important;
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.08) !important;
+}
+
+html:not([data-theme="dark"]) .db-hero h1 {
+    color: #0f172a !important;
+}
+
+html:not([data-theme="dark"]) .search-wrap input,
+html:not([data-theme="dark"]) .filter-chip,
+html:not([data-theme="dark"]) .skill-chip {
+    background: #ffffff !important;
+    border-color: #d1fae5 !important;
+    color: #0f172a !important;
+}
+
+html:not([data-theme="dark"]) .search-wrap input::placeholder {
+    color: #64748b !important;
+}
+
+html:not([data-theme="dark"]) .filter-chip.active,
+html:not([data-theme="dark"]) .filter-chip:hover {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #10B981 !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
 }
