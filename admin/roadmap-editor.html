@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Roadmap Editor | SkillBridge</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <style>
+    .roadmap-editor-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .editor-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 2rem;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 992px) {
+      .editor-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Course list sidebar */
+    .course-list-box {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+      max-height: 700px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .course-list-box h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: var(--text-dark);
+      border-bottom: 1.5px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+    .search-bar { 
+      width:100%; 
+      padding:.6rem 1rem; 
+      border:1.5px solid var(--border-color); 
+      border-radius:10px; 
+      font-size:.9rem; 
+      background:var(--card-bg); 
+      color:var(--text-dark); 
+      outline:none; 
+    }
+    .search-bar:focus {
+      border-color: var(--primary-color);
+    }
+    .course-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-dark);
+      transition: all 0.2s;
+      margin-bottom: 0.5rem;
+      background: var(--bg-secondary);
+      border: 1.5px solid transparent;
+    }
+    .course-item:hover, .course-item.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    /* Main Editor */
+    .main-editor-box {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 2rem;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    }
+    .editor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .editor-header h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 850;
+      color: var(--text-dark);
+    }
+
+    /* Stage card styling */
+    .stage-row-card {
+      border: 1.5px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+      background: var(--bg-secondary);
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .stage-row-card:focus-within {
+      border-color: var(--primary-color);
+      box-shadow: var(--shadow);
+    }
+    .stage-title-header {
+      font-weight: 800;
+      font-size: 1.05rem;
+      margin-bottom: 1.25rem;
+      color: var(--text-dark);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 80px 180px 180px 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .form-field label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .form-field input, .form-field textarea {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.55rem 0.8rem;
+      color: var(--text-dark);
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-field input:focus, .form-field textarea:focus {
+      border-color: var(--primary-color);
+    }
+    .form-field textarea {
+      resize: vertical;
+      min-height: 50px;
+    }
+
+    /* Modals overlays & preview frames */
+    .modal-overlay { 
+      display:none; 
+      position:fixed; 
+      inset:0; 
+      background:rgba(0,0,0,.6); 
+      backdrop-filter:blur(4px); 
+      z-index:1000; 
+      align-items:center; 
+      justify-content:center; 
+    }
+    .modal-overlay.open { 
+      display:flex; 
+    }
+    .modal-box { 
+      background:var(--card-bg); 
+      border-radius:16px; 
+      padding:2rem; 
+      width:min(640px,95vw); 
+      max-height:90vh; 
+      overflow-y:auto; 
+      box-shadow:0 20px 60px rgba(0,0,0,.25); 
+      border: 1px solid var(--border-color);
+    }
+    .modal-box h2 { 
+      margin-bottom:1.5rem; 
+      font-size:1.35rem; 
+      font-weight: 850;
+      color: var(--text-dark);
+    }
+    .modal-actions { 
+      display:flex; 
+      gap:1rem; 
+      justify-content:flex-end; 
+      margin-top:1.5rem; 
+    }
+    .btn-save {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 0.65rem 1.6rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+    }
+    .btn-save:hover { opacity: 0.9; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.55rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .success-alert {
+      display: none;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1.5px solid #10b981;
+      color: var(--text-dark);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+
+    /* Live Preview Roadmap visualizer */
+    .rm-stage-card {
+      background: var(--light-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .rm-stage-header {
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .rm-chip {
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.15);
+      color: var(--text-dark);
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      display: inline-block;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <a href="../index.html" class="logo">SkillBridge</a>
+      <ul class="nav-links"></ul>
+      <div class="hamburger"><span></span><span></span><span></span></div>
+    </div>
+  </nav>
+
+  <section class="section" style="padding: 2.5rem 1rem;">
+    <div class="container roadmap-editor-wrapper">
+      
+      <!-- Header -->
+      <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <a href="dashboard.html" style="text-decoration: none; font-size: 1.4rem;" title="Back to Dashboard">⬅️</a>
+        <h1 class="section-title" style="margin: 0;">🧭 Career Roadmap Editor</h1>
+      </div>
+      <p style="color: var(--text-light); margin-top: -1rem; margin-bottom: 2rem;">Configure custom step-by-step learning stages (Beginner to Career Ready) for SkillBridge courses.</p>
+
+      <div class="editor-layout">
+        
+        <!-- LEFT: Course Selector -->
+        <div class="course-list-box">
+          <h3>Select Course</h3>
+          <input type="text" id="courseSearch" placeholder="🔍 Search course..." class="search-bar" style="margin-bottom: 1rem;" oninput="filterCoursesList()" />
+          <div id="courseListContainer" style="flex: 1; overflow-y: auto; padding-right: 0.25rem;"></div>
+        </div>
+
+        <!-- RIGHT: Stages Editor -->
+        <div class="main-editor-box">
+          <div id="successMsg" class="success-alert">✓ Course learning roadmap saved and updated successfully!</div>
+
+          <div id="editorContent" style="display: none;">
+            <div class="editor-header">
+              <h2 id="selectedCourseTitle">Course Title</h2>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-dark);" onclick="previewRoadmap()">👁 Live Preview</button>
+                <button class="btn-save" onclick="saveRoadmap()">💾 Save Roadmap</button>
+              </div>
+            </div>
+
+            <!-- Stages Form Container -->
+            <div id="stagesContainer"></div>
+
+            <!-- Editor Action Bar -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2rem; border-top: 1.5px solid var(--border-color); padding-top: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+              <button class="btn" style="background: rgba(16,185,129,0.08); color: var(--primary-color); border: 1.5px dashed var(--primary-color); padding: 0.6rem 1.25rem;" onclick="addNewStage()">➕ Add Stage</button>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-dark);" onclick="previewRoadmap()">👁 Live Preview</button>
+                <button class="btn-save" onclick="saveRoadmap()">💾 Save Roadmap</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="noCourseSelected" style="text-align: center; padding: 6rem 1rem; color: var(--text-light);">
+            <p style="font-size: 3.5rem; margin-bottom: 1rem;">👈</p>
+            <p style="font-size: 1.05rem; font-weight: 700;">Select a study course on the left to load its learning stages</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Student-View Preview Modal -->
+  <div class="modal-overlay" id="previewModal">
+    <div class="modal-box" style="width: min(680px, 95vw); display: flex; flex-direction: column;">
+      <h2 style="border-bottom: 1.5px solid var(--border-color); padding-bottom: 0.8rem; margin: 0 0 1rem 0;">🧭 Career Roadmap Live Preview</h2>
+      
+      <p style="font-size: 0.82rem; color: var(--text-light); margin-top: -0.5rem; margin-bottom: 1.5rem; font-style: italic;">(This is how the roadmap will render to students in their course syllabus details)</p>
+
+      <div style="flex: 1; overflow-y: auto; padding-right: 0.25rem;" id="previewContainer">
+        <!-- Renders timeline dynamically -->
+      </div>
+      
+      <div class="modal-actions" style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+        <button class="btn-cancel" onclick="closePreviewModal()">Close Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    let activeCourseId = null;
+    let allCoursesList = [];
+    let currentRoadmapStages = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      requireRole('admin');
+      loadCoursesList();
+    });
+
+    function loadCoursesList() {
+      const courses = JSON.parse(localStorage.getItem('customCourses') || 'null') || coursesData;
+      allCoursesList = courses;
+      filterCoursesList();
+    }
+
+    function filterCoursesList() {
+      const search = document.getElementById('courseSearch').value.toLowerCase();
+      const listContainer = document.getElementById('courseListContainer');
+      listContainer.innerHTML = '';
+      
+      const filtered = allCoursesList.filter(c => 
+        (c.title || '').toLowerCase().includes(search) || 
+        (c.category || '').toLowerCase().includes(search)
+      );
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `<div style="text-align: center; font-size: 0.85rem; color: var(--text-light); padding: 1.5rem 0;">No courses match.</div>`;
+        return;
+      }
+
+      filtered.forEach(course => {
+        const item = document.createElement('div');
+        item.className = 'course-item';
+        if (activeCourseId === course.id) item.classList.add('active');
+        item.dataset.id = course.id;
+        item.innerHTML = `<span>${course.icon}</span> <span>${course.title}</span>`;
+        item.addEventListener('click', () => selectCourse(course.id, course.title));
+        listContainer.appendChild(item);
+      });
+    }
+
+    function selectCourse(courseId, courseTitle) {
+      activeCourseId = courseId;
+      
+      document.querySelectorAll('.course-item').forEach(item => {
+        item.classList.toggle('active', parseInt(item.dataset.id) === courseId);
+      });
+
+      document.getElementById('selectedCourseTitle').textContent = `${courseTitle} Syllabus stages`;
+      document.getElementById('noCourseSelected').style.display = 'none';
+      document.getElementById('editorContent').style.display = 'block';
+
+      // Load stages into local memory
+      const rmData = courseRoadmapData[courseId];
+      currentRoadmapStages = rmData && rmData.stages ? JSON.parse(JSON.stringify(rmData.stages)) : [];
+
+      // Seed a default stage if empty
+      if (currentRoadmapStages.length === 0) {
+        currentRoadmapStages.push({
+          icon: "🌱",
+          stage: "Beginner Stage",
+          duration: "Weeks 1-4",
+          topics: ["HTML Syntax"],
+          tools: ["VS Code"],
+          outcome: "Build simple markup layouts"
+        });
+      }
+
+      renderStages();
+    }
+
+    function renderStages() {
+      const container = document.getElementById('stagesContainer');
+      container.innerHTML = '';
+
+      if (currentRoadmapStages.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-light); padding: 2rem 0; font-style: italic;">No stages configured. Click "+ Add Stage" below.</div>`;
+        return;
+      }
+
+      currentRoadmapStages.forEach((stage, i) => {
+        const title = stage.stage || `Stage ${i + 1}`;
+        const icon = stage.icon || '📖';
+        const duration = stage.duration || '';
+        const topics = stage.topics ? stage.topics.join(', ') : '';
+        const tools = stage.tools ? stage.tools.join(', ') : '';
+        const outcome = stage.outcome || '';
+
+        const card = document.createElement('div');
+        card.className = 'stage-row-card';
+        card.innerHTML = `
+          <div class="stage-title-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 0.5rem;">
+            <div>Stage <span class="stage-num">${i + 1}</span>: <span style="color: var(--primary-color);">${title}</span></div>
+            <div style="display:flex; gap:0.3rem;">
+              <button class="btn" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-dark);" onclick="moveStage(${i}, -1)" ${i === 0 ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''}>▲ Up</button>
+              <button class="btn" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-dark);" onclick="moveStage(${i}, 1)" ${i === currentRoadmapStages.length - 1 ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''}>▼ Down</button>
+              <button class="btn" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.15); color: #ef4444;" onclick="deleteStage(${i})">🗑 Delete</button>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Icon (Emoji)</label>
+              <input type="text" class="stage-icon" value="${icon}" placeholder="Emoji" maxlength="4" />
+            </div>
+            <div class="form-field">
+              <label>Stage Name</label>
+              <input type="text" class="stage-name" value="${title}" placeholder="e.g. Fundamentals" />
+            </div>
+            <div class="form-field">
+              <label>Duration</label>
+              <input type="text" class="stage-duration" value="${duration}" placeholder="e.g. Weeks 1-4" />
+            </div>
+            <div class="form-field">
+              <label>Outcome</label>
+              <input type="text" class="stage-outcome" value="${outcome}" placeholder="What you'll achieve in this stage" />
+            </div>
+          </div>
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="form-field">
+              <label>Topics to Learn (comma-separated)</label>
+              <textarea class="stage-topics" rows="2" placeholder="HTML Structure, CSS Styling...">${topics}</textarea>
+            </div>
+            <div class="form-field">
+              <label>Tools & Resources (comma-separated)</label>
+              <textarea class="stage-tools" rows="2" placeholder="VS Code, Git...">${tools}</textarea>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Save form DOM values back to local memory array
+    function syncDOMToMemory() {
+      const cards = document.querySelectorAll('.stage-row-card');
+      const updatedStages = [];
+      
+      cards.forEach(card => {
+        updatedStages.push({
+          icon: card.querySelector('.stage-icon').value.trim(),
+          stage: card.querySelector('.stage-name').value.trim() || 'Syllabus Stage',
+          duration: card.querySelector('.stage-duration').value.trim() || 'Self-paced',
+          topics: card.querySelector('.stage-topics').value.split(',').map(s=>s.trim()).filter(Boolean),
+          tools: card.querySelector('.stage-tools').value.split(',').map(s=>s.trim()).filter(Boolean),
+          outcome: card.querySelector('.stage-outcome').value.trim()
+        });
+      });
+      
+      currentRoadmapStages = updatedStages;
+    }
+
+    function addNewStage() {
+      syncDOMToMemory();
+      currentRoadmapStages.push({
+        icon: "💡",
+        stage: `Stage ${currentRoadmapStages.length + 1}`,
+        duration: "Weeks...",
+        topics: [],
+        tools: [],
+        outcome: ""
+      });
+      renderStages();
+      
+      // Auto-scroll to the new stage card
+      setTimeout(() => {
+        const cards = document.querySelectorAll('.stage-row-card');
+        if (cards.length > 0) {
+          cards[cards.length - 1].scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+
+    function deleteStage(index) {
+      if (!confirm('Are you sure you want to delete this roadmap stage?')) return;
+      syncDOMToMemory();
+      currentRoadmapStages.splice(index, 1);
+      renderStages();
+    }
+
+    function moveStage(index, direction) {
+      syncDOMToMemory();
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= currentRoadmapStages.length) return;
+
+      // Swap
+      const temp = currentRoadmapStages[index];
+      currentRoadmapStages[index] = currentRoadmapStages[targetIndex];
+      currentRoadmapStages[targetIndex] = temp;
+
+      renderStages();
+    }
+
+    function saveRoadmap() {
+      if (!activeCourseId) return;
+      syncDOMToMemory();
+
+      // Update local storage datasets
+      courseRoadmapData[activeCourseId] = { stages: currentRoadmapStages };
+      localStorage.setItem('courseRoadmapData', JSON.stringify(courseRoadmapData));
+
+      // Show success alert
+      const alertDiv = document.getElementById('successMsg');
+      alertDiv.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        alertDiv.style.display = 'none';
+      }, 3000);
+    }
+
+    // ── Live Preview modal logic ──────────────────────────────────
+    function previewRoadmap() {
+      syncDOMToMemory();
+      const previewContainer = document.getElementById('previewContainer');
+      previewContainer.innerHTML = '';
+
+      if (currentRoadmapStages.length === 0) {
+        previewContainer.innerHTML = `<p style="text-align: center; color: var(--text-light); font-style: italic;">No roadmap stages to preview.</p>`;
+      } else {
+        previewContainer.innerHTML = currentRoadmapStages.map((stage, i) => `
+          <div class="rm-stage-card">
+            <div class="rm-stage-header">
+              <span style="font-size: 2.2rem; flex-shrink:0;">${stage.icon || '📖'}</span>
+              <div style="flex:1; text-align: left;">
+                <div style="font-weight:800; font-size:1.05rem; color: var(--text-dark);">${stage.stage}</div>
+                <div style="font-size:0.8rem; color: var(--text-light); margin-top: 0.15rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">🕒 ${stage.duration || 'Self-paced'}</div>
+              </div>
+            </div>
+            <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; text-align: left;">
+                <div>
+                  <p style="font-weight:800; margin:0 0 0.5rem; font-size:0.85rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px;">📚 What to Learn</p>
+                  <div style="display:flex; flex-direction:column; gap:0.4rem;">
+                    ${stage.topics.length > 0 
+                      ? stage.topics.map(t => `
+                          <div style="display:flex;align-items:flex-start;gap:0.4rem;padding:0.4rem 0.65rem;background:var(--bg-secondary);border-radius:6px;border-left:3px solid var(--primary-color);">
+                            <span style="color:var(--primary-color);flex-shrink:0;">›</span>
+                            <span style="font-size:0.82rem;color:var(--text-dark); font-weight: 600;">${t}</span>
+                          </div>
+                        `).join('')
+                      : '<div style="color: var(--text-light); font-size: 0.8rem; font-style: italic;">No topics added.</div>'
+                    }
+                  </div>
+                </div>
+                <div>
+                  <p style="font-weight:800; margin:0 0 0.5rem; font-size:0.85rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px;">🔧 Tools & Resources</p>
+                  <div style="display:flex; flex-wrap:wrap; gap:0.4rem; align-content: flex-start;">
+                    ${stage.tools.length > 0
+                      ? stage.tools.map(t => `<span class="rm-chip">🔧 ${t}</span>`).join('')
+                      : '<div style="color: var(--text-light); font-size: 0.8rem; font-style: italic;">No tools added.</div>'
+                    }
+                  </div>
+                </div>
+              </div>
+              
+              ${stage.outcome 
+                ? `
+                  <div style="background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(59,130,246,0.04));border:1px dashed var(--primary-color);border-radius:10px;padding:0.75rem 1rem;display:flex;align-items:flex-start;gap:0.6rem; text-align: left; margin-top: 0.25rem;">
+                    <span style="font-size:1.25rem;flex-shrink:0;">🎯</span>
+                    <div>
+                      <p style="font-weight:800;margin:0 0 0.15rem;font-size:0.85rem;color:var(--primary-color); text-transform: uppercase; letter-spacing: 0.5px;">Stage Outcome</p>
+                      <p style="margin:0;font-size:0.85rem;color:var(--text-dark); line-height: 1.4;">${stage.outcome}</p>
+                    </div>
+                  </div>
+                ` 
+                : ''
+              }
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('previewModal').classList.add('open');
+    }
+
+    function closePreviewModal() {
+      document.getElementById('previewModal').classList.remove('open');
+    }
+
+    document.getElementById('previewModal').addEventListener('click', function(e) {
+      if (e.target === this) closePreviewModal();
+    });
+  </script>
+</body>
+</html>
