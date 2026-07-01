@@ -237,6 +237,31 @@
 
             setMode('register');
 
+            function handleAuthSuccessRedirect(userRole) {
+                const pendingEnrollId = sessionStorage.getItem('pendingEnrollId');
+                const pendingEnrollTitle = sessionStorage.getItem('pendingEnrollTitle');
+                
+                if (userRole === 'student' && pendingEnrollId && pendingEnrollTitle) {
+                    let enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+                    if (!enrolled.some(e => String(e.id) === String(pendingEnrollId))) {
+                        enrolled.push({
+                            id: parseInt(pendingEnrollId),
+                            title: pendingEnrollTitle,
+                            enrolledAt: new Date().toLocaleString()
+                        });
+                        localStorage.setItem('enrolledCourses', JSON.stringify(enrolled));
+                    }
+                    sessionStorage.removeItem('pendingEnrollId');
+                    sessionStorage.removeItem('pendingEnrollTitle');
+                    
+                    const target = `course-details.html?id=${pendingEnrollId}`;
+                    setTimeout(()=>{ window.location.href = target; }, 650);
+                } else {
+                    const target = userRole === 'admin' ? 'admin/dashboard.html' : 'student/dashboard.html';
+                    setTimeout(()=>{ window.location.href = target; }, 650);
+                }
+            }
+
             form?.addEventListener('submit', function(e){
                 e.preventDefault();
 
@@ -258,12 +283,11 @@
                         localStorage.setItem('userFullName', fullName);
 
                         statusEl.style.display = 'block';
-                        statusEl.textContent = 'Account created! Redirecting to dashboard...';
+                        statusEl.textContent = 'Account created! Redirecting...';
                         statusEl.classList.remove('error');
                         statusEl.classList.add('success');
 
-                        const target = role === 'admin' ? 'admin/dashboard.html' : 'student/dashboard.html';
-                        setTimeout(()=>{ window.location.href = target; }, 650);
+                        handleAuthSuccessRedirect('student');
                     } else {
                         statusEl.style.display = 'block';
                         statusEl.textContent = res.message;
@@ -278,8 +302,7 @@
                         statusEl.classList.remove('error');
                         statusEl.classList.add('success');
 
-                        const target = role === 'admin' ? 'admin/dashboard.html' : 'student/dashboard.html';
-                        setTimeout(()=>{ window.location.href = target; }, 650);
+                        handleAuthSuccessRedirect(res.role);
                     } else {
                         statusEl.style.display = 'block';
                         statusEl.textContent = res.message;
