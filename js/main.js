@@ -13,6 +13,28 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
+    // Check and clear old cached courses if schema is outdated or missing Finance courses (ID 21)
+    const stored = localStorage.getItem('coursesData') || localStorage.getItem('customCourses');
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            const financeCourse = parsed.find(c => c.id === 21);
+            if (!financeCourse) {
+                localStorage.removeItem('coursesData');
+                localStorage.removeItem('customCourses');
+                window.location.reload();
+                return;
+            }
+        } catch(e) {}
+    }
+
+    // Sync and clear old cached quiz data if version is outdated
+    if (localStorage.getItem('quizDataVersion') !== '3.0') {
+        localStorage.removeItem('customQuizzes');
+        localStorage.removeItem('quizEditorData');
+        localStorage.setItem('quizDataVersion', '3.0');
+    }
+
     checkOnboardingRedirect();
     seedDemoUsers();
     setupAuthHelpers();
@@ -117,6 +139,7 @@ function getLoginPath(expectedRole) {
 
 function logoutUser() {
     localStorage.removeItem('session');
+    localStorage.removeItem('userFullName');
 }
 
 function normalizeEmail(email) {
@@ -131,7 +154,7 @@ function registerUser({ fullName, username, email, password, role }) {
     seedDemoUsers();
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    const uname = (username || '').trim();
+    const uname = (username || '').trim().toLowerCase();
     const fname = (fullName || '').trim();
     const emailValue = normalizeEmail(email);
 
@@ -143,7 +166,7 @@ function registerUser({ fullName, username, email, password, role }) {
         return { ok: false, message: 'Please enter a valid email address.' };
     }
 
-    if (users.some(u => u.username === uname)) {
+    if (users.some(u => u.username.toLowerCase() === uname)) {
         return { ok: false, message: 'Username already exists. Please login.' };
     }
 
@@ -174,7 +197,7 @@ function loginUser({ username, password, role }) {
     seedDemoUsers();
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    const loginId = (username || '').trim();
+    const loginId = (username || '').trim().toLowerCase();
     const loginEmail = normalizeEmail(loginId);
 
     if (!loginId || !password) {
@@ -182,7 +205,7 @@ function loginUser({ username, password, role }) {
     }
 
     const matches = users.filter((u) => {
-        const sameUsername = u.username === loginId;
+        const sameUsername = u.username.toLowerCase() === loginId;
         const sameEmail = normalizeEmail(u.email) === loginEmail;
         return (sameUsername || sameEmail) && u.password === password;
     });
@@ -220,7 +243,7 @@ function resetPassword({ username, newPassword, role }) {
     seedDemoUsers();
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    const uname = (username || '').trim();
+    const uname = (username || '').trim().toLowerCase();
 
     if (!uname || !newPassword) {
         return { ok: false, message: 'Please enter username and new password.' };
@@ -231,7 +254,7 @@ function resetPassword({ username, newPassword, role }) {
     }
 
     const expectedRole = role === 'admin' ? 'admin' : 'student';
-    const user = users.find((u) => u.username === uname && u.role === expectedRole);
+    const user = users.find((u) => u.username.toLowerCase() === uname && u.role === expectedRole);
 
     if (!user) {
         return { ok: false, message: 'No account found with this username.' };
@@ -302,7 +325,7 @@ function setupThemeToggle() {
 function updateThemeToggleButton(theme) {
     const themeToggle = document.getElementById('themeToggle');
     if (themeToggle) {
-        themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+        themeToggle.textContent = theme === 'light' ? '☀️' : '🌙';
     }
 }
 
@@ -316,6 +339,34 @@ function initializeSkillCards() {
         const courses = limit ? coursesData.slice(0, parseInt(limit, 10)) : coursesData;
         renderSkillCards(courses);
     }
+}
+
+function getSkillCardButtons(course) {
+    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+    const completed = JSON.parse(localStorage.getItem('completedCourses') || '[]');
+    const isEnrolled = enrolled.some(e => String(e.id) === String(course.id));
+    const isCompleted = completed.some(c => String(c.id) === String(course.id));
+
+    if (isCompleted) {
+        return `
+            <button class="btn btn-primary" onclick="viewCourseDetails(${course.id})">View Details</button>
+            <button class="btn btn-secondary" style="background:#10b981; border-color:#10b981; color:white; font-weight:700;" disabled>✅ Completed</button>
+        `;
+    } else if (isEnrolled) {
+        return `
+            <button class="btn btn-primary" onclick="viewCourseDetails(${course.id})">View Details</button>
+            <button class="btn btn-secondary" style="background:rgba(59,130,246,0.1); color:#3b82f6; border-color:#3b82f6; font-weight:700;" onclick="viewCourseDetails(${course.id})">Resume Study</button>
+        `;
+    } else {
+        return `
+            <button class="btn btn-primary" onclick="viewCourseDetails(${course.id})">View Details</button>
+            <button class="btn btn-secondary" onclick="enrollCourse(${course.id}, '${escapeQuote(course.title)}')">Enroll Now</button>
+        `;
+    }
+}
+
+function escapeQuote(str) {
+    return str.replace(/'/g, "\\'");
 }
 
 function renderSkillCards(courses) {
@@ -336,12 +387,7 @@ function renderSkillCards(courses) {
                     <span>⭐ ${course.rating}</span>
                 </div>
                 <div class="skill-card-footer">
-                    <button class="btn btn-primary" onclick="viewCourseDetails(${course.id})">
-                        View Details
-                    </button>
-                    <button class="btn btn-secondary" onclick="markAsCompleted(${course.id}, '${course.title}')">
-                        Enroll Now
-                    </button>
+                    ${getSkillCardButtons(course)}
                 </div>
             </div>
         </div>
@@ -426,8 +472,52 @@ function getCourseVideoInfo(courseId) {
 function renderCourseDetailHero(course) {
     if (!course.detailImage) return '';
     return `
-                <section style="padding: 0; overflow: hidden;">
-                    <img src="${course.detailImage}" alt="${course.title}" style="width: 100%; height: auto; display: block;">
+                <style>
+                    .course-detail-banner-container {
+                        position: relative;
+                        width: 100%;
+                        height: 420px;
+                        overflow: hidden;
+                        background: #0a0e1a;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-bottom: 2px solid var(--border-color, #1e293b);
+                    }
+                    .course-detail-banner-bg {
+                        position: absolute;
+                        inset: -20px;
+                        background-image: url('${course.detailImage}');
+                        background-size: cover;
+                        background-position: center;
+                        filter: blur(18px) brightness(0.35);
+                        transform: scale(1.1);
+                        z-index: 0;
+                    }
+                    .course-detail-banner-img {
+                        position: relative;
+                        z-index: 1;
+                        max-width: 100%;
+                        max-height: 400px;
+                        width: auto;
+                        height: auto;
+                        object-fit: contain;
+                        display: block;
+                        border-radius: 6px;
+                        box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+                    }
+                    @media (max-width: 768px) {
+                        .course-detail-banner-container {
+                            height: 260px;
+                        }
+                        .course-detail-banner-img {
+                            max-height: 230px;
+                        }
+                    }
+                </style>
+                <section class="course-detail-banner-container">
+                    <div class="course-detail-banner-bg"></div>
+                    <img src="${course.detailImage}" alt="${course.title}" class="course-detail-banner-img">
                 </section>`;
 }
 
@@ -435,9 +525,36 @@ function renderCourseVideoEmbed(course) {
     const { videoId, title } = getCourseVideoInfo(course.id);
     if (!videoId) return '';
 
+    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+    const isEnrolled = enrolled.some(e => String(e.id) === String(course.id));
+
+    const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+    const isWatched = watched.includes(String(course.id));
+
+    let actionBtn = '';
+    if (isWatched) {
+        actionBtn = `
+            <button class="btn" style="background:#10b981; border:1px solid #10b981; color:white; font-weight:700; width:100%; max-width:320px; padding:0.65rem; margin-top:1.5rem;" disabled>
+                ✅ Video Lesson Completed
+            </button>
+        `;
+    } else if (isEnrolled) {
+        actionBtn = `
+            <button class="btn btn-secondary" onclick="markVideoAsWatched(${course.id})" style="font-weight:700; width:100%; max-width:320px; padding:0.65rem; margin-top:1.5rem;">
+                🎥 Mark Video Lesson as Completed
+            </button>
+        `;
+    } else {
+        actionBtn = `
+            <button class="btn btn-outline" onclick="enrollCourse(${course.id}, '${escapeQuote(course.title)}')" style="font-weight:700; width:100%; max-width:320px; padding:0.65rem; margin-top:1.5rem;">
+                🔔 Enroll to Unlock Progress Tracking
+            </button>
+        `;
+    }
+
     return `
-                    <div style="margin-bottom: 3rem;">
-                        <div style="background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                    <div style="margin-bottom: 3rem; display:flex; flex-direction:column; align-items:center;">
+                        <div style="background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3); width:100%;">
                             <div style="position: relative; padding-bottom: 56.25%; height: 0;">
                                 <iframe
                                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
@@ -448,10 +565,69 @@ function renderCourseVideoEmbed(course) {
                                 </iframe>
                             </div>
                         </div>
+                        ${actionBtn}
                         <p style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
                             ℹ️ <strong>Video plays on live server.</strong> In development (file://) there may be restrictions, but it works perfectly when deployed!
                         </p>
                     </div>`;
+}
+
+function getDetailsHeroEnrollSection(course) {
+    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+    const completed = JSON.parse(localStorage.getItem('completedCourses') || '[]');
+    const isEnrolled = enrolled.some(e => String(e.id) === String(course.id));
+    const isCompleted = completed.some(c => String(c.id) === String(course.id));
+
+    if (isCompleted) {
+        return `
+            <div class="section" style="text-align: center; padding: 1.5rem 0;">
+                <div class="container" style="display: flex; justify-content: center;">
+                    <div style="background: rgba(16,185,129,0.08); border: 2px solid #10b981; border-radius: 12px; padding: 1.5rem; width: 100%; max-width: 500px; text-align: center;">
+                        <h4 style="color: #10b981; font-weight: 800; margin-bottom: 0.4rem; font-size: 1.25rem;">🎉 Course Completed!</h4>
+                        <p style="margin: 0 0 1rem 0; color: var(--text-light); font-size: 0.95rem;">You have completed the video lesson and successfully passed the quiz.</p>
+                        <a href="certificate.html" class="btn btn-primary" style="display: inline-block; padding: 0.7rem 1.6rem; font-size: 0.95rem; font-weight: 700; text-decoration: none; border-radius: 8px;">🎓 View Your Certificate</a>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (isEnrolled) {
+        const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+        const isVideoWatched = watched.includes(String(course.id));
+
+        const quizScores = JSON.parse(localStorage.getItem('quizScores') || '[]');
+        const attempts = quizScores.filter(q => String(q.courseId) === String(course.id));
+        const hasPassedQuiz = attempts.some(q => q.percentage >= 70);
+
+        return `
+            <div class="section" style="text-align: center; padding: 1.5rem 0;">
+                <div class="container" style="display: flex; justify-content: center;">
+                    <div style="background: var(--bg-secondary); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 1.5rem; width: 100%; max-width: 500px; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                        <h4 style="color: var(--text-dark); font-weight: 800; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 1.5px solid var(--border-color); padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">🧭 Course Completion Progress</h4>
+                        <div style="display:flex; flex-direction:column; gap:0.8rem;">
+                            <div style="display:flex; align-items:center; gap:0.75rem;">
+                                <span style="font-size:1.2rem; flex-shrink: 0;">${isVideoWatched ? '✅' : '⏳'}</span>
+                                <span style="font-size:0.95rem; color:${isVideoWatched ? '#10b981' : 'var(--text-light)'}; font-weight:${isVideoWatched ? '700' : '500'};">Watch the Video Lesson</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.75rem;">
+                                <span style="font-size:1.2rem; flex-shrink: 0;">${hasPassedQuiz ? '✅' : '⏳'}</span>
+                                <span style="font-size:0.95rem; color:${hasPassedQuiz ? '#10b981' : 'var(--text-light)'}; font-weight:${hasPassedQuiz ? '700' : '500'};">Pass the Assessment Quiz (>= 70%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        return `
+            <div class="section" style="text-align: center; padding: 1.5rem 0;">
+                <div class="container" style="display: flex; justify-content: center;">
+                    <button class="btn btn-primary" style="width: 100%; max-width: 420px; padding: 1.1rem; font-size: 1.15rem; font-weight: 800; border-radius: 10px; box-shadow: 0 4px 14px rgba(59,130,246,0.35);" onclick="enrollCourse(${course.id}, '${escapeQuote(course.title)}')">
+                        ✨ Enroll Now - Start Learning
+                    </button>
+                </div>
+            </div>
+        `;
+    }
 }
 
 function displayCourseDetails() {
@@ -478,9 +654,36 @@ function displayCourseDetails() {
 
     const detailsContainer = document.querySelector('.course-details');
     if (detailsContainer) {
-        const isAdmin = localStorage.getItem('userRole') === 'admin';
+        const session = JSON.parse(localStorage.getItem('session')) || null;
+        const isAdmin = session?.role === 'admin';
         const adminBtn = isAdmin ? `<button onclick="window.location.href='admin/image-editor.html?courseId=${course.id}'" style="position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">🎨 Edit Image</button>` : '';
         
+        const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+        const isEnrolled = enrolled.some(e => String(e.id) === String(course.id));
+        const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+        const isVideoWatched = watched.includes(String(course.id));
+
+        let quizBtn = '';
+        if (!isEnrolled) {
+            quizBtn = `
+                <button class="btn btn-quiz" style="width: 100%; padding: 1rem; margin-top: 1rem; background: #4b5563; border-color: #4b5563; opacity: 0.6; cursor: not-allowed;" onclick="alert('⚠️ Please enroll in this course first.')">
+                    🔒 Take Quiz (Enroll first)
+                </button>
+            `;
+        } else if (!isVideoWatched) {
+            quizBtn = `
+                <button class="btn btn-quiz" style="width: 100%; padding: 1rem; margin-top: 1rem; background: #4b5563; border-color: #4b5563; opacity: 0.6; cursor: not-allowed;" onclick="alert('⚠️ Please watch and complete the course video first.')">
+                    🔒 Take Quiz (Watch video first)
+                </button>
+            `;
+        } else {
+            quizBtn = `
+                <button class="btn btn-quiz" style="width: 100%; padding: 1rem; margin-top: 1rem;" onclick="startQuiz(${course.id})">
+                    📝 Take Quiz
+                </button>
+            `;
+        }
+
         detailsContainer.innerHTML = `
             <div style="position: relative;">
                 ${adminBtn}
@@ -493,49 +696,64 @@ function displayCourseDetails() {
                 </div>
             </div>
 
-            <div class="section">
-                <div class="container">
-                    <button class="btn btn-primary" style="width: 100%; max-width: 400px; padding: 1rem; font-size: 1.1rem; margin-bottom: 2rem;" onclick="enrollCourse(${course.id}, '${course.title}')">
-                        ✨ Enroll Now - Start Learning
-                    </button>
-                </div>
-            </div>
+            ${getDetailsHeroEnrollSection(course)}
 
             <div class="section">
                 <div class="details-container">
                     <div class="details-main">
-                        <div class="details-section">
-                            <h3>📖 Course Overview</h3>
-                            <p>${course.fullDescription}</p>
+
+                        <!-- Course Overview -->
+                        <div class="details-section" style="background: linear-gradient(135deg, rgba(16,185,129,0.07), rgba(59,130,246,0.07)); border: 1.5px solid var(--border-color); border-radius: 14px; padding: 1.6rem 1.8rem;">
+                            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">📖 Course Overview</h3>
+                            <p style="margin: 0; color: var(--text-muted); line-height: 1.75; font-size: 0.97rem;">${course.fullDescription}</p>
                         </div>
 
-                        <div class="details-section">
-                            <h3>🎯 Prerequisites</h3>
-                            <ul>
-                                ${course.prerequisites.map(prereq => `<li>${prereq}</li>`).join('')}
-                            </ul>
+                        <!-- Prerequisites -->
+                        <div class="details-section" style="border: 1.5px solid var(--border-color); border-radius: 14px; padding: 1.6rem 1.8rem; background: var(--bg-card);">
+                            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">🎯 Prerequisites</h3>
+                            <div style="display: flex; flex-direction: column; gap: 0.7rem;">
+                                ${course.prerequisites.map(prereq => `
+                                    <div style="display: flex; align-items: flex-start; gap: 0.75rem; background: var(--bg-secondary); border-radius: 8px; padding: 0.75rem 1rem; border-left: 3px solid var(--primary-color);">
+                                        <span style="color: var(--primary-color); font-size: 1rem; flex-shrink: 0; margin-top: 1px;">✓</span>
+                                        <span style="color: var(--text-muted); font-size: 0.93rem; line-height: 1.5;">${prereq}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
 
-                        <div class="details-section">
-                            <h3>💡 Skills You'll Gain</h3>
-                            <ul>
-                                ${course.skillsGained.map(skill => `<li>${skill}</li>`).join('')}
-                            </ul>
+                        <!-- Skills You'll Gain -->
+                        <div class="details-section" style="border: 1.5px solid var(--border-color); border-radius: 14px; padding: 1.6rem 1.8rem; background: var(--bg-card);">
+                            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">💡 Skills You'll Gain</h3>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.6rem;">
+                                ${course.skillsGained.map(skill => `
+                                    <span style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(59,130,246,0.15)); border: 1px solid rgba(16,185,129,0.3); color: var(--text-dark); padding: 0.45rem 1rem; border-radius: 999px; font-size: 0.88rem; font-weight: 500;">🔹 ${skill}</span>
+                                `).join('')}
+                            </div>
                         </div>
 
-                        <div class="details-section">
-                            <h3>📚 Curriculum Topics</h3>
-                            <ul>
-                                ${course.curriculumTopics.map(topic => `<li>${topic}</li>`).join('')}
-                            </ul>
+                        <!-- Curriculum Topics -->
+                        <div class="details-section" style="border: 1.5px solid var(--border-color); border-radius: 14px; padding: 1.6rem 1.8rem; background: var(--bg-card);">
+                            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">📚 Curriculum Topics</h3>
+                            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                                ${course.curriculumTopics.map((topic, i) => `
+                                    <div style="display: flex; align-items: center; gap: 1rem; padding: 0.7rem 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                                        <span style="background: var(--primary-color); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0;">${i + 1}</span>
+                                        <span style="color: var(--text-muted); font-size: 0.93rem;">${topic}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
 
-                        <div class="details-section">
-                            <h3>🚀 Career Opportunities</h3>
-                            <ul>
-                                ${course.careerPaths.map(path => `<li>${path}</li>`).join('')}
-                            </ul>
+                        <!-- Career Opportunities -->
+                        <div class="details-section" style="border: 1.5px solid var(--border-color); border-radius: 14px; padding: 1.6rem 1.8rem; background: var(--bg-card);">
+                            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">🚀 Career Opportunities</h3>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.6rem;">
+                                ${course.careerPaths.map(path => `
+                                    <span style="background: linear-gradient(135deg, rgba(249,115,22,0.12), rgba(168,85,247,0.12)); border: 1px solid rgba(249,115,22,0.3); color: var(--text-dark); padding: 0.45rem 1rem; border-radius: 999px; font-size: 0.88rem; font-weight: 500;">💼 ${path}</span>
+                                `).join('')}
+                            </div>
                         </div>
+
                     </div>
 
                     <div class="details-sidebar">
@@ -559,9 +777,7 @@ function displayCourseDetails() {
                             <div class="info-value">⭐ ${course.rating}</div>
                         </div>
 
-                        <button class="btn btn-quiz" style="width: 100%; padding: 1rem; margin-top: 1rem;" onclick="startQuiz(${course.id})">
-                            📝 Take Quiz
-                        </button>
+                        ${quizBtn}
                     </div>
                 </div>
             </div>
@@ -569,7 +785,7 @@ function displayCourseDetails() {
             <div class="section">
                 <h2 class="section-title">Learning Roadmap</h2>
                 <div class="roadmap-container">
-                    ${renderRoadmap()}
+                    ${renderRoadmap(course.id)}
                 </div>
             </div>
 
@@ -589,22 +805,71 @@ function displayCourseDetails() {
 // ============================================
 // ROADMAP DISPLAY
 // ============================================
-function renderRoadmap() {
+function renderRoadmap(courseId) {
+    const data = courseRoadmapData && courseRoadmapData[courseId];
+    const stages = data ? data.stages : roadmapStages.map(s => ({ ...s, topics: [], tools: [], outcome: '' }));
+    const uid = 'roadmap_' + courseId;
+
     return `
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 2rem;">
-            ${roadmapStages.map((stage, index) => `
-                <div style="flex: 1; min-width: 150px;">
-                    <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 0.5rem; color: white;">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">${stage.icon}</div>
-                        <h4 style="margin-bottom: 0.5rem;">${stage.stage}</h4>
-                        <p style="font-size: 0.9rem; opacity: 0.9;">${stage.duration}</p>
+        <div id="${uid}" style="display: flex; flex-direction: column; gap: 0.9rem; margin-top: 1.5rem;">
+            ${stages.map((stage, i) => {
+                const sid = uid + '_' + i;
+                return `
+                <div class="rm-stage-card" id="${sid}" onclick="rmToggle('${sid}')">
+                    <div class="rm-stage-header">
+                        <span style="font-size: 2rem; flex-shrink:0;">${stage.icon}</span>
+                        <div style="flex:1;">
+                            <div style="font-weight:700; font-size:1.05rem;">${stage.stage}</div>
+                            <div style="font-size:0.85rem; opacity:0.85;">${stage.duration}</div>
+                        </div>
+                        <span id="${sid}_arrow" style="font-size:1.1rem; transition:transform 0.25s;">▼</span>
                     </div>
-                    ${index < roadmapStages.length - 1 ? '<div style="text-align: center; margin-top: 1rem; font-size: 1.5rem;">→</div>' : ''}
+                    <div class="rm-stage-body" id="${sid}_body">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.2rem;">
+                            <div>
+                                <p style="font-weight:700; margin:0 0 0.6rem; font-size:0.95rem; color:var(--text-dark);">📚 What to Learn</p>
+                                <div style="display:flex; flex-direction:column; gap:0.45rem;">
+                                    ${(stage.topics||[]).map(t => `
+                                        <div style="display:flex;align-items:flex-start;gap:0.5rem;padding:0.5rem 0.75rem;background:var(--bg-secondary);border-radius:8px;border-left:3px solid var(--primary-color);">
+                                            <span style="color:var(--primary-color);flex-shrink:0;">›</span>
+                                            <span style="font-size:0.88rem;color:var(--text-muted);">${t}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div>
+                                <p style="font-weight:700; margin:0 0 0.6rem; font-size:0.95rem; color:var(--text-dark);">🔧 Tools & Resources</p>
+                                <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+                                    ${(stage.tools||[]).map(t => `<span class="rm-chip" style="background:linear-gradient(135deg,rgba(59,130,246,0.12),rgba(168,85,247,0.12));border:1px solid rgba(59,130,246,0.25);color:var(--text-dark);">🔧 ${t}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        ${stage.outcome ? `
+                        <div style="background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(59,130,246,0.08));border:1.5px solid var(--primary-color);border-radius:10px;padding:0.9rem 1.1rem;display:flex;align-items:flex-start;gap:0.75rem;">
+                            <span style="font-size:1.3rem;flex-shrink:0;">🎯</span>
+                            <div>
+                                <p style="font-weight:700;margin:0 0 0.2rem;font-size:0.9rem;color:var(--primary-color);">Stage Outcome</p>
+                                <p style="margin:0;font-size:0.9rem;color:var(--text-muted);">${stage.outcome}</p>
+                            </div>
+                        </div>` : ''}
+                    </div>
                 </div>
-            `).join('')}
-        </div>
+                `;
+            }).join('')}
     `;
 }
+
+// Global toggle for roadmap stages (so it runs even when elements are injected via innerHTML)
+window.rmToggle = function(id) {
+    const card = document.getElementById(id);
+    const body = document.getElementById(id + '_body');
+    const arrow = document.getElementById(id + '_arrow');
+    if (!card || !body || !arrow) return;
+    const isOpen = body.classList.contains('rm-open');
+    body.classList.toggle('rm-open', !isOpen);
+    card.classList.toggle('rm-active', !isOpen);
+    arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+};
 
 // ============================================
 // FUTURE OPPORTUNITIES DISPLAY
@@ -616,33 +881,48 @@ function renderFutureOpportunities(courseId) {
     }
 
     return `
-        <div style="margin-bottom: 2rem;">
-            <h3 class="growth-paths-title">🚀 Growth Paths</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                ${opportunities.growthPaths.map(path => `
-                    <div class="opportunity-card">
-                        <h4>${path.title}</h4>
-                        <div style="margin-bottom: 1rem;">
-                            <p><strong>💰 Salary Range:</strong> ${path.salary}</p>
-                            <p><strong>📈 Market Demand:</strong> ${path.demand}</p>
-                            <p><strong>🎯 Career Path:</strong> ${path.growth}</p>
-                        </div>
-                        <div>
-                            <strong>Key Skills:</strong>
-                            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
-                                ${path.skills.map(skill => `<li>${skill}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
+        <div style="display: flex; flex-direction: column; gap: 2.5rem;">
 
-        <div class="insights-box">
-            <h3>📊 Industry Insights</h3>
-            <ul>
-                ${opportunities.industryInsights.map(insight => `<li>${insight}</li>`).join('')}
-            </ul>
+            <!-- Growth Paths Grid -->
+            <div>
+                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    🚀 Growth Paths
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                    ${opportunities.growthPaths.map(path => `
+                        <div class="opportunity-card">
+                            <h4 style="margin-bottom: 1rem; font-size: 1.05rem;">${path.title}</h4>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                                <p style="margin:0;"><strong>💰 Salary Range:</strong> ${path.salary}</p>
+                                <p style="margin:0;"><strong>📈 Market Demand:</strong> ${path.demand}</p>
+                                <p style="margin:0;"><strong>🎯 Career Path:</strong> ${path.growth}</p>
+                            </div>
+                            <div>
+                                <strong>Key Skills:</strong>
+                                <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                    ${path.skills.map(skill => `<li>${skill}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <!-- Industry Insights — full width below -->
+            <div style="background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,130,246,0.08)); border: 1.5px solid var(--border-color); border-radius: 14px; padding: 1.8rem 2rem;">
+                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-dark);">
+                    📊 Industry Insights
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+                    ${opportunities.industryInsights.map(insight => `
+                        <div style="display: flex; align-items: flex-start; gap: 0.75rem; background: var(--bg-card); border-radius: 10px; padding: 1rem 1.2rem; border: 1px solid var(--border-color);">
+                            <span style="font-size: 1.3rem; flex-shrink: 0; margin-top: 2px;">💡</span>
+                            <p style="margin: 0; font-size: 0.92rem; color: var(--text-muted); line-height: 1.55;">${insight}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
         </div>
     `;
 }
@@ -653,7 +933,21 @@ function renderFutureOpportunities(courseId) {
 function startQuiz(courseId) {
     const cid = String(courseId);
 
-    // Prefer admin-managed quizzes first (customQuizzes from admin/quizzes.html)
+    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+    const isEnrolled = enrolled.some(e => String(e.id) === String(courseId));
+    if (!isEnrolled) {
+        alert('⚠️ Please enroll in this course first before taking the assessment quiz.');
+        return;
+    }
+
+    const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+    const isVideoWatched = watched.includes(String(courseId));
+    if (!isVideoWatched) {
+        alert('⚠️ Please watch and complete the course video first before taking the assessment quiz.');
+        return;
+    }
+
+    // Prefer admin-managed quizzes (customQuizzes from admin/quizzes.html & quiz-editor.html)
     let quiz = null;
     try {
         const custom = JSON.parse(localStorage.getItem('customQuizzes') || 'null');
@@ -661,16 +955,6 @@ function startQuiz(courseId) {
             quiz = custom[cid];
         }
     } catch (e) {}
-
-    // Then prefer quiz editor saved data (admin/quiz-editor.html)
-    if (!quiz) {
-        try {
-            const edited = JSON.parse(localStorage.getItem('quizEditorData') || 'null');
-            if (edited && edited[courseId] && edited[courseId].questions) {
-                quiz = edited[courseId];
-            }
-        } catch (e) {}
-    }
 
     // Fallback to built-in quizData
     if (!quiz) {
@@ -694,6 +978,37 @@ function displayQuiz() {
     
     if (!quizData || !quizContainer) return;
 
+    const quizCourseId = sessionStorage.getItem('quizCourseId');
+    if (quizCourseId) {
+        const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+        const isEnrolled = enrolled.some(e => String(e.id) === String(quizCourseId));
+        if (!isEnrolled) {
+            quizContainer.innerHTML = `
+                <div style="background: rgba(239,68,68,0.1); border: 2px solid #ef4444; border-radius: 12px; padding: 2rem; text-align: center; margin-top: 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                    <h3 style="color: #f87171; font-weight: 700; margin-bottom: 0.5rem;">Access Denied</h3>
+                    <p style="color: var(--text-light); margin-bottom: 1.5rem;">Please enroll in this course first before taking the assessment quiz.</p>
+                    <a href="skills.html" class="btn btn-primary">Browse Courses</a>
+                </div>
+            `;
+            return;
+        }
+
+        const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+        const isVideoWatched = watched.includes(String(quizCourseId));
+        if (!isVideoWatched) {
+            quizContainer.innerHTML = `
+                <div style="background: rgba(239,68,68,0.1); border: 2px solid #ef4444; border-radius: 12px; padding: 2rem; text-align: center; margin-top: 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+                    <h3 style="color: #f87171; font-weight: 700; margin-bottom: 0.5rem;">Quiz Locked</h3>
+                    <p style="color: var(--text-light); margin-bottom: 1.5rem;">Please watch and complete the course video lesson first before attempting this quiz.</p>
+                    <a href="course-details.html?id=${quizCourseId}" class="btn btn-primary">Go to Course Video</a>
+                </div>
+            `;
+            return;
+        }
+    }
+
     let currentQuestion = 0;
     let score = 0;
     const userAnswers = [];
@@ -701,6 +1016,29 @@ function displayQuiz() {
     function showQuestion() {
         const question = quizData.questions[currentQuestion];
         quizContainer.innerHTML = `
+            <style>
+                .quiz-option-label {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.8rem;
+                    background: var(--bg-secondary);
+                    border: 1.5px solid var(--border-color);
+                    border-radius: 8px;
+                    padding: 0.9rem 1.2rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    font-weight: 500;
+                    color: var(--text-dark);
+                    margin-bottom: 0.8rem;
+                }
+                .quiz-option-label:hover {
+                    border-color: var(--primary-color);
+                    background: rgba(16,185,129,0.03);
+                }
+                .quiz-option-label input[type="radio"]:checked {
+                    accent-color: var(--primary-color);
+                }
+            </style>
             <div class="quiz-container">
                 <div style="margin-bottom: 1rem;">
                     <div class="quiz-progress-header">
@@ -714,13 +1052,13 @@ function displayQuiz() {
                     </div>
                 </div>
                 
-                <h4 class="quiz-question">${question.question}</h4>
+                <h4 class="quiz-question" style="margin-bottom: 1.5rem; font-size: 1.15rem; font-weight: 700; line-height: 1.5; color: var(--text-dark);">${question.question}</h4>
                 
-                <div class="quiz-option" style="margin: 1.5rem 0;">
+                <div class="quiz-options-list" style="display: flex; flex-direction: column; margin: 1.5rem 0;">
                     ${question.options.map((option, index) => `
-                        <label>
-                            <input type="radio" name="answer" value="${index}">
-                            <span>${option}</span>
+                        <label class="quiz-option-label">
+                            <input type="radio" name="answer" value="${index}" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                            <span style="line-height: 1.4;">${option}</span>
                         </label>
                     `).join('')}
                 </div>
@@ -729,8 +1067,8 @@ function displayQuiz() {
                     <button class="btn btn-outline" ${currentQuestion === 0 ? 'disabled' : ''} onclick="previousQuestion()">
                         ← Previous
                     </button>
-                    <button class="btn btn-primary" onclick="nextQuestion(${currentQuestion})">
-                        Next →
+                    <button class="btn btn-primary" onclick="nextQuestion(${currentQuestion})" style="${currentQuestion === quizData.questions.length - 1 ? 'background: linear-gradient(135deg, #10b981, #059669); border-color: #10b981; box-shadow: 0 4px 12px rgba(16,185,129,0.25);' : ''}">
+                        ${currentQuestion === quizData.questions.length - 1 ? '✅ Submit Quiz' : 'Next →'}
                     </button>
                 </div>
             </div>
@@ -770,14 +1108,9 @@ function displayQuiz() {
 
         saveQuizProgress(quizCourseId, score, quizData.questions.length);
 
-        // Auto-create quiz certificates only when passed (>= 70%)
+        // Trigger course completion checks (which will issue the single unified Course Completion certificate if all conditions are met)
         if (passed) {
-            const course = coursesData.find(c => String(c.id) === String(quizCourseId));
-            const courseTitle = course?.title || 'Unknown Course';
-            const issued = generateCertificate(parseInt(quizCourseId), courseTitle, 'quiz');
-            if (issued) {
-                showCertificateNotification(`Quiz certificate earned for ${courseTitle}! 📝`);
-            }
+            checkAndTriggerCourseCompletion(quizCourseId);
         }
 
         quizContainer.innerHTML = `
@@ -817,25 +1150,82 @@ function displayQuiz() {
 // ============================================
 // PROGRESS TRACKING (LOCAL STORAGE)
 // ============================================
-function markAsCompleted(courseId, courseTitle) {
+function checkAndTriggerCourseCompletion(courseId) {
+    const course = coursesData.find(c => String(c.id) === String(courseId));
+    if (!course) return;
+
+    // Check if enrolled
+    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+    const isEnrolled = enrolled.some(e => String(e.id) === String(courseId));
+    if (!isEnrolled) return;
+
+    // Check if video watched
+    const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+    const isVideoWatched = watched.includes(String(courseId));
+    if (!isVideoWatched) return;
+
+    // Check if passed quiz (>= 70%)
+    const quizScores = JSON.parse(localStorage.getItem('quizScores') || '[]');
+    const attempts = quizScores.filter(q => String(q.courseId) === String(courseId));
+    const hasPassedQuiz = attempts.some(q => q.percentage >= 70);
+    if (!hasPassedQuiz) return;
+
+    // All conditions met! Let's mark as completed
     let completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
-    
-    if (!completedCourses.find(c => c.id === courseId)) {
+    if (!completedCourses.find(c => String(c.id) === String(courseId))) {
         completedCourses.push({
-            id: courseId,
-            title: courseTitle,
+            id: parseInt(courseId),
+            title: course.title,
             completedAt: new Date().toLocaleString()
         });
         localStorage.setItem('completedCourses', JSON.stringify(completedCourses));
-        alert(`✅ ${courseTitle} marked as completed!`);
+        
+        // Generate Course Certificate
+        generateCertificate(parseInt(courseId), course.title, 'course');
+        
+        showCertificateNotification(`Congratulations! You completed ${course.title} and earned your Certificate of Achievement! 📜`);
         updateProgressDisplay();
-    } else {
-        alert('This course is already marked as completed.');
     }
 }
 
+window.markVideoAsWatched = function(courseId) {
+    let watched = JSON.parse(localStorage.getItem('watchedVideos')) || [];
+    if (!watched.includes(String(courseId))) {
+        watched.push(String(courseId));
+        localStorage.setItem('watchedVideos', JSON.stringify(watched));
+        alert('🎥 Video lesson marked as completed!');
+        
+        // Check if this triggers overall course completion
+        checkAndTriggerCourseCompletion(courseId);
+        
+        // Reload details page
+        window.location.reload();
+    }
+};
+
 function enrollCourse(courseId, courseTitle) {
-    markAsCompleted(courseId, courseTitle);
+    const session = getSession();
+    if (!session) {
+        alert('⚠️ Please register or login to enroll in this course.');
+        sessionStorage.setItem('pendingEnrollId', courseId);
+        sessionStorage.setItem('pendingEnrollTitle', courseTitle);
+        window.location.href = 'register.html';
+        return;
+    }
+
+    let enrolled = JSON.parse(localStorage.getItem('enrolledCourses')) || [];
+    if (!enrolled.some(e => String(e.id) === String(courseId))) {
+        enrolled.push({
+            id: parseInt(courseId),
+            title: courseTitle,
+            enrolledAt: new Date().toLocaleString()
+        });
+        localStorage.setItem('enrolledCourses', JSON.stringify(enrolled));
+        alert(`🎉 Successfully enrolled in ${courseTitle}! Watch the video lesson and pass the quiz to earn your certificate.`);
+        window.location.reload();
+    } else {
+        alert('You are already enrolled in this course.');
+    }
 }
 
 function saveQuizProgress(courseId, score, total) {
@@ -1005,10 +1395,14 @@ if (document.readyState === 'loading') {
 // CERTIFICATE SYSTEM
 // ============================================
 function generateCertificate(courseId, courseTitle, certificateType = 'course') {
+    // Quiz certificates are disabled — only course completion certs are issued
+    if (certificateType === 'quiz') return null;
+
     const certificates = JSON.parse(localStorage.getItem('certificates')) || [];
 
     // Get user name from any input or use default
-    const userName = localStorage.getItem('userFullName') || 'Learner';
+    const session = JSON.parse(localStorage.getItem('session')) || null;
+    const userName = session?.fullName || localStorage.getItem('userFullName') || 'Learner';
 
     // Avoid duplicates for course certificates (one per course completion)
     if (certificateType === 'course') {
@@ -1017,6 +1411,7 @@ function generateCertificate(courseId, courseTitle, certificateType = 'course') 
             return null;
         }
     }
+
 
     // Generate unique certificate ID
     const certificateId = 'CERT-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -1039,7 +1434,11 @@ function generateCertificate(courseId, courseTitle, certificateType = 'course') 
 }
 
 function displayCertificates() {
-    const certificates = JSON.parse(localStorage.getItem('certificates')) || [];
+    let certificates = JSON.parse(localStorage.getItem('certificates')) || [];
+    if (certificates.some(c => c.type === 'quiz')) {
+        certificates = certificates.filter(c => c.type !== 'quiz');
+        localStorage.setItem('certificates', JSON.stringify(certificates));
+    }
     const certificatesGrid = document.querySelector('.certificates-grid');
     const emptyState = document.querySelector('.empty-certificate-state');
     
@@ -1054,23 +1453,37 @@ function displayCertificates() {
     certificatesGrid.style.display = 'grid';
     if (emptyState) emptyState.style.display = 'none';
     
-    certificatesGrid.innerHTML = certificates.map((cert, index) => `
-        <div class="certificate-card" data-certificate-id="${cert.id}" data-type="${cert.type}">
+    certificatesGrid.innerHTML = certificates.map((cert, index) => {
+        // Resolve student's name dynamically
+        let displayName = cert.userName;
+        if (!displayName || displayName === 'Learner' || displayName === 'Demo Admin') {
+            const session = JSON.parse(localStorage.getItem('session') || 'null');
+            if (session && session.fullName) {
+                displayName = session.fullName;
+            } else {
+                displayName = localStorage.getItem('userFullName') || 'Learner';
+            }
+        }
+        
+        return `
+        <div class="certificate-card ${cert.type}-type" data-certificate-id="${cert.id}" data-type="${cert.type}" onclick="viewCertificate('${cert.id}')" style="cursor: pointer;">
             <div class="certificate-badge">
-                <div class="certificate-badge-icon">${cert.type === 'quiz' ? '📝' : '📜'}</div>
+                <div class="certificate-badge-icon">${cert.type === 'quiz' ? '🎓' : '🏆'}</div>
             </div>
             <div class="certificate-info">
                 <h3>${cert.courseTitle}</h3>
-                <p>🏆 ${cert.type === 'quiz' ? 'Quiz Completion' : 'Course Completion'}</p>
-                <p>📅 ${cert.issuedDate}</p>
-                <p>👤 ${cert.userName}</p>
+                <div class="certificate-type-tag">${cert.type === 'quiz' ? 'Quiz Certificate' : 'Course Certificate'}</div>
+                <div class="certificate-details">
+                    <p><span>📅 Date:</span> ${cert.issuedDate}</p>
+                    <p><span>👤 Student:</span> ${displayName}</p>
+                </div>
                 <div class="certificate-meta">
-                    <span class="certificate-id">${cert.id}</span>
-                    <button class="certificate-action-btn" onclick="viewCertificate('${cert.id}')">View</button>
+                    <button class="certificate-action-btn" onclick="event.stopPropagation(); viewCertificate('${cert.id}')">View Certificate</button>
                 </div>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function setupCertificateFilters() {
@@ -1130,36 +1543,29 @@ function viewCertificate(certificateId) {
     
     const currentYear = new Date().getFullYear();
     
-    const completionTypeText = certificate.type === 'quiz' ? 'completed the quiz' : 'completed the course';
-    const completionLabel = certificate.type === 'quiz' ? 'Quiz Completion Certificate' : 'Course Completion Certificate';
+    const session = JSON.parse(localStorage.getItem('session')) || null;
+    const currentUserName = session?.fullName || localStorage.getItem('userFullName') || 'Learner';
+    const displayName = (certificate.userName && certificate.userName !== 'Learner' && certificate.userName !== 'Demo Admin') ? certificate.userName : currentUserName;
+    
+    const completionTypeText = 'completed the course';
+    const completionLabel = 'Course Completion Certificate';
     
     certificateDisplay.innerHTML = `
         <div class="certificate-display">
             <div class="certificate-header">
+                <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary-color); margin-bottom: 0.5rem; letter-spacing: 1px;">SkillBridge</div>
                 <h2>${completionLabel}</h2>
                 <p>IN RECOGNITION OF DEDICATION AND EXCELLENCE</p>
             </div>
             
             <div class="certificate-body">
                 <h3>This is to certify that</h3>
-                <div class="certificate-recipient">${certificate.userName}</div>
+                <div class="certificate-recipient">${displayName}</div>
                 <p>has successfully ${completionTypeText}</p>
                 <h3 style="font-size: 1.4rem; color: var(--primary-color); font-weight: bold;">${certificate.courseTitle}</h3>
                 <p><strong>Completion date:</strong> ${certificate.issuedDate}</p>
-                <p style="margin-top: 1rem; font-style: italic; font-size: 0.9rem;">Certificate ID: ${certificate.id}</p>
             </div>
             
-            <div class="certificate-footer">
-                <div class="certificate-signature">
-                    <div class="certificate-signature-line"></div>
-                    <div class="certificate-signature-text">SkillBridge Signature</div>
-                </div>
-                <div class="certificate-seal">✅ Verified Badge</div>
-                <div class="certificate-signature">
-                    <div class="certificate-signature-line"></div>
-                    <div class="certificate-signature-text">${currentYear}</div>
-                </div>
-            </div>
         </div>
     `;
     
@@ -1245,25 +1651,33 @@ function downloadCertificate(certificate) {
     ctx.strokeRect(60, 60, canvas.width - 120, canvas.height - 120);
     
     // Draw text
+    ctx.fillStyle = '#6366f1';
+    ctx.font = 'bold 36px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('SkillBridge', canvas.width / 2, 120);
+
     ctx.fillStyle = '#d4af37';
     ctx.font = 'bold 48px Georgia, serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Certificate of Achievement', canvas.width / 2, 150);
+    ctx.fillText('Certificate of Achievement', canvas.width / 2, 190);
     
     ctx.fillStyle = '#666';
     ctx.font = '18px Georgia, serif';
-    ctx.fillText('IN RECOGNITION OF DEDICATION AND EXCELLENCE', canvas.width / 2, 220);
+    ctx.fillText('IN RECOGNITION OF DEDICATION AND EXCELLENCE', canvas.width / 2, 250);
     
     ctx.font = 'normal 24px Georgia, serif';
     ctx.fillText('This is to certify that', canvas.width / 2, 380);
     
     ctx.fillStyle = '#000';
     ctx.font = 'bold 36px Georgia, serif';
-    ctx.fillText(certificate.userName, canvas.width / 2, 480);
+    const session = JSON.parse(localStorage.getItem('session')) || null;
+    const currentUserName = session?.fullName || localStorage.getItem('userFullName') || 'Learner';
+    const displayName = (certificate.userName && certificate.userName !== 'Learner' && certificate.userName !== 'Demo Admin') ? certificate.userName : currentUserName;
+    ctx.fillText(displayName, canvas.width / 2, 480);
     
     ctx.fillStyle = '#666';
     ctx.font = 'normal 24px Georgia, serif';
-    ctx.fillText('has successfully completed the course', canvas.width / 2, 580);
+    const completionTypeText = 'completed the course';
+    ctx.fillText('has successfully ' + completionTypeText, canvas.width / 2, 580);
     
     ctx.fillStyle = '#6366f1';
     ctx.font = 'bold 28px Georgia, serif';
@@ -1272,9 +1686,6 @@ function downloadCertificate(certificate) {
     ctx.fillStyle = '#666';
     ctx.font = 'normal 20px Georgia, serif';
     ctx.fillText('on this ' + certificate.issuedDate, canvas.width / 2, 750);
-    
-    ctx.font = 'italic 16px Georgia, serif';
-    ctx.fillText('Certificate ID: ' + certificate.id, canvas.width / 2, 850);
     
     // Download
     const link = document.createElement('a');
@@ -1347,18 +1758,7 @@ function shareCertificate(certificate) {
 
 // Update markAsCompleted to also generate certificate
 function updateMarkAsCompletedWithCertificate() {
-    const originalMarkAsCompleted = window.markAsCompleted;
-    
-    window.markAsCompleted = function(courseId, courseTitle) {
-        // Call original function
-        originalMarkAsCompleted.call(this, courseId, courseTitle);
-        
-        // Generate certificate
-        generateCertificate(courseId, courseTitle, 'course');
-        
-        // Show success message
-        showCertificateNotification(`Certificate earned for ${courseTitle}! 🎓`);
-    };
+    // Deprecated wrapper - now handled dynamically in checkAndTriggerCourseCompletion
 }
 
 function showCertificateNotification(message) {
@@ -1424,6 +1824,11 @@ function maybeApplyAdminHomeContent() {
         const heroP = document.querySelector('.hero-content p');
         if (heroH1 && content.heroTitle) heroH1.textContent = content.heroTitle;
         if (heroP && content.heroSubtitle) heroP.textContent = content.heroSubtitle;
+
+        const heroSection = document.querySelector('.hero');
+        if (heroSection && content.heroBgImage) {
+            heroSection.style.background = `linear-gradient(135deg, rgba(17, 24, 39, 0.78), rgba(99, 102, 241, 0.72)), url("${content.heroBgImage}") center/cover`;
+        }
 
         // Featured section
         const featuredH2 = document.querySelector('#featured .section-title');
@@ -1520,7 +1925,17 @@ function maybeApplyAdminHomeContent() {
         const footer = document.querySelector('footer');
         if (footer && content.footer) {
             const footerSections = footer.querySelectorAll('.footer-section');
-            // Sections correspond roughly to 4 blocks in this template.
+            
+            // Helper to resolve '#' to active files
+            const resolveHref = (text, href) => {
+                if (href && href !== '#') return href;
+                const txt = String(text).toLowerCase().trim();
+                if (txt.includes('about') || txt.includes('mission') || txt.includes('team')) return 'index.html#about-us';
+                if (txt.includes('course') || txt.includes('cat') || txt.includes('trend')) return 'skills.html';
+                if (txt.includes('help') || txt.includes('contact') || txt.includes('faq') || txt.includes('feedback')) return 'feedback.html';
+                return 'index.html';
+            };
+
             footerSections.forEach((sec, i) => {
                 const block = content.footer[i];
                 if (!block) return;
@@ -1528,7 +1943,18 @@ function maybeApplyAdminHomeContent() {
                 if (h4) h4.textContent = block.title || '';
                 const ul = sec.querySelector('ul');
                 if (ul) {
-                    ul.innerHTML = cleanRepeatedLinks(block.links).map(l => `<li><a href="${l.href || '#'}">${l.text || ''}</a></li>`).join('');
+                    const seenHrefs = new Set();
+                    const uniqueLinks = [];
+
+                    cleanRepeatedLinks(block.links).forEach(l => {
+                        const targetHref = resolveHref(l.text, l.href);
+                        if (!seenHrefs.has(targetHref)) {
+                            seenHrefs.add(targetHref);
+                            uniqueLinks.push({ text: l.text, href: targetHref });
+                        }
+                    });
+
+                    ul.innerHTML = uniqueLinks.map(l => `<li><a href="${l.href}">${l.text || ''}</a></li>`).join('');
                 }
             });
 
@@ -1817,8 +2243,12 @@ function setupLogoDblClick() {
         logo.addEventListener('dblclick', function(e) {
             e.preventDefault();
             const path = window.location.pathname.replace(/\\/g, '/');
-            const inSubfolder = path.includes('/student/') || path.includes('/admin/');
-            const target = inSubfolder ? 'admin-login.html' : 'admin/admin-login.html';
+            let target = 'admin/admin-login.html';
+            if (path.includes('/student/')) {
+                target = '../admin/admin-login.html';
+            } else if (path.includes('/admin/')) {
+                target = 'admin-login.html';
+            }
             window.location.href = target;
         });
     });
@@ -1861,20 +2291,32 @@ function renderDynamicNavbar() {
         const isMyCerts = pageName === 'certificates.html' && path.includes('/student/');
         const isSkills = pageName === 'skills.html';
         const isProgress = pageName === 'progress.html';
-        const isCertificates = pageName === 'certificate.html';
         const isRoadmap = pageName === 'roadmap.html';
+        
+        const studentPath = inSubfolder ? '' : 'student/';
+        const initials = session.fullName ? session.fullName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : '👤';
 
         html += `
             <li><a href="${prefix}index.html" class="${pageName === 'index.html' ? 'active' : ''}">Home</a></li>
             <li><a href="${prefix}skills.html" class="${isSkills ? 'active' : ''}">Skills</a></li>
             <li><a href="${prefix}progress.html" class="${isProgress ? 'active' : ''}">Progress</a></li>
             <li><a href="${prefix}roadmap.html" class="${isRoadmap ? 'active' : ''}">Roadmap</a></li>
-            <li><a href="${prefix}certificate.html" class="${isCertificates ? 'active' : ''}">Certificates</a></li>
-            <li><a href="${inSubfolder ? '' : 'student/'}dashboard.html" class="${isDashboard ? 'active' : ''}">Dashboard</a></li>
-            <li><a href="${inSubfolder ? '' : 'student/'}profile.html" class="${isProfile ? 'active' : ''}">My Profile</a></li>
-            <li><a href="${inSubfolder ? '' : 'student/'}mycourses.html" class="${isMyCourses ? 'active' : ''}">My Courses</a></li>
-            <li><a href="${inSubfolder ? '' : 'student/'}certificates.html" class="${isMyCerts ? 'active' : ''}">My Certificates</a></li>
-            <li><button onclick="logoutAndRedirect()" style="padding: 0.4rem 1rem; font-size: 0.9rem; font-weight: 700; background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(239,68,68,0.4); transition: opacity 0.2s;">🚪 Logout</button></li>
+            <li class="profile-dropdown-container">
+                <div class="profile-avatar-trigger" onclick="toggleProfileDropdown(event)">${initials}</div>
+                <div class="profile-dropdown-card" id="profileDropdownCard">
+                    <div class="dropdown-user-info">
+                        <div class="dropdown-user-name">${session.fullName}</div>
+                        <div class="dropdown-user-username">@${session.username}</div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a href="${inSubfolder ? '' : 'student/'}dashboard.html" class="${isDashboard ? 'active' : ''}">📊 Dashboard</a>
+                    <a href="${inSubfolder ? '' : 'student/'}profile.html" class="${isProfile ? 'active' : ''}">👤 My Profile</a>
+                    <a href="${inSubfolder ? '' : 'student/'}mycourses.html" class="${isMyCourses ? 'active' : ''}">📚 My Courses</a>
+                    <a href="${inSubfolder ? '' : 'student/'}certificates.html" class="${isMyCerts ? 'active' : ''}">📜 My Certificates</a>
+                    <div class="dropdown-divider"></div>
+                    <button onclick="logoutAndRedirect()" class="dropdown-logout-btn">🚪 Log Out</button>
+                </div>
+            </li>
         `;
     } else if (session && session.role === 'admin') {
         // Logged in as admin
@@ -1884,23 +2326,36 @@ function renderDynamicNavbar() {
         const isReports = pageName === 'reports.html';
         const isSettings = pageName === 'settings.html';
         const isSiteEditor = pageName === 'site-editor.html';
-        const isFeedback = pageName === 'feedback.html';
+        const isRoadmapEditor = pageName === 'roadmap-editor.html';
+
+        const initials = session.fullName ? session.fullName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : 'AD';
 
         html += `
             <li><a href="${prefix}index.html" class="${pageName === 'index.html' ? 'active' : ''}">Home</a></li>
-            <li><a href="${inSubfolder ? '' : 'admin/'}dashboard.html" class="${isDashboard ? 'active' : ''}">Dashboard</a></li>
-            <li><a href="${inSubfolder ? '' : 'admin/'}students.html" class="${isStudents ? 'active' : ''}">Students</a></li>
-            <li><a href="${inSubfolder ? '' : 'admin/'}courses.html" class="${isCourses ? 'active' : ''}">Courses</a></li>
-            <li><a href="${inSubfolder ? '' : 'admin/'}reports.html" class="${isReports ? 'active' : ''}">Reports</a></li>
-            <li><a href="${inSubfolder ? '' : 'admin/'}settings.html" class="${isSettings ? 'active' : ''}">Settings</a></li>
-            <li><a href="${inSubfolder ? '' : 'admin/'}site-editor.html" class="${isSiteEditor ? 'active' : ''}">Site Editor</a></li>
-            <li><button onclick="logoutAndRedirect()" style="padding: 0.4rem 1rem; font-size: 0.9rem; font-weight: 700; background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(239,68,68,0.4); transition: opacity 0.2s;">🚪 Logout</button></li>
+            <li class="profile-dropdown-container">
+                <div class="profile-avatar-trigger" onclick="toggleProfileDropdown(event)" style="background: rgba(99, 102, 241, 0.2); border-color: rgba(99, 102, 241, 0.4);">${initials}</div>
+                <div class="profile-dropdown-card" id="profileDropdownCard">
+                    <div class="dropdown-user-info">
+                        <div class="dropdown-user-name">${session.fullName} (Admin)</div>
+                        <div class="dropdown-user-username">@${session.username}</div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a href="${inSubfolder ? '' : 'admin/'}dashboard.html" class="${isDashboard ? 'active' : ''}">📊 Dashboard</a>
+                    <a href="${inSubfolder ? '' : 'admin/'}students.html" class="${isStudents ? 'active' : ''}">👥 Students</a>
+                    <a href="${inSubfolder ? '' : 'admin/'}courses.html" class="${isCourses ? 'active' : ''}">📚 Courses</a>
+                    <a href="${inSubfolder ? '' : 'admin/'}roadmap-editor.html" class="${isRoadmapEditor ? 'active' : ''}">🧭 Roadmaps</a>
+                    <a href="${inSubfolder ? '' : 'admin/'}reports.html" class="${isReports ? 'active' : ''}">📈 Reports</a>
+                    <a href="${inSubfolder ? '' : 'admin/'}settings.html" class="${isSettings ? 'active' : ''}">⚙️ Settings</a>
+                    <a href="${inSubfolder ? '' : 'admin/'}site-editor.html" class="${isSiteEditor ? 'active' : ''}">🖊️ Site Editor</a>
+                    <div class="dropdown-divider"></div>
+                    <button onclick="logoutAndRedirect()" class="dropdown-logout-btn">🚪 Log Out</button>
+                </div>
+            </li>
         `;
     } else {
         // Guest user (not logged in)
         const isSkills = pageName === 'skills.html';
         const isProgress = pageName === 'progress.html';
-        const isCertificates = pageName === 'certificate.html';
         const isRoadmap = pageName === 'roadmap.html';
         const isRegister = pageName === 'register.html';
 
@@ -1909,16 +2364,29 @@ function renderDynamicNavbar() {
             <li><a href="${prefix}skills.html" class="${isSkills ? 'active' : ''}">Skills</a></li>
             <li><a href="${prefix}progress.html" class="${isProgress ? 'active' : ''}">Progress</a></li>
             <li><a href="${prefix}roadmap.html" class="${isRoadmap ? 'active' : ''}">Roadmap</a></li>
-            <li><a href="${prefix}certificate.html" class="${isCertificates ? 'active' : ''}">Certificates</a></li>
             <li><a href="${prefix}register.html" class="${isRegister ? 'active' : ''}">Register</a></li>
         `;
     }
 
     // Append theme toggle to the list
-    html += `<li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>`;
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    html += `<li><button id="themeToggle" class="theme-toggle-btn">${currentTheme === 'dark' ? '🌙' : '☀️'}</button></li>`;
 
     navLinksEl.innerHTML = html;
 }
+
+// Float Dropdown toggler action
+function toggleProfileDropdown(event) {
+    event.stopPropagation();
+    const card = document.getElementById('profileDropdownCard');
+    if (card) card.classList.toggle('open');
+}
+window.toggleProfileDropdown = toggleProfileDropdown;
+
+document.addEventListener('click', function() {
+    const card = document.getElementById('profileDropdownCard');
+    if (card) card.classList.remove('open');
+});
 
 function setupHomeFeedbackForm() {
     // Check if we're on home page with feedback form
