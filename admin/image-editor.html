@@ -386,6 +386,7 @@
 
       // Save to localStorage
       localStorage.setItem('coursesData', JSON.stringify(coursesData));
+      localStorage.setItem('customCourses', JSON.stringify(coursesData));
       
       showSuccess(`✓ Image updated for "${course.title}"`);
       setTimeout(() => {
