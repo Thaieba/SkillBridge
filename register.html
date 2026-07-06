@@ -262,7 +262,7 @@
                 }
             }
 
-            form?.addEventListener('submit', function(e){
+            form?.addEventListener('submit', async function(e){
                 e.preventDefault();
 
                 const username = regUsername.value.trim();
@@ -272,7 +272,7 @@
 
                 if (authMode === 'register') {
                     const fullName = regFullName.value.trim();
-                    const res = registerUser({ fullName, username, email, password, role });
+                    const res = await registerUser({ fullName, username, email, password, role });
                     if(res.ok){
                         localStorage.setItem('session', JSON.stringify({
                             username: username,
@@ -295,7 +295,7 @@
                         statusEl.classList.add('error');
                     }
                 } else if (authMode === 'login') {
-                    const res = loginUser({ username, password, role });
+                    const res = await loginUser({ username, password, role });
                     if(res.ok){
                         statusEl.style.display = 'block';
                         statusEl.textContent = res.message;
@@ -310,7 +310,7 @@
                         statusEl.classList.add('error');
                     }
                 } else {
-                    const res = resetPassword({ username, newPassword: password, role });
+                    const res = await resetPassword({ username, newPassword: password, role });
                     statusEl.style.display = 'block';
                     statusEl.textContent = res.message;
                     statusEl.classList.toggle('success', res.ok);
