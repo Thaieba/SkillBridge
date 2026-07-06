@@ -31,14 +31,26 @@ body {
     color: var(--text-dark);
     background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 a {
     color: inherit;
 }
 
+img,
+video,
+iframe,
+embed,
+object {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
 .container {
     width: min(1120px, calc(100% - 2rem));
+    max-width: 1120px;
     margin: 0 auto;
 }
 
@@ -124,11 +136,11 @@ nav .container {
 }
 
 .section {
-    padding: 4rem 1rem;
+    padding: 1.5rem 1rem;
 }
 
 .section-title {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     text-align: center;
     font-size: clamp(2rem, 4vw, 3rem);
     line-height: 1.1;
@@ -261,8 +273,15 @@ nav .container {
 .features-grid,
 .future-opportunities {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+@media (max-width: 700px) {
+    .career-container {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+    }
 }
 
 .skill-card {
@@ -638,6 +657,7 @@ html[data-theme="dark"] ::placeholder {
         align-items: stretch;
         padding: 1rem;
         background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        min-width: 240px;
     }
 
     .nav-links.active {
@@ -648,6 +668,7 @@ html[data-theme="dark"] ::placeholder {
     .nav-links button {
         width: 100%;
     }
+
 
     .about-intro,
     .contact-wrapper,
@@ -840,13 +861,26 @@ html[data-theme="dark"] .rating-btn {
     }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 768px) {
     .section {
         padding: 3rem 1rem;
     }
 
     .hero {
-        min-height: 65vh;
+        min-height: 62vh;
+    }
+
+    .hero h1 {
+        font-size: clamp(2.2rem, 7vw, 3.8rem);
+    }
+
+    .hero p {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-buttons {
+        gap: 0.75rem;
     }
 
     .skill-card-footer,
@@ -870,6 +904,25 @@ html[data-theme="dark"] .rating-btn {
     .rating-btn {
         width: 100%;
         min-width: auto;
+    }
+}
+
+@media (max-width: 560px) {
+    .section {
+        padding: 2.5rem 0.75rem;
+    }
+
+    .hero {
+        min-height: 55vh;
+        padding: 3rem 1rem;
+    }
+
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+
+    .hero p {
+        font-size: 0.95rem;
     }
 }
 
@@ -1517,6 +1570,34 @@ html[data-theme="dark"] .rating-btn {
     border-color: #ef4444 !important;
     color: white !important;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+/* Dashboard visual polish: avatar, dropdown blur, stat-card glow */
+.db-avatar {
+    box-shadow: 0 6px 30px rgba(16,185,129,0.18), 0 0 0 6px rgba(16,185,129,0.03) inset;
+    transform: translateZ(0);
+}
+
+/* Make dropdown subtly glassy on dark theme */
+html[data-theme="dark"] .profile-dropdown-card {
+    background: rgba(10,14,22,0.72);
+    border: 1px solid rgba(255,255,255,0.04);
+    backdrop-filter: blur(6px) saturate(1.05);
+    box-shadow: 0 12px 40px rgba(2,6,23,0.6);
+}
+
+/* Stat card glow */
+.db-stat-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.db-stat-card.green:hover { box-shadow: 0 20px 50px rgba(16,185,129,0.12), 0 6px 18px rgba(2,6,23,0.5); }
+.db-stat-card.purple:hover { box-shadow: 0 20px 50px rgba(99,102,241,0.10), 0 6px 18px rgba(2,6,23,0.5); }
+.db-stat-card.orange:hover  { box-shadow: 0 20px 50px rgba(245,158,11,0.10), 0 6px 18px rgba(2,6,23,0.5); }
+.db-stat-card.blue:hover    { box-shadow: 0 20px 50px rgba(59,130,246,0.10), 0 6px 18px rgba(2,6,23,0.5); }
+
+/* Slightly elevate hero on dark theme for depth */
+html[data-theme="dark"] .db-hero {
+    box-shadow: 0 18px 60px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
 }
 
 @media (max-width: 768px) {
