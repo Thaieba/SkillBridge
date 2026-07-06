@@ -152,7 +152,18 @@
         function displayProgress() {
             const completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
             const quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
-            const certificates = (JSON.parse(localStorage.getItem('certificates')) || []).filter(c => c.type !== 'quiz');
+            let certificates = (JSON.parse(localStorage.getItem('certificates')) || []).filter(c => c.type !== 'quiz');
+            // If a student is logged in, only show their certificates
+            const session = JSON.parse(localStorage.getItem('session') || 'null');
+            if (session && session.role === 'student') {
+                const email = (session.email || '').toLowerCase();
+                certificates = certificates.filter(c => {
+                    if (email && c.userEmail && c.userEmail.toLowerCase() === email) return true;
+                    if (session.fullName && c.userName === session.fullName) return true;
+                    if (session.username && c.userName === session.username) return true;
+                    return false;
+                });
+            }
 
             // Update statistics
             document.getElementById('totalCourses').textContent = completedCourses.length;
@@ -207,9 +218,6 @@
                             <h3>${cert.courseTitle}</h3>
                             <p>🏆 Course Completion</p>
                             <p>📅 ${cert.issuedDate}</p>
-                            <div class="certificate-meta">
-                                <button class="certificate-action-btn" onclick="event.stopPropagation(); viewCertificate('${cert.id}')">View</button>
-                            </div>
                         </div>
                     </div>
                 `).join('');
