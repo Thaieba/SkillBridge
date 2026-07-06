@@ -7,12 +7,317 @@ const DEMO_USERS = [
     { fullName: 'Demo Admin', username: 'admin', email: 'admin@skillbridge.com', password: 'admin123', role: 'admin' }
 ];
 
+// Configure remote/local PHP API backend (Option B)
+// When deploying, set this to your hosted backend root domain, e.g., 'https://skillbridge-backend.up.railway.app'
+const API_BASE_URL = '';
+
+// Helper to get the correct base path depending on page nesting
+function getApiBaseUrl() {
+    if (API_BASE_URL) return API_BASE_URL;
+    const path = window.location.pathname.replace(/\\/g, '/');
+    if (path.includes('/admin/')) {
+        return '..';
+    } else if (path.includes('/student/')) {
+        return '..';
+    }
+    return '.';
+}
+
+// Helper to check if the remote/local API server is reachable
+async function isApiServerReachable() {
+    if (!API_BASE_URL && window.location.protocol === 'file:') {
+        return false;
+    }
+    const targetUrl = `${getApiBaseUrl()}/api/auth.php`;
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2-second timeout
+        const response = await fetch(targetUrl, {
+            method: 'OPTIONS',
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        return response.ok || response.status === 200;
+    } catch (e) {
+        return false;
+    }
+}
+
+// Load courses from database with auto-seeding if empty
+async function loadCoursesFromDatabase() {
+    const isOnline = await isApiServerReachable();
+    if (isOnline) {
+        try {
+            let response = await fetch(`${getApiBaseUrl()}/api/courses.php?action=get`);
+            let data = await response.json();
+            
+            if (data.status === 'success') {
+                if (data.need_seeding) {
+                    console.log("Database courses table is empty. Seeding from local data...");
+                    if (typeof coursesData !== 'undefined' && Array.isArray(coursesData) && coursesData.length > 0) {
+                        const seedResponse = await fetch(`${getApiBaseUrl()}/api/courses.php`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'seed',
+                                courses: coursesData
+                            })
+                        });
+                        const seedData = await seedResponse.json();
+                        if (seedData.status === 'success') {
+                            response = await fetch(`${getApiBaseUrl()}/api/courses.php?action=get`);
+                            data = await response.json();
+                        }
+                    }
+                }
+                
+                if (data.courses && data.courses.length > 0) {
+                    coursesData = data.courses;
+                    localStorage.setItem('customCourses', JSON.stringify(data.courses));
+                    localStorage.setItem('coursesData', JSON.stringify(data.courses));
+                }
+            }
+        } catch (e) {
+            console.warn("Failed to load courses from database API, using LocalStorage fallback", e);
+        }
+    }
+}
+
+// Load student enrollments from database
+async function loadEnrollmentsFromDatabase() {
+    const session = getSession();
+    if (!session || !session.email) {
+        return;
+    }
+    
+    const isOnline = await isApiServerReachable();
+    if (isOnline) {
+        try {
+            const response = await fetch(`${getApiBaseUrl()}/api/enrollments.php?action=get&email=${encodeURIComponent(session.email)}`);
+            const data = await response.json();
+            
+            if (data.status === 'success' && Array.isArray(data.enrolled_courses)) {
+                let enrolled = JSON.parse(localStorage.getItem('enrolledCourses')) || [];
+                let modified = false;
+                
+                data.enrolled_courses.forEach(courseId => {
+                    if (!enrolled.some(e => parseInt(e.id) === parseInt(courseId))) {
+                        let title = 'Course';
+                        if (typeof coursesData !== 'undefined') {
+                            const c = coursesData.find(x => parseInt(x.id) === parseInt(courseId));
+                            if (c) title = c.title;
+                        }
+                        enrolled.push({
+                            id: parseInt(courseId),
+                            title: title,
+                            enrolledAt: new Date().toLocaleString()
+                        });
+                        modified = true;
+                    }
+                });
+                
+                if (modified) {
+                    localStorage.setItem('enrolledCourses', JSON.stringify(enrolled));
+                }
+            }
+        } catch (e) {
+            console.warn("Failed to load enrollments from database:", e);
+        }
+    }
+}
+
+// Save course to database (Admin CRUD)
+async function saveCourseToDatabase(course) {
+    const isOnline = await isApiServerReachable();
+    if (isOnline) {
+        try {
+            await fetch(`${getApiBaseUrl()}/api/courses.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'save',
+                    course: course
+                })
+            });
+        } catch (e) {
+            console.error("Failed to save course to database:", e);
+        }
+    }
+}
+
+// Delete course from database (Admin CRUD)
+async function deleteCourseFromDatabase(id) {
+    const isOnline = await isApiServerReachable();
+    if (isOnline) {
+        try {
+            await fetch(`${getApiBaseUrl()}/api/courses.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'delete',
+                    id: id
+                })
+            });
+        } catch (e) {
+            console.error("Failed to delete course from database:", e);
+        }
+    }
+}
+
+// Fetch all registered students/users from MySQL and sync local cache
+async function fetchStudentsFromDatabase() {
+    const isOnline = await isApiServerReachable();
+    console.log("[DB Sync] fetchStudentsFromDatabase started. API reachable:", isOnline);
+    if (isOnline) {
+        try {
+            const response = await fetch(`${getApiBaseUrl()}/api/auth.php?action=list_students`);
+            const data = await response.json();
+            console.log("[DB Sync] API Response:", data);
+            if (data.status === 'success' && Array.isArray(data.users)) {
+                localStorage.setItem('users', JSON.stringify(data.users));
+                console.log("[DB Sync] Saved users list to LocalStorage:", data.users.length, "accounts");
+            }
+        } catch (e) {
+            console.warn("[DB Sync] Failed to fetch students list from database:", e);
+        }
+    } else {
+        console.warn("[DB Sync] API is unreachable. Skipping student database sync.");
+    }
+}
+
+// Load lesson progress from database
+async function loadProgressFromDatabase() {
+    const session = getSession();
+    if (!session || !session.email) {
+        return;
+    }
+    const isOnline = await isApiServerReachable();
+    if (isOnline) {
+        try {
+            const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+            let watched = JSON.parse(localStorage.getItem('watchedVideos')) || [];
+            let modified = false;
+            
+            for (const course of enrolled) {
+                const response = await fetch(`${getApiBaseUrl()}/api/progress.php?action=get&email=${encodeURIComponent(session.email)}&courseId=${course.id}`);
+                const data = await response.json();
+                if (data.status === 'success' && Array.isArray(data.completed_lessons)) {
+                    if (data.completed_lessons.includes(0) && !watched.includes(String(course.id))) {
+                        watched.push(String(course.id));
+                        modified = true;
+                    }
+                }
+            }
+            if (modified) {
+                localStorage.setItem('watchedVideos', JSON.stringify(watched));
+                if (typeof displayProgress === 'function') displayProgress();
+                if (typeof updateProgressDisplay === 'function') updateProgressDisplay();
+            }
+        } catch (e) {
+            console.warn("Failed to load progress from database:", e);
+        }
+    }
+}
+
+// Load quiz scores from database
+async function loadQuizScoresFromDatabase() {
+    const session = getSession();
+    if (!session || !session.email) {
+        return;
+    }
+    const isOnline = await isApiServerReachable();
+    if (isOnline) {
+        try {
+            const response = await fetch(`${getApiBaseUrl()}/api/quizzes.php?action=get&email=${encodeURIComponent(session.email)}`);
+            const data = await response.json();
+            if (data.status === 'success' && Array.isArray(data.quiz_scores)) {
+                const quizScores = data.quiz_scores.map(q => ({
+                    courseId: q.courseId,
+                    score: q.score,
+                    total: q.total,
+                    percentage: q.percentage,
+                    date: new Date(q.date).toLocaleString(),
+                    studentName: session.fullName || 'Learner',
+                    studentUsername: session.username || 'learner'
+                }));
+                localStorage.setItem('quizScores', JSON.stringify(quizScores));
+                if (typeof displayProgress === 'function') displayProgress();
+            }
+        } catch (e) {
+            console.warn("Failed to load quiz scores from database:", e);
+        }
+    }
+}
+
+// Load certificates from database
+async function loadCertificatesFromDatabase() {
+    const session = getSession();
+    if (!session || !session.email) {
+        return;
+    }
+    const isOnline = await isApiServerReachable();
+    if (isOnline) {
+        try {
+            const response = await fetch(`${getApiBaseUrl()}/api/certificates.php?action=get&email=${encodeURIComponent(session.email)}`);
+            const data = await response.json();
+            if (data.status === 'success' && Array.isArray(data.certificates)) {
+                const certificates = data.certificates.map(c => ({
+                    id: c.code,
+                    courseId: c.courseId,
+                    courseTitle: c.courseTitle,
+                    type: c.type,
+                    userName: c.userName,
+                    userEmail: c.userEmail || c.email || '',
+                    issuedDate: new Date(c.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                    timestamp: new Date(c.date).getTime(),
+                    verified: true
+                }));
+                localStorage.setItem('certificates', JSON.stringify(certificates));
+                
+                const completed = certificates.map(c => ({
+                    id: c.courseId,
+                    title: c.courseTitle,
+                    completedAt: c.issuedDate
+                }));
+                localStorage.setItem('completedCourses', JSON.stringify(completed));
+                
+                if (typeof displayCertificates === 'function') displayCertificates();
+                if (typeof displayProgress === 'function') displayProgress();
+            }
+        } catch (e) {
+            console.warn("Failed to load certificates from database:", e);
+        }
+    }
+}
+
+// Bind handlers to window scope
+window.saveCourseToDatabase = saveCourseToDatabase;
+window.deleteCourseFromDatabase = deleteCourseFromDatabase;
+window.fetchStudentsFromDatabase = fetchStudentsFromDatabase;
+
 // Initialize app when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
+document.addEventListener('DOMContentLoaded', async function() {
+    await initializeApp();
 });
 
-function initializeApp() {
+async function initializeApp() {
+    // Load courses from database
+    await loadCoursesFromDatabase();
+    
+    // Load student enrollments from database
+    await loadEnrollmentsFromDatabase();
+
+    // Load progress, quiz scores, and certificates from database
+    await loadProgressFromDatabase();
+    await loadQuizScoresFromDatabase();
+    await loadCertificatesFromDatabase();
+
+    // Auto-trigger self-healing completion checks for enrolled courses
+    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+    for (const course of enrolled) {
+        await checkAndTriggerCourseCompletion(course.id);
+    }
+
     // Check and clear old cached courses if schema is outdated or missing Finance courses (ID 21)
     const stored = localStorage.getItem('coursesData') || localStorage.getItem('customCourses');
     if (stored) {
@@ -150,7 +455,33 @@ function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function registerUser({ fullName, username, email, password, role }) {
+async function registerUser({ fullName, username, email, password, role }) {
+    const isOnline = await isApiServerReachable();
+    
+    if (isOnline) {
+        try {
+            const response = await fetch(`${getApiBaseUrl()}/api/auth.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'register',
+                    name: fullName,
+                    email: email,
+                    password: password,
+                    role: role === 'admin' ? 'admin' : 'student'
+                })
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                return { ok: true, message: data.message };
+            } else {
+                return { ok: false, message: data.message };
+            }
+        } catch (e) {
+            console.warn("API registration failed, falling back to LocalStorage", e);
+        }
+    }
+
     seedDemoUsers();
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
@@ -193,7 +524,53 @@ function registerUser({ fullName, username, email, password, role }) {
     return { ok: true, message: 'Account created successfully! Please login.' };
 }
 
-function loginUser({ username, password, role }) {
+async function loginUser({ username, password, role }) {
+    const isOnline = await isApiServerReachable();
+    
+    if (isOnline) {
+        try {
+            const response = await fetch(`${getApiBaseUrl()}/api/auth.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'login',
+                    email: username,
+                    password: password
+                })
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                const user = data.user;
+                const expectedRole = role === 'admin' ? 'admin' : 'student';
+                
+                if (user.role !== expectedRole) {
+                    return {
+                        ok: false,
+                        message: `Please select "${user.role === 'admin' ? 'Admin' : 'Student'}" in Login as.`
+                    };
+                }
+                
+                localStorage.setItem('session', JSON.stringify({
+                    username: user.email,
+                    email: user.email,
+                    fullName: user.name,
+                    role: user.role
+                }));
+                localStorage.setItem('userFullName', user.name);
+                
+                return {
+                    ok: true,
+                    role: user.role,
+                    message: `Welcome, ${user.name}! Redirecting...`
+                };
+            } else {
+                return { ok: false, message: data.message };
+            }
+        } catch (e) {
+            console.warn("API login failed, falling back to LocalStorage", e);
+        }
+    }
+
     seedDemoUsers();
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
@@ -239,7 +616,7 @@ function loginUser({ username, password, role }) {
     };
 }
 
-function resetPassword({ username, newPassword, role }) {
+async function resetPassword({ username, newPassword, role }) {
     seedDemoUsers();
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
@@ -311,6 +688,25 @@ function setupThemeToggle() {
     updateThemeToggleButton(savedTheme);
 
     if (themeToggle) {
+        // Ensure the theme button stays clickable on mobile by keeping it visible outside a hidden nav list.
+        const navContainer = document.querySelector('nav .container');
+        const navLinks = document.querySelector('nav .nav-links');
+        if (navContainer && navLinks && navLinks.contains(themeToggle)) {
+            const themeListItem = themeToggle.parentElement;
+            themeContainer:
+            if (window.innerWidth <= 860) {
+                themeToggle.style.position = 'absolute';
+                themeToggle.style.right = '1rem';
+                themeToggle.style.top = '50%';
+                themeToggle.style.transform = 'translateY(-50%)';
+                themeToggle.style.zIndex = '12';
+                navContainer.appendChild(themeToggle);
+                if (themeListItem && themeListItem.parentElement === navLinks && themeListItem.childElementCount === 0) {
+                    themeListItem.remove();
+                }
+            }
+        }
+
         themeToggle.addEventListener('click', function() {
             const currentTheme = html.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -486,12 +882,14 @@ function renderCourseDetailHero(course) {
                     }
                     .course-detail-banner-bg {
                         position: absolute;
-                        inset: -20px;
+                        inset: 0;
+                        width: 100%;
+                        height: 100%;
                         background-image: url('${course.detailImage}');
                         background-size: cover;
                         background-position: center;
                         filter: blur(18px) brightness(0.35);
-                        transform: scale(1.1);
+                        transform: scale(1.05);
                         z-index: 0;
                     }
                     .course-detail-banner-img {
@@ -1101,16 +1499,16 @@ function displayQuiz() {
         showQuestion();
     };
 
-    function showResults() {
+    async function showResults() {
         const percentage = Math.round((score / quizData.questions.length) * 100);
         const passed = percentage >= 70;
         const quizCourseId = sessionStorage.getItem('quizCourseId');
 
-        saveQuizProgress(quizCourseId, score, quizData.questions.length);
+        await saveQuizProgress(quizCourseId, score, quizData.questions.length);
 
         // Trigger course completion checks (which will issue the single unified Course Completion certificate if all conditions are met)
         if (passed) {
-            checkAndTriggerCourseCompletion(quizCourseId);
+            await checkAndTriggerCourseCompletion(quizCourseId);
         }
 
         quizContainer.innerHTML = `
@@ -1150,7 +1548,7 @@ function displayQuiz() {
 // ============================================
 // PROGRESS TRACKING (LOCAL STORAGE)
 // ============================================
-function checkAndTriggerCourseCompletion(courseId) {
+async function checkAndTriggerCourseCompletion(courseId) {
     const course = coursesData.find(c => String(c.id) === String(courseId));
     if (!course) return;
 
@@ -1172,38 +1570,60 @@ function checkAndTriggerCourseCompletion(courseId) {
 
     // All conditions met! Let's mark as completed
     let completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
-    if (!completedCourses.find(c => String(c.id) === String(courseId))) {
-        completedCourses.push({
-            id: parseInt(courseId),
-            title: course.title,
-            completedAt: new Date().toLocaleString()
+if (!completedCourses.find(c => String(c.id) === String(courseId) && c.userEmail === (session?.email || localStorage.getItem('userEmail') || ''))) {
+            completedCourses.push({
+                id: parseInt(courseId),
+                title: course.title,
+                completedAt: new Date().toLocaleString(),
+                userEmail: session?.email || localStorage.getItem('userEmail') || ''
         });
         localStorage.setItem('completedCourses', JSON.stringify(completedCourses));
         
-        // Generate Course Certificate
-        generateCertificate(parseInt(courseId), course.title, 'course');
+        // Generate Course Certificate (now async)
+        await generateCertificate(parseInt(courseId), course.title, 'course');
         
         showCertificateNotification(`Congratulations! You completed ${course.title} and earned your Certificate of Achievement! 📜`);
         updateProgressDisplay();
     }
 }
 
-window.markVideoAsWatched = function(courseId) {
+window.markVideoAsWatched = async function(courseId) {
     let watched = JSON.parse(localStorage.getItem('watchedVideos')) || [];
     if (!watched.includes(String(courseId))) {
         watched.push(String(courseId));
         localStorage.setItem('watchedVideos', JSON.stringify(watched));
+        
+        // Sync lesson completion to database
+        const session = getSession();
+        const isOnline = await isApiServerReachable();
+        if (isOnline && session && session.email) {
+            try {
+                await fetch(`${getApiBaseUrl()}/api/progress.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'complete',
+                        email: session.email,
+                        courseId: parseInt(courseId),
+                        lessonIndex: 0 // Video lesson corresponds to index 0
+                    })
+                });
+            } catch (e) {
+                console.warn("Failed to sync progress to database:", e);
+            }
+        }
+        
         alert('🎥 Video lesson marked as completed!');
         
         // Check if this triggers overall course completion
-        checkAndTriggerCourseCompletion(courseId);
+        await checkAndTriggerCourseCompletion(courseId);
         
         // Reload details page
         window.location.reload();
     }
 };
 
-function enrollCourse(courseId, courseTitle) {
+async function enrollCourse(courseId, courseTitle) {
     const session = getSession();
     if (!session) {
         alert('⚠️ Please register or login to enroll in this course.');
@@ -1221,6 +1641,25 @@ function enrollCourse(courseId, courseTitle) {
             enrolledAt: new Date().toLocaleString()
         });
         localStorage.setItem('enrolledCourses', JSON.stringify(enrolled));
+        
+        // Sync to database
+        const isOnline = await isApiServerReachable();
+        if (isOnline && session.email) {
+            try {
+                await fetch(`${getApiBaseUrl()}/api/enrollments.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'enroll',
+                        email: session.email,
+                        courseId: parseInt(courseId)
+                    })
+                });
+            } catch (e) {
+                console.warn("Failed to sync enrollment to database:", e);
+            }
+        }
+        
         alert(`🎉 Successfully enrolled in ${courseTitle}! Watch the video lesson and pass the quiz to earn your certificate.`);
         window.location.reload();
     } else {
@@ -1228,7 +1667,8 @@ function enrollCourse(courseId, courseTitle) {
     }
 }
 
-function saveQuizProgress(courseId, score, total) {
+async function saveQuizProgress(courseId, score, total) {
+    const percentage = Math.round((score / total) * 100);
     let quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
     const session = getSession();
     
@@ -1236,13 +1676,34 @@ function saveQuizProgress(courseId, score, total) {
         courseId: courseId,
         score: score,
         total: total,
-        percentage: Math.round((score / total) * 100),
+        percentage: percentage,
         date: new Date().toLocaleString(),
         studentName: session?.fullName || localStorage.getItem('userFullName') || 'Unknown Student',
         studentUsername: session?.username || 'unknown'
     });
     
     localStorage.setItem('quizScores', JSON.stringify(quizScores));
+
+    // Sync quiz score to database
+    const isOnline = await isApiServerReachable();
+    if (isOnline && session && session.email) {
+        try {
+            await fetch(`${getApiBaseUrl()}/api/quizzes.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'submit',
+                    email: session.email,
+                    courseId: parseInt(courseId),
+                    score: parseInt(score),
+                    total: parseInt(total),
+                    percentage: percentage
+                })
+            });
+        } catch (e) {
+            console.warn("Failed to sync quiz score to database:", e);
+        }
+    }
 }
 
 function loadProgressFromStorage() {
@@ -1394,7 +1855,7 @@ if (document.readyState === 'loading') {
 // ============================================
 // CERTIFICATE SYSTEM
 // ============================================
-function generateCertificate(courseId, courseTitle, certificateType = 'course') {
+async function generateCertificate(courseId, courseTitle, certificateType = 'course') {
     // Quiz certificates are disabled — only course completion certs are issued
     if (certificateType === 'quiz') return null;
 
@@ -1412,7 +1873,6 @@ function generateCertificate(courseId, courseTitle, certificateType = 'course') 
         }
     }
 
-
     // Generate unique certificate ID
     const certificateId = 'CERT-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
@@ -1422,6 +1882,7 @@ function generateCertificate(courseId, courseTitle, certificateType = 'course') 
         courseTitle: courseTitle,
         type: certificateType, // 'course' or 'quiz'
         userName: userName,
+        userEmail: session?.email || localStorage.getItem('userEmail') || '',
         issuedDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
         timestamp: Date.now(),
         verified: true
@@ -1429,6 +1890,34 @@ function generateCertificate(courseId, courseTitle, certificateType = 'course') 
 
     certificates.push(certificate);
     localStorage.setItem('certificates', JSON.stringify(certificates));
+
+    // Sync certificate to database
+    const isOnline = await isApiServerReachable();
+    if (isOnline && session && session.email) {
+        try {
+            const response = await fetch(`${getApiBaseUrl()}/api/certificates.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'issue',
+                    email: session.email,
+                    courseId: parseInt(courseId)
+                })
+            });
+            const data = await response.json();
+            if (data.status === 'success' && data.certificate) {
+                // Update local certificate list with database code/date
+                const index = certificates.findIndex(c => c.courseId === courseId && c.type === 'course');
+                if (index !== -1) {
+                    certificates[index].id = data.certificate.code;
+                    certificates[index].issuedDate = new Date(data.certificate.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                    localStorage.setItem('certificates', JSON.stringify(certificates));
+                }
+            }
+        } catch (e) {
+            console.warn("Failed to sync certificate to database:", e);
+        }
+    }
 
     return certificate;
 }
@@ -1534,16 +2023,27 @@ function setupCertificateFilters() {
 
 function viewCertificate(certificateId) {
     const certificates = JSON.parse(localStorage.getItem('certificates')) || [];
-    const certificate = certificates.find(c => c.id === certificateId);
+    const certificate = certificates.find(c => String(c.id) === String(certificateId));
     
     if (!certificate) return;
+
+    const session = JSON.parse(localStorage.getItem('session')) || null;
+    if (session?.role === 'student') {
+        const currentEmail = (session.email || '').toLowerCase();
+        const currentName = (session.fullName || '').trim();
+        const certEmail = (certificate.userEmail || '').toLowerCase();
+        const certName = certificate.userName || '';
+        if (currentEmail && certEmail !== currentEmail && certName !== currentName) {
+            alert('⚠️ This certificate is not available for your account.');
+            return;
+        }
+    }
     
     const certificateDisplay = document.getElementById('certificateDisplay');
     if (!certificateDisplay) return;
     
     const currentYear = new Date().getFullYear();
     
-    const session = JSON.parse(localStorage.getItem('session')) || null;
     const currentUserName = session?.fullName || localStorage.getItem('userFullName') || 'Learner';
     const displayName = (certificate.userName && certificate.userName !== 'Learner' && certificate.userName !== 'Demo Admin') ? certificate.userName : currentUserName;
     
