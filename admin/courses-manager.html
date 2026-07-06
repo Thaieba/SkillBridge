@@ -680,6 +680,10 @@
       localStorage.setItem('coursesData', JSON.stringify(coursesData));
       localStorage.setItem('customCourses', JSON.stringify(coursesData));
 
+      if (window.saveCourseToDatabase) {
+        window.saveCourseToDatabase(course);
+      }
+
       showSuccess(`✓ ${course.title} updated successfully!`);
       setTimeout(() => {
         closeModal();
