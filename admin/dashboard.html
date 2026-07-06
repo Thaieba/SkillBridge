@@ -504,7 +504,7 @@
     <script src="../js/data.js"></script>
     <script src="../js/main.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function(){
+        document.addEventListener('DOMContentLoaded', async function(){
             requireRole('admin');
             const session = getSession();
 
@@ -512,6 +512,10 @@
             document.getElementById('adminName').textContent = fullName;
             document.getElementById('adminRole').textContent = session?.role || 'admin';
             document.getElementById('welcomeText').textContent = `Welcome back, ${fullName.split(' ')[0]}!`;
+
+            if (window.fetchStudentsFromDatabase) {
+                await window.fetchStudentsFromDatabase();
+            }
 
             // Load and parse local storage database
             const users = JSON.parse(localStorage.getItem('users')) || [];
