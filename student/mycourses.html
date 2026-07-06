@@ -780,9 +780,19 @@
         completed = completed.filter(c => c.title !== title);
         localStorage.setItem('completedCourses', JSON.stringify(completed));
 
-        // Remove matching certificate too
+        // Remove matching certificate for this user only
         let certs = JSON.parse(localStorage.getItem('certificates')) || [];
-        certs = certs.filter(c => c.courseTitle !== title);
+        const session = JSON.parse(localStorage.getItem('session') || 'null');
+        certs = certs.filter(c => {
+            if (c.courseTitle !== title) return true;
+            // if no session, be conservative and keep the certificate
+            if (!session) return true;
+            const emailMatch = session.email && c.userEmail && String(c.userEmail).toLowerCase() === String(session.email).toLowerCase();
+            const nameMatch = session.fullName && c.userName === session.fullName;
+            const usernameMatch = session.username && c.userName === session.username;
+            // remove only when cert belongs to current session user
+            return !(emailMatch || nameMatch || usernameMatch);
+        });
         localStorage.setItem('certificates', JSON.stringify(certs));
 
         // Rebuild allCards and re-render
