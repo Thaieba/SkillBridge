@@ -89,13 +89,13 @@
             const form = document.getElementById('adminLoginForm');
             const statusEl = document.getElementById('adminLoginStatus');
 
-            form?.addEventListener('submit', function(e){
+            form?.addEventListener('submit', async function(e){
                 e.preventDefault();
 
                 const username = document.getElementById('adminUsername').value.trim();
                 const password = document.getElementById('adminPassword').value;
 
-                const res = loginUser({ username, password, role: 'admin' });
+                const res = await loginUser({ username, password, role: 'admin' });
                 if(res.ok){
                     statusEl.style.display = 'block';
                     statusEl.textContent = res.message;
