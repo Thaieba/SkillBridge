@@ -945,16 +945,22 @@
       } catch (e) {}
 
       saveCustomCourses(courses);
+      if (window.saveCourseToDatabase) {
+        window.saveCourseToDatabase(course);
+      }
       closeModal();
       renderTable();
       showToast(isEdit ? '✅ Course updated!' : '✅ Course added!');
     }
 
-    function deleteCourse(courseId) {
+    async function deleteCourse(courseId) {
       if (!confirm('Are you sure you want to delete this course? This will remove all curriculum records.')) return;
       let courses = getAllCourses();
       courses = courses.filter(c=>c.id!==courseId);
       saveCustomCourses(courses);
+      if (window.deleteCourseFromDatabase) {
+        await window.deleteCourseFromDatabase(courseId);
+      }
       renderTable();
       showToast('🗑 Course deleted.');
     }
