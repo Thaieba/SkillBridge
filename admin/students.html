@@ -491,8 +491,11 @@
     let activeDetailsUsername = '';
     let currentEditUsername = '';
 
-    function loadUsers() {
+    async function loadUsers() {
       requireRole('admin');
+      if (window.fetchStudentsFromDatabase) {
+        await window.fetchStudentsFromDatabase();
+      }
       allUsers = JSON.parse(localStorage.getItem('users') || '[]');
       const certs = JSON.parse(localStorage.getItem('certificates') || '[]');
       const quizScores = JSON.parse(localStorage.getItem('quizScores') || '[]');
@@ -805,7 +808,10 @@
       const details = JSON.parse(localStorage.getItem(detailsKey) || 'null');
       
       const certs = JSON.parse(localStorage.getItem('certificates') || '[]');
-      const userCerts = certs.filter(c => c.type === 'course' && (c.userName === user.fullName || c.userName === user.username));
+      const userCerts = certs.filter(c => c.type === 'course' && (
+        (c.userName === user.fullName || c.userName === user.username) ||
+        (c.userEmail && String(c.userEmail).toLowerCase() === String(user.email).toLowerCase())
+      ));
 
       const quizScores = JSON.parse(localStorage.getItem('quizScores') || '[]');
       const userScores = quizScores.filter(q => q.studentUsername === user.username || q.studentName === user.fullName);
