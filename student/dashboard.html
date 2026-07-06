@@ -4,7 +4,581 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - SkillBridge</title>
+    <meta name="description" content="Your personal SkillBridge learning dashboard — track progress, scores, and achievements.">
     <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ─── Dashboard-specific overrides ─── */
+        body {
+            background: #0a0f1e;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Animated background mesh */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 10%, rgba(16,185,129,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(99,102,241,0.10) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .db-wrapper {
+            position: relative;
+            z-index: 1;
+            padding: 2rem 1rem 4rem;
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        /* ─── Hero welcome banner ─── */
+        .db-hero {
+            background: linear-gradient(135deg, #0f2027 0%, #1a1f35 50%, #0f2027 100%);
+            border: 1px solid rgba(16,185,129,0.25);
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .db-hero::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .db-hero-left {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .db-avatar {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10B981, #6366f1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 10px 28px rgba(16,185,129,0.14), 0 2px 8px rgba(2,6,23,0.25);
+            position: relative;
+        }
+
+        .db-avatar::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: conic-gradient(#10B981, #6366f1, #10B981);
+            z-index: -1;
+            animation: spin 4s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .db-welcome-text h1 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #f1f5f9;
+            margin: 0;
+        }
+
+        .db-welcome-text h1 span {
+            background: linear-gradient(90deg, #10B981, #6EE7B7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .db-welcome-text p {
+            margin: 0.25rem 0 0;
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        .db-hero-right {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .db-badge {
+            background: rgba(16,185,129,0.12);
+            border: 1px solid rgba(16,185,129,0.3);
+            border-radius: 20px;
+            padding: 0.35rem 0.9rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #10B981;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-logout {
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.4);
+            color: #f87171;
+            padding: 0.5rem 1.2rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239,68,68,0.25);
+            transform: translateY(-1px);
+        }
+
+        /* ─── Section label ─── */
+        .db-section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #10B981;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .db-section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(16,185,129,0.4), transparent);
+        }
+
+        /* ─── Stat cards ─── */
+        .db-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .db-stat-card {
+            background: linear-gradient(145deg, #111827, #0f1629);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 1.5rem 1.75rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            cursor: default;
+        }
+
+        .db-stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+        }
+
+        .db-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .db-stat-card.green::before  { background: linear-gradient(90deg, #10B981, #6EE7B7); }
+        .db-stat-card.purple::before { background: linear-gradient(90deg, #6366f1, #a78bfa); }
+        .db-stat-card.orange::before { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
+        .db-stat-card.blue::before   { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
+
+        .db-stat-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .db-stat-value {
+            font-size: 2.4rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 0.3rem;
+        }
+
+        .db-stat-card.green  .db-stat-value { color: #10B981; }
+        .db-stat-card.purple .db-stat-value { color: #a78bfa; }
+        .db-stat-card.orange .db-stat-value { color: #fbbf24; }
+        .db-stat-card.blue   .db-stat-value { color: #60a5fa; }
+
+        .db-stat-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .db-stat-trend {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 20px;
+        }
+
+        .trend-up   { background: rgba(16,185,129,0.15); color: #10B981; }
+        .trend-hot  { background: rgba(239,68,68,0.15);  color: #f87171; }
+        .trend-star { background: rgba(251,191,36,0.15); color: #fbbf24; }
+
+        /* ─── Two-column layout ─── */
+        .db-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .db-cols { grid-template-columns: 1fr; }
+        }
+
+        /* ─── Panel card ─── */
+        .db-panel {
+            background: linear-gradient(145deg, #111827, #0f1629);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .db-panel-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ─── Progress ring ─── */
+        .ring-wrap {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .ring-svg {
+            flex-shrink: 0;
+        }
+
+        .ring-bg   { fill: none; stroke: rgba(255,255,255,0.05); }
+        .ring-fill { fill: none; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1); }
+        .ring-fill.green  { stroke: url(#ringGrad1); }
+        .ring-fill.purple { stroke: url(#ringGrad2); }
+
+        .ring-info { flex: 1; }
+        .ring-info h3 { font-size: 2rem; font-weight: 900; color: #f1f5f9; }
+        .ring-info p  { font-size: 0.8rem; color: #64748b; margin-top: 0.25rem; }
+
+        /* ─── Score bar ─── */
+        .score-bars { display: flex; flex-direction: column; gap: 0.9rem; }
+
+        .score-bar-row { display: flex; flex-direction: column; gap: 0.35rem; }
+        .score-bar-meta { display: flex; justify-content: space-between; font-size: 0.78rem; }
+        .score-bar-meta span:first-child { color: #94a3b8; font-weight: 500; }
+        .score-bar-meta span:last-child  { color: #10B981; font-weight: 700; }
+
+        .score-bar-track {
+            height: 6px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+            width: 0%;
+        }
+
+        /* ─── Quick link cards ─── */
+        .db-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .db-link-card {
+            background: linear-gradient(145deg, #111827, #0f1629);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .db-link-card::after {
+            content: '→';
+            position: absolute;
+            bottom: 1.2rem;
+            right: 1.2rem;
+            font-size: 1.1rem;
+            color: #334155;
+            transition: color 0.2s, right 0.2s;
+        }
+
+        .db-link-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(16,185,129,0.35);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(16,185,129,0.1);
+        }
+
+        .db-link-card:hover::after {
+            color: #10B981;
+            right: 0.9rem;
+        }
+
+        .db-link-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .db-link-card h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin: 0;
+        }
+
+        .db-link-card p {
+            font-size: 0.78rem;
+            color: #64748b;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* ─── Recent activity ─── */
+        .activity-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .activity-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .activity-text { flex: 1; }
+        .activity-text strong { display: block; font-size: 0.83rem; color: #cbd5e1; font-weight: 600; }
+        .activity-text span   { font-size: 0.72rem; color: #475569; }
+
+        .activity-score {
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+        }
+
+        .score-high { background: rgba(16,185,129,0.15); color: #10B981; }
+        .score-mid  { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+        .score-low  { background: rgba(239,68,68,0.15);   color: #f87171; }
+
+        /* ─── Streak widget ─── */
+        .streak-wrap {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .streak-flame {
+            font-size: 3rem;
+            line-height: 1;
+            animation: flicker 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes flicker {
+            from { transform: scale(1)   rotate(-3deg); }
+            to   { transform: scale(1.08) rotate(3deg);  }
+        }
+
+        .streak-info h3 { font-size: 2.2rem; font-weight: 900; color: #fbbf24; }
+        .streak-info p  { font-size: 0.8rem; color: #64748b; margin-top: 0.2rem; }
+
+        .streak-days {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.85rem;
+            flex-wrap: wrap;
+        }
+
+        .streak-day {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+        }
+
+        .streak-day.done    { background: rgba(16,185,129,0.25); color: #10B981; border: 1px solid rgba(16,185,129,0.4); }
+        .streak-day.today   { background: rgba(251,191,36,0.25); color: #fbbf24; border: 1px solid rgba(251,191,36,0.5); }
+        .streak-day.pending { background: rgba(255,255,255,0.04); color: #334155; border: 1px solid rgba(255,255,255,0.06); }
+
+        /* ─── Empty state ─── */
+        .db-empty {
+            text-align: center;
+            padding: 2rem;
+            color: #475569;
+            font-size: 0.85rem;
+        }
+
+        .db-empty span { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+
+        /* ─── Onboarding modal (kept from original) ─── */
+        #profileDetailsModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal-box {
+            background: #111827;
+            border: 1px solid rgba(16,185,129,0.25);
+            border-radius: 20px;
+            padding: 2.2rem;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1.5rem; }
+        .modal-header h2 { color: #f1f5f9; font-size: 1.4rem; font-weight: 800; margin: 0; }
+        .modal-header p  { color: #64748b; font-size: 0.85rem; margin: 0.2rem 0 0; }
+
+        .form-field { display: flex; flex-direction: column; gap: 0.4rem; }
+        .form-field label { font-size: 0.85rem; font-weight: 600; color: #94a3b8; }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1.5px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            outline: none;
+            border-color: #10B981;
+        }
+
+        .form-field select option { background: #111827; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        .btn-primary-full {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .btn-primary-full:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Number counter animation */
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .db-stat-value { animation: countUp 0.6s ease forwards; }
+    </style>
 </head>
 <body>
     <nav>
@@ -18,64 +592,242 @@
                 <li><a href="profile.html">My Profile</a></li>
                 <li><a href="mycourses.html">My Courses</a></li>
                 <li><a href="certificates.html">My Certificates</a></li>
-                <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
+                <li><button id="themeToggle" class="btn" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:8px;padding:0.4rem 0.8rem;">🌙</button></li>
             </ul>
             <div class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span></span><span></span><span></span>
             </div>
         </div>
     </nav>
 
-    <section class="section" style="padding: 3rem 1rem;">
-        <div class="container" style="max-width: 1100px;">
-            <h1 class="section-title" style="margin-bottom: 1.5rem;">👋 Student Dashboard</h1>
+    <div class="db-wrapper">
 
-            <div class="progress-stat-box" style="border-left: 6px solid var(--primary-color); margin-bottom: 2rem;">
-                <div style="display:flex; justify-content:space-between; gap: 1rem; flex-wrap: wrap; align-items:center;">
-                    <div>
-                        <div style="font-size: 1.2rem; font-weight: 800;">Welcome, <span id="studentName">Student</span></div>
-                        <div style="color: var(--text-light); margin-top: 0.25rem;">Role: <span id="studentRole">student</span></div>
+        <!-- ── Hero Banner ── -->
+        <div class="db-hero">
+            <div class="db-hero-left">
+                <div class="db-avatar" id="avatarInitial">S</div>
+                <div class="db-welcome-text">
+                    <h1>Welcome back, <span id="studentName">Student</span> 👋</h1>
+                    <p id="studentTagline">Keep pushing — you're doing great!</p>
+                </div>
+            </div>
+            <div class="db-hero-right">
+                <div class="db-badge" id="roleBadge">🎓 Student</div>
+                <button class="btn-logout" onclick="logoutAndRedirect()">Sign Out</button>
+            </div>
+        </div>
+
+        <!-- ── Stat Cards ── -->
+        <div class="db-section-label">📊 Your Stats</div>
+        <div class="db-stats">
+            <div class="db-stat-card green">
+                <div class="db-stat-trend trend-up" id="courseTrend">✓ Done</div>
+                <span class="db-stat-icon">📚</span>
+                <div class="db-stat-value" id="statCourses">0</div>
+                <div class="db-stat-label">Courses Completed</div>
+            </div>
+            <div class="db-stat-card purple">
+                <div class="db-stat-trend trend-hot" id="quizTrend">🔥 Active</div>
+                <span class="db-stat-icon">📝</span>
+                <div class="db-stat-value" id="statQuizzes">0</div>
+                <div class="db-stat-label">Quiz Attempts</div>
+            </div>
+            <div class="db-stat-card orange">
+                <div class="db-stat-trend trend-star" id="avgTrend">⭐ Score</div>
+                <span class="db-stat-icon">🎯</span>
+                <div class="db-stat-value" id="statAvg">0%</div>
+                <div class="db-stat-label">Average Score</div>
+            </div>
+            <div class="db-stat-card blue">
+                <div class="db-stat-trend trend-up">🏆 Best</div>
+                <span class="db-stat-icon">🥇</span>
+                <div class="db-stat-value" id="statBest">—</div>
+                <div class="db-stat-label">Best Quiz Score</div>
+            </div>
+        </div>
+
+        <!-- ── Two Column: Progress Ring + Score Breakdown ── -->
+        <div class="db-cols" style="margin-bottom:2rem;">
+            <!-- Progress ring -->
+            <div class="db-panel">
+                <div class="db-panel-title">🎯 Overall Progress</div>
+                <div class="ring-wrap">
+                    <svg class="ring-svg" width="100" height="100" viewBox="0 0 100 100">
+                        <defs>
+                            <linearGradient id="ringGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#10B981"/>
+                                <stop offset="100%" stop-color="#6EE7B7"/>
+                            </linearGradient>
+                        </defs>
+                        <circle class="ring-bg" cx="50" cy="50" r="40" stroke-width="8"/>
+                        <circle class="ring-fill green" id="progressRing" cx="50" cy="50" r="40"
+                            stroke-width="8"
+                            stroke-dasharray="251.2"
+                            stroke-dashoffset="251.2"
+                            transform="rotate(-90 50 50)"/>
+                        <text x="50" y="50" text-anchor="middle" dominant-baseline="middle"
+                            fill="#10B981" font-size="16" font-weight="900" id="ringText">0%</text>
+                    </svg>
+                    <div class="ring-info">
+                        <h3 id="ringLabel">0%</h3>
+                        <p>Average quiz score</p>
+                        <p style="color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;" id="ringDesc">Take more quizzes to track your growth!</p>
                     </div>
-                    <button class="btn btn-clear" onclick="logoutAndRedirect()">Logout</button>
                 </div>
             </div>
 
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                <div class="progress-stat-box" style="border-left: 4px solid var(--primary-color);">
-                    <div style="font-size:2rem; font-weight:800; color: var(--primary-color);" id="statCourses">0</div>
-                    <div class="progress-stat-label">Courses Completed</div>
-                </div>
-                <div class="progress-stat-box" style="border-left: 4px solid var(--secondary-color);">
-                    <div style="font-size:2rem; font-weight:800; color: var(--secondary-color);" id="statQuizzes">0</div>
-                    <div class="progress-stat-label">Quiz Attempts</div>
-                </div>
-                <div class="progress-stat-box" style="border-left: 4px solid var(--accent-color);">
-                    <div style="font-size:2rem; font-weight:800; color: var(--accent-color);" id="statAvg">0%</div>
-                    <div class="progress-stat-label">Average Score</div>
-                </div>
-            </div>
-
-            <div style="margin-top: 2.5rem;">
-                <h2 class="progress-section-title">Quick Links</h2>
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    <a href="mycourses.html" class="opportunity-card" style="text-decoration:none;">
-                        <h4>📚 My Courses</h4>
-                        <p>See your completed courses with timestamps.</p>
-                    </a>
-                    <a href="certificates.html" class="opportunity-card" style="text-decoration:none;">
-                        <h4>🎓 My Certificates</h4>
-                        <p>View certificates earned from courses and quizzes.</p>
-                    </a>
-                    <a href="../quiz.html" class="opportunity-card" style="text-decoration:none;">
-                        <h4>📝 Take Quiz</h4>
-                        <p>Use course details → Take Quiz.</p>
-                    </a>
+            <!-- Streak widget -->
+            <div class="db-panel">
+                <div class="db-panel-title">🔥 Learning Streak</div>
+                <div class="streak-wrap">
+                    <div class="streak-flame">🔥</div>
+                    <div class="streak-info">
+                        <h3 id="streakCount">0</h3>
+                        <p>Day streak — keep it going!</p>
+                        <div class="streak-days" id="streakDays"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+
+        <!-- ── Score Breakdown ── -->
+        <div class="db-panel" style="margin-bottom:2rem;">
+            <div class="db-panel-title">📈 Quiz Score Breakdown</div>
+            <div class="score-bars" id="scoreBars">
+                <div class="db-empty"><span>📭</span>No quiz attempts yet. Take a quiz to see your breakdown!</div>
+            </div>
+        </div>
+
+        <!-- ── Recent Activity ── -->
+        <div class="db-cols" style="margin-bottom:2rem;">
+            <div class="db-panel">
+                <div class="db-panel-title">🕐 Recent Activity</div>
+                <div class="activity-list" id="activityList">
+                    <div class="db-empty"><span>🌱</span>No recent activity yet!</div>
+                </div>
+            </div>
+
+            <!-- Completed Courses -->
+            <div class="db-panel">
+                <div class="db-panel-title">✅ Completed Courses</div>
+                <div class="activity-list" id="completedList">
+                    <div class="db-empty"><span>📖</span>No courses completed yet. Start learning!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Quick Links ── -->
+        <div class="db-section-label">⚡ Quick Access</div>
+        <div class="db-links">
+            <a href="mycourses.html" class="db-link-card">
+                <div class="db-link-icon" style="background:rgba(16,185,129,0.15);">📚</div>
+                <h4>My Courses</h4>
+                <p>View your completed courses with timestamps and details.</p>
+            </a>
+            <a href="certificates.html" class="db-link-card">
+                <div class="db-link-icon" style="background:rgba(99,102,241,0.15);">🎓</div>
+                <h4>My Certificates</h4>
+                <p>Download and share certificates you've earned.</p>
+            </a>
+            <a href="../quiz.html" class="db-link-card">
+                <div class="db-link-icon" style="background:rgba(251,191,36,0.15);">📝</div>
+                <h4>Take a Quiz</h4>
+                <p>Test your knowledge and boost your score.</p>
+            </a>
+            <a href="../progress.html" class="db-link-card">
+                <div class="db-link-icon" style="background:rgba(59,130,246,0.15);">📊</div>
+                <h4>View Progress</h4>
+                <p>Deep dive into your full learning analytics.</p>
+            </a>
+            <a href="profile.html" class="db-link-card">
+                <div class="db-link-icon" style="background:rgba(239,68,68,0.15);">👤</div>
+                <h4>My Profile</h4>
+                <p>Update your personal info and learning goals.</p>
+            </a>
+            <a href="../skills.html" class="db-link-card">
+                <div class="db-link-icon" style="background:rgba(16,185,129,0.15);">🚀</div>
+                <h4>Explore Courses</h4>
+                <p>Browse all available courses and start a new one.</p>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- ── Onboarding Modal ── -->
+    <div id="profileDetailsModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span style="font-size:2rem;">📋</span>
+                <div>
+                    <h2>Complete Your Profile</h2>
+                    <p>Tell us a bit about yourself to get started.</p>
+                </div>
+            </div>
+            <form id="onboardingProfileForm" onsubmit="saveOnboardingProfile(event)" style="display:flex;flex-direction:column;gap:1.1rem;">
+                <div class="form-field">
+                    <label>Full Name *</label>
+                    <input type="text" id="obFullName" placeholder="e.g. John Doe" required>
+                </div>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label>Gender *</label>
+                        <select id="obGender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Date of Birth *</label>
+                        <input type="date" id="obDob" required>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label>Phone Number *</label>
+                        <input type="tel" id="obPhone" placeholder="e.g. +91 98765" required>
+                    </div>
+                    <div class="form-field">
+                        <label>City / Country *</label>
+                        <input type="text" id="obLocation" placeholder="e.g. Chennai, India" required>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label>Current Status *</label>
+                        <select id="obStatus" required>
+                            <option value="">Select Status</option>
+                            <option value="School Student">School Student</option>
+                            <option value="College Student">College Student</option>
+                            <option value="Working Professional">Working Professional</option>
+                            <option value="Job Seeker">Job Seeker</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Highest Education *</label>
+                        <select id="obEducation" required>
+                            <option value="">Select Qualification</option>
+                            <option value="High School">High School</option>
+                            <option value="Undergraduate">Undergraduate (UG)</option>
+                            <option value="Postgraduate">Postgraduate (PG)</option>
+                            <option value="Doctorate">Doctorate (Ph.D.)</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label>Learning Goal / Bio *</label>
+                    <textarea id="obBio" rows="2" placeholder="e.g. I want to learn web development..." required></textarea>
+                </div>
+                <div class="form-field">
+                    <label>Skills / Interests *</label>
+                    <input type="text" id="obSkills" placeholder="e.g. HTML, JavaScript, Video Editing" required>
+                </div>
+                <button type="submit" class="btn-primary-full">🚀 Save &amp; Get Started</button>
+            </form>
+        </div>
+    </div>
 
     <footer>
         <div class="footer-container">
@@ -101,29 +853,300 @@
     <script src="../js/data.js"></script>
     <script src="../js/main.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function(){
-            if (!requireRole('student')) return;
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!requireRole('student')) return;
 
-            const session = getSession();
-            const name = session?.fullName || session?.username || 'Student';
-            document.getElementById('studentName').textContent = name;
-            document.getElementById('studentRole').textContent = session?.role || 'student';
+        const session = getSession();
+        const name = session?.fullName || session?.username || 'Student';
+        const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
-            const completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
-            const quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
+        document.getElementById('studentName').textContent = name;
+        document.getElementById('avatarInitial').textContent = initials || 'S';
 
-            document.getElementById('statCourses').textContent = completedCourses.length;
-            document.getElementById('statQuizzes').textContent = quizScores.length;
+        // ── Load data ──
+        const completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
+        const quizScores       = JSON.parse(localStorage.getItem('quizScores'))       || [];
+        const avg = quizScores.length
+            ? Math.round(quizScores.reduce((a, b) => a + b.percentage, 0) / quizScores.length)
+            : 0;
+        const best = quizScores.length
+            ? Math.max(...quizScores.map(q => q.percentage))
+            : null;
 
-            const avg = quizScores.length ? Math.round(quizScores.reduce((a,b)=>a+b.percentage,0)/quizScores.length) : 0;
-            document.getElementById('statAvg').textContent = avg + '%';
+        // ── Tagline ──
+        const taglines = [
+            'Keep pushing — you\'re doing great! 💪',
+            'Every quiz makes you sharper. 🧠',
+            'Learning is a superpower. 🚀',
+            'Stay consistent, stay ahead! ⚡',
+        ];
+        document.getElementById('studentTagline').textContent =
+            taglines[Math.floor(Math.random() * taglines.length)];
+
+        // ── Animate stat counters ──
+        animateValue('statCourses', 0, completedCourses.length, 800);
+        animateValue('statQuizzes', 0, quizScores.length, 800);
+        animatePct('statAvg', avg, 900);
+        document.getElementById('statBest').textContent = best !== null ? best + '%' : '—';
+
+        // ── Progress ring ──
+        const circumference = 251.2;
+        const offset = circumference - (avg / 100) * circumference;
+        setTimeout(() => {
+            document.getElementById('progressRing').style.strokeDashoffset = offset;
+            document.getElementById('ringText').textContent = avg + '%';
+            document.getElementById('ringLabel').textContent = avg + '%';
+            document.getElementById('ringDesc').textContent = avg >= 80
+                ? '🔥 Excellent performance!'
+                : avg >= 50
+                ? '👍 Good going — keep it up!'
+                : 'Take more quizzes to improve!';
+        }, 300);
+
+        // ── Streak (simulated from quiz activity) ──
+        buildStreak(quizScores);
+
+        // ── Score breakdown bars ──
+        buildScoreBars(quizScores);
+
+        // ── Recent activity ──
+        buildActivity(quizScores);
+
+        // ── Completed courses list ──
+        buildCompletedCourses(completedCourses);
+
+        // ── Profile check ──
+        checkProfile(session, name);
+    });
+
+    /* ── Helpers ── */
+    function animateValue(id, start, end, duration) {
+        const el = document.getElementById(id);
+        if (!el || end === 0) return;
+        const range = end - start;
+        const startTime = performance.now();
+        function update(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(start + range * ease);
+            if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+    }
+
+    function animatePct(id, end, duration) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (end === 0) { el.textContent = '0%'; return; }
+        const startTime = performance.now();
+        function update(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(end * ease) + '%';
+            if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+    }
+
+    function buildStreak(quizScores) {
+        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const today = new Date().getDay();
+        const streakEl = document.getElementById('streakCount');
+        const daysEl   = document.getElementById('streakDays');
+
+        // Compute streak from quiz dates
+        let streak = 0;
+        if (quizScores.length) {
+            const dates = quizScores
+                .filter(q => q.date)
+                .map(q => new Date(q.date).toDateString());
+            const uniqueDates = [...new Set(dates)];
+            uniqueDates.sort((a, b) => new Date(b) - new Date(a));
+
+            let current = new Date();
+            for (const d of uniqueDates) {
+                const diff = Math.floor((current - new Date(d)) / 86400000);
+                if (diff <= 1) { streak++; current = new Date(d); }
+                else break;
+            }
+        }
+
+        streakEl.textContent = streak;
+
+        // Render week dots
+        daysEl.innerHTML = '';
+        for (let i = 0; i < 7; i++) {
+            const dayIdx = (today - 6 + i + 7) % 7;
+            const isToday = i === 6;
+            const isPast  = i < 6 && i >= (6 - streak);
+            const cls = isToday ? 'today' : isPast ? 'done' : 'pending';
+            daysEl.innerHTML += `<div class="streak-day ${cls}">${days[dayIdx]}</div>`;
+        }
+    }
+
+    function buildScoreBars(quizScores) {
+        const container = document.getElementById('scoreBars');
+        if (!quizScores.length) return;
+
+        // Group by course
+        const byCourse = {};
+        quizScores.forEach(q => {
+            const key = q.courseTitle || q.courseId || 'Unknown Course';
+            if (!byCourse[key]) byCourse[key] = [];
+            byCourse[key].push(q.percentage);
         });
 
-        function logoutAndRedirect(){
-            logoutUser();
-            window.location.href = '../register.html';
+        container.innerHTML = '';
+        Object.entries(byCourse).slice(0, 6).forEach(([course, scores]) => {
+            const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+            const color = avg >= 80 ? '#10B981' : avg >= 50 ? '#f59e0b' : '#ef4444';
+            container.innerHTML += `
+                <div class="score-bar-row">
+                    <div class="score-bar-meta">
+                        <span>${course}</span>
+                        <span>${avg}%</span>
+                    </div>
+                    <div class="score-bar-track">
+                        <div class="score-bar-fill" data-width="${avg}"
+                            style="background: linear-gradient(90deg, ${color}, ${color}aa);"></div>
+                    </div>
+                </div>`;
+        });
+
+        // Animate bars
+        setTimeout(() => {
+            document.querySelectorAll('.score-bar-fill').forEach(bar => {
+                bar.style.width = bar.dataset.width + '%';
+            });
+        }, 400);
+    }
+
+    function buildActivity(quizScores) {
+        const container = document.getElementById('activityList');
+        if (!quizScores.length) return;
+
+        const recent = [...quizScores].reverse().slice(0, 5);
+        container.innerHTML = recent.map(q => {
+            const cls   = q.percentage >= 80 ? 'score-high' : q.percentage >= 50 ? 'score-mid' : 'score-low';
+            const icon  = q.percentage >= 80 ? '🏆' : q.percentage >= 50 ? '📝' : '📌';
+            const bg    = q.percentage >= 80 ? 'rgba(16,185,129,0.12)' : q.percentage >= 50 ? 'rgba(251,191,36,0.12)' : 'rgba(239,68,68,0.12)';
+            const date  = q.date ? new Date(q.date).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : 'Recently';
+            const title = q.courseTitle || q.courseId || 'Quiz';
+            return `
+                <div class="activity-item">
+                    <div class="activity-dot" style="background:${bg};">${icon}</div>
+                    <div class="activity-text">
+                        <strong>${title}</strong>
+                        <span>${date}</span>
+                    </div>
+                    <span class="activity-score ${cls}">${q.percentage}%</span>
+                </div>`;
+        }).join('');
+    }
+
+    function buildCompletedCourses(courses) {
+        const container = document.getElementById('completedList');
+        if (!courses.length) return;
+
+        container.innerHTML = courses.slice(0, 5).map(c => {
+            const title = typeof c === 'string' ? c : c.title || c.courseTitle || 'Course';
+            const date  = c.completedAt
+                ? new Date(c.completedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short' })
+                : '';
+            return `
+                <div class="activity-item">
+                    <div class="activity-dot" style="background:rgba(16,185,129,0.12);">✅</div>
+                    <div class="activity-text">
+                        <strong>${title}</strong>
+                        <span>${date}</span>
+                    </div>
+                    <span class="activity-score score-high">Done</span>
+                </div>`;
+        }).join('');
+    }
+
+    function checkProfile(session, name) {
+        return; // Disable onboarding modal prompt
+        const users      = JSON.parse(localStorage.getItem('users') || '[]');
+        const userInDb   = users.find(u => u.username === session.username) || {};
+        const profileKey = 'profileDetails_' + session.username;
+        let parsed = {};
+        try { parsed = JSON.parse(localStorage.getItem(profileKey) || '{}'); } catch(e) {}
+
+        const details = {
+            skills:        parsed.skills        || userInDb.skills        || '',
+            gender:        parsed.gender         || userInDb.gender         || '',
+            currentStatus: parsed.currentStatus  || userInDb.currentStatus  || '',
+            location:      parsed.location       || userInDb.location       || '',
+            phone:         parsed.phone          || userInDb.phone          || '',
+            dob:           parsed.dob            || userInDb.dob            || '',
+            education:     parsed.education      || userInDb.education      || '',
+            bio:           parsed.bio            || userInDb.bio            || '',
+        };
+
+        if (!details.skills || !details.gender || !details.currentStatus || !details.location) {
+            document.getElementById('obFullName').value  = name;
+            document.getElementById('obPhone').value     = details.phone;
+            document.getElementById('obDob').value       = details.dob;
+            document.getElementById('obEducation').value = details.education;
+            document.getElementById('obBio').value       = details.bio;
+            document.getElementById('obSkills').value    = details.skills;
+            document.getElementById('obGender').value    = details.gender;
+            document.getElementById('obStatus').value    = details.currentStatus;
+            document.getElementById('obLocation').value  = details.location;
+
+            const modal = document.getElementById('profileDetailsModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
+    }
+
+    function saveOnboardingProfile(event) {
+        event.preventDefault();
+        const session = getSession();
+        if (!session) return;
+
+        const fullName      = document.getElementById('obFullName').value.trim();
+        const phone         = document.getElementById('obPhone').value.trim();
+        const dob           = document.getElementById('obDob').value;
+        const education     = document.getElementById('obEducation').value;
+        const bio           = document.getElementById('obBio').value.trim();
+        const skills        = document.getElementById('obSkills').value.trim();
+        const gender        = document.getElementById('obGender').value;
+        const currentStatus = document.getElementById('obStatus').value;
+        const location      = document.getElementById('obLocation').value.trim();
+
+        if (fullName) {
+            document.getElementById('studentName').textContent = fullName;
+            const initials = fullName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            document.getElementById('avatarInitial').textContent = initials;
+            session.fullName = fullName;
+            localStorage.setItem('session', JSON.stringify(session));
+            localStorage.setItem('userFullName', fullName);
+        }
+
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const uidx  = users.findIndex(u => u.username === session.username);
+        if (uidx !== -1) {
+            if (fullName) users[uidx].fullName = fullName;
+            Object.assign(users[uidx], { phone, dob, education, bio, skills, gender, currentStatus, location });
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        localStorage.setItem('profileDetails_' + session.username,
+            JSON.stringify({ phone, dob, education, bio, skills, gender, currentStatus, location }));
+
+        document.getElementById('profileDetailsModal').style.display = 'none';
+        document.body.style.overflow = '';
+        alert('🎉 Profile saved! Enjoy your learning journey.');
+    }
+
+    function logoutAndRedirect() {
+        logoutUser();
+        window.location.href = '../register.html';
+    }
     </script>
 </body>
 </html>
-
