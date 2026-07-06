@@ -686,13 +686,14 @@
     function exportCertificatesCSV() {
       const certs = JSON.parse(localStorage.getItem('certificates')) || [];
       const courseCerts = certs.filter(c => c.type === 'course');
-      const headers = ['Certificate ID', 'Course Title', 'Recipient Name', 'Issued Date', 'Status'];
-      
+      // Include recipient email to make exports unambiguous and filterable
+      const headers = ['Certificate ID', 'Course Title', 'Recipient Name', 'Recipient Email', 'Issued Date', 'Status'];
+
       downloadCSV(
         'skillbridge-certificates-issued.csv',
         headers,
         courseCerts,
-        (c) => [c.id, c.courseTitle, c.userName, c.issuedDate, c.verified ? 'VERIFIED' : 'PENDING']
+        (c) => [c.id, c.courseTitle, c.userName || c.userName || '', c.userEmail || c.email || '', c.issuedDate || '', c.verified ? 'VERIFIED' : 'PENDING']
       );
     }
 
