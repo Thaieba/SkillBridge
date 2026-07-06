@@ -1549,6 +1549,7 @@ function displayQuiz() {
 // PROGRESS TRACKING (LOCAL STORAGE)
 // ============================================
 async function checkAndTriggerCourseCompletion(courseId) {
+    const session = getSession();
     const course = coursesData.find(c => String(c.id) === String(courseId));
     if (!course) return;
 
