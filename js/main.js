@@ -97,7 +97,7 @@ async function loadEnrollmentsFromDatabase() {
             const data = await response.json();
             
             if (data.status === 'success' && Array.isArray(data.enrolled_courses)) {
-                let enrolled = JSON.parse(localStorage.getItem('enrolledCourses')) || [];
+                let enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses'))) || [];
                 let modified = false;
                 
                 data.enrolled_courses.forEach(courseId => {
@@ -117,7 +117,7 @@ async function loadEnrollmentsFromDatabase() {
                 });
                 
                 if (modified) {
-                    localStorage.setItem('enrolledCourses', JSON.stringify(enrolled));
+                    localStorage.setItem(getUserStorageKey('enrolledCourses'), JSON.stringify(enrolled));
                 }
             }
         } catch (e) {
@@ -164,6 +164,29 @@ async function deleteCourseFromDatabase(id) {
     }
 }
 
+// Delete certificate from database
+async function deleteCertificateFromDatabase(courseId) {
+    const session = getSession();
+    if (!session || !session.email) return;
+
+    const isOnline = await isApiServerReachable();
+    if (isOnline) {
+        try {
+            await fetch(`${getApiBaseUrl()}/api/certificates.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'delete',
+                    email: session.email,
+                    courseId: parseInt(courseId, 10)
+                })
+            });
+        } catch (e) {
+            console.error("Failed to delete certificate from database:", e);
+        }
+    }
+}
+
 // Fetch all registered students/users from MySQL and sync local cache
 async function fetchStudentsFromDatabase() {
     const isOnline = await isApiServerReachable();
@@ -194,8 +217,8 @@ async function loadProgressFromDatabase() {
     const isOnline = await isApiServerReachable();
     if (isOnline) {
         try {
-            const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
-            let watched = JSON.parse(localStorage.getItem('watchedVideos')) || [];
+            const enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses')) || '[]');
+            let watched = JSON.parse(localStorage.getItem(getUserStorageKey('watchedVideos'))) || [];
             let modified = false;
             
             for (const course of enrolled) {
@@ -209,7 +232,7 @@ async function loadProgressFromDatabase() {
                 }
             }
             if (modified) {
-                localStorage.setItem('watchedVideos', JSON.stringify(watched));
+                localStorage.setItem(getUserStorageKey('watchedVideos'), JSON.stringify(watched));
                 if (typeof displayProgress === 'function') displayProgress();
                 if (typeof updateProgressDisplay === 'function') updateProgressDisplay();
             }
@@ -240,7 +263,7 @@ async function loadQuizScoresFromDatabase() {
                     studentName: session.fullName || 'Learner',
                     studentUsername: session.username || 'learner'
                 }));
-                localStorage.setItem('quizScores', JSON.stringify(quizScores));
+                localStorage.setItem(getUserStorageKey('quizScores'), JSON.stringify(quizScores));
                 if (typeof displayProgress === 'function') displayProgress();
             }
         } catch (e) {
@@ -279,7 +302,7 @@ async function loadCertificatesFromDatabase() {
                     title: c.courseTitle,
                     completedAt: c.issuedDate
                 }));
-                localStorage.setItem('completedCourses', JSON.stringify(completed));
+                localStorage.setItem(getUserStorageKey('completedCourses'), JSON.stringify(completed));
                 
                 if (typeof displayCertificates === 'function') displayCertificates();
                 if (typeof displayProgress === 'function') displayProgress();
@@ -293,6 +316,8 @@ async function loadCertificatesFromDatabase() {
 // Bind handlers to window scope
 window.saveCourseToDatabase = saveCourseToDatabase;
 window.deleteCourseFromDatabase = deleteCourseFromDatabase;
+window.deleteCertificateFromDatabase = deleteCertificateFromDatabase;
+window.generateCertificate = generateCertificate;
 window.fetchStudentsFromDatabase = fetchStudentsFromDatabase;
 
 // Initialize app when DOM is loaded
@@ -313,7 +338,7 @@ async function initializeApp() {
     await loadCertificatesFromDatabase();
 
     // Auto-trigger self-healing completion checks for enrolled courses
-    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+    const enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses')) || '[]');
     for (const course of enrolled) {
         await checkAndTriggerCourseCompletion(course.id);
     }
@@ -327,17 +352,16 @@ async function initializeApp() {
             if (!financeCourse) {
                 localStorage.removeItem('coursesData');
                 localStorage.removeItem('customCourses');
-                window.location.reload();
                 return;
             }
         } catch(e) {}
     }
 
     // Sync and clear old cached quiz data if version is outdated
-    if (localStorage.getItem('quizDataVersion') !== '3.0') {
+    if (localStorage.getItem('quizDataVersion') !== '3.1') {
         localStorage.removeItem('customQuizzes');
         localStorage.removeItem('quizEditorData');
-        localStorage.setItem('quizDataVersion', '3.0');
+        localStorage.setItem('quizDataVersion', '3.1');
     }
 
     checkOnboardingRedirect();
@@ -352,10 +376,12 @@ async function initializeApp() {
     setupLogoDblClick();
     // Render saved home-page content and show edit controls for admins.
     maybeApplyAdminHomeContent();
+    applyAdminFooterEverywhere();
     applyAdminHomeInlineEdits();
     applySkillBridgeContactDetails();
     setupAdminHomeEditor();
     setupHomeFeedbackForm();
+    setupBackToTopButton();
 }
 
 function setupPasswordToggles() {
@@ -415,8 +441,14 @@ function setupAuthHelpers() {
     window.resetPassword = resetPassword;
 }
 
+
+function getUserStorageKey(baseKey) {
+    const session = getSession();
+    return session && session.username ? `${baseKey}_${session.username}` : baseKey;
+}
+
 function getSession() {
-    return JSON.parse(localStorage.getItem('session')) || null;
+    return JSON.parse(sessionStorage.getItem('session')) || null;
 }
 
 function requireRole(expectedRole) {
@@ -443,7 +475,7 @@ function getLoginPath(expectedRole) {
 }
 
 function logoutUser() {
-    localStorage.removeItem('session');
+    sessionStorage.removeItem('session');
     localStorage.removeItem('userFullName');
 }
 
@@ -550,7 +582,7 @@ async function loginUser({ username, password, role }) {
                     };
                 }
                 
-                localStorage.setItem('session', JSON.stringify({
+                sessionStorage.setItem('session', JSON.stringify({
                     username: user.email,
                     email: user.email,
                     fullName: user.name,
@@ -600,7 +632,7 @@ async function loginUser({ username, password, role }) {
         };
     }
 
-    localStorage.setItem('session', JSON.stringify({
+    sessionStorage.setItem('session', JSON.stringify({
         username: user.username,
         email: user.email || '',
         fullName: user.fullName,
@@ -731,6 +763,7 @@ function updateThemeToggleButton(theme) {
 function initializeSkillCards() {
     const skillsContainer = document.querySelector('.skills-grid');
     if (skillsContainer) {
+        skillsContainer.innerHTML = Array(skillsContainer.dataset.featuredLimit ? parseInt(skillsContainer.dataset.featuredLimit, 10) : 6).fill('<div class="skill-card-skeleton"></div>').join('');
         const limit = skillsContainer.dataset.featuredLimit;
         const courses = limit ? coursesData.slice(0, parseInt(limit, 10)) : coursesData;
         renderSkillCards(courses);
@@ -738,20 +771,38 @@ function initializeSkillCards() {
 }
 
 function getSkillCardButtons(course) {
-    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
-    const completed = JSON.parse(localStorage.getItem('completedCourses') || '[]');
+    const session = getSession();
+    if (!session) {
+        return `
+            <button class="btn btn-primary" onclick="viewCourseDetails(${course.id})">View Details</button>
+            <button class="btn btn-secondary" onclick="enrollCourse(${course.id}, '${escapeQuote(course.title)}')">Enroll Now</button>
+        `;
+    }
+
+    const enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses')) || '[]');
+    const watched = JSON.parse(localStorage.getItem(getUserStorageKey('watchedVideos')) || '[]');
+    const quizScores = JSON.parse(localStorage.getItem(getUserStorageKey('quizScores')) || '[]');
+    
     const isEnrolled = enrolled.some(e => String(e.id) === String(course.id));
-    const isCompleted = completed.some(c => String(c.id) === String(course.id));
+    const isVideoWatched = watched.includes(String(course.id));
+    const attempts = quizScores.filter(q => String(q.courseId) === String(course.id));
+    const isQuizPassed = attempts.some(q => q.percentage >= 70);
+    const isCompleted = isVideoWatched && isQuizPassed;
 
     if (isCompleted) {
         return `
             <button class="btn btn-primary" onclick="viewCourseDetails(${course.id})">View Details</button>
             <button class="btn btn-secondary" style="background:#10b981; border-color:#10b981; color:white; font-weight:700;" disabled>✅ Completed</button>
         `;
-    } else if (isEnrolled) {
+    } else if (isEnrolled && isVideoWatched) {
         return `
             <button class="btn btn-primary" onclick="viewCourseDetails(${course.id})">View Details</button>
             <button class="btn btn-secondary" style="background:rgba(59,130,246,0.1); color:#3b82f6; border-color:#3b82f6; font-weight:700;" onclick="viewCourseDetails(${course.id})">Resume Study</button>
+        `;
+    } else if (isEnrolled) {
+        return `
+            <button class="btn btn-primary" onclick="viewCourseDetails(${course.id})">View Details</button>
+            <button class="btn btn-secondary" style="background:rgba(59,130,246,0.1); color:#3b82f6; border-color:#3b82f6; font-weight:700;" onclick="viewCourseDetails(${course.id})">Continue Learning</button>
         `;
     } else {
         return `
@@ -779,9 +830,31 @@ function renderSkillCards(courses) {
                 <h3 class="skill-card-title">${course.title}</h3>
                 <p class="skill-card-description">${course.description}</p>
                 <div class="skill-card-meta">
-                    <span>📚 ${course.duration}</span>
+                    <span>⏱ ${course.duration}</span>
                     <span>⭐ ${course.rating}</span>
                 </div>
+                ${(() => {
+                    const session = getSession();
+                    if (!session) return '';
+                    const watched = JSON.parse(localStorage.getItem(getUserStorageKey('watchedVideos')) || '[]');
+                    const quizScores = JSON.parse(localStorage.getItem(getUserStorageKey('quizScores')) || '[]');
+                    const isVideoWatched = watched.includes(String(course.id));
+                    const attempts = quizScores.filter(q => String(q.courseId) === String(course.id));
+                    const isQuizPassed = attempts.some(q => q.percentage >= 70);
+                    const enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses')) || '[]');
+                    const isEnrolled = enrolled.some(e => String(e.id) === String(course.id));
+                    if (!isEnrolled) return '';
+                    const steps = [isVideoWatched, isQuizPassed];
+                    const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100);
+                    return `
+                        <div style="margin: 0.5rem 0 0.75rem;">
+                            <div style="height: 6px; background: var(--border-color, #e5e7eb); border-radius: 999px; overflow: hidden;">
+                                <div style="height: 100%; width: ${pct}%; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); border-radius: 999px; transition: width 0.4s ease;"></div>
+                            </div>
+                            <div style="font-size: 0.72rem; color: var(--text-light); margin-top: 0.25rem; font-weight: 600;">${pct}% complete</div>
+                        </div>
+                    `;
+                })()}
                 <div class="skill-card-footer">
                     ${getSkillCardButtons(course)}
                 </div>
@@ -923,10 +996,10 @@ function renderCourseVideoEmbed(course) {
     const { videoId, title } = getCourseVideoInfo(course.id);
     if (!videoId) return '';
 
-    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+    const enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses')) || '[]');
     const isEnrolled = enrolled.some(e => String(e.id) === String(course.id));
 
-    const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+    const watched = JSON.parse(localStorage.getItem(getUserStorageKey('watchedVideos')) || '[]');
     const isWatched = watched.includes(String(course.id));
 
     let actionBtn = '';
@@ -943,11 +1016,7 @@ function renderCourseVideoEmbed(course) {
             </button>
         `;
     } else {
-        actionBtn = `
-            <button class="btn btn-outline" onclick="enrollCourse(${course.id}, '${escapeQuote(course.title)}')" style="font-weight:700; width:100%; max-width:320px; padding:0.65rem; margin-top:1.5rem;">
-                🔔 Enroll to Unlock Progress Tracking
-            </button>
-        `;
+        actionBtn = '';
     }
 
     return `
@@ -964,15 +1033,12 @@ function renderCourseVideoEmbed(course) {
                             </div>
                         </div>
                         ${actionBtn}
-                        <p style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
-                            ℹ️ <strong>Video plays on live server.</strong> In development (file://) there may be restrictions, but it works perfectly when deployed!
-                        </p>
                     </div>`;
 }
 
 function getDetailsHeroEnrollSection(course) {
-    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
-    const completed = JSON.parse(localStorage.getItem('completedCourses') || '[]');
+    const enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses')) || '[]');
+    const completed = JSON.parse(localStorage.getItem(getUserStorageKey('completedCourses')) || '[]');
     const isEnrolled = enrolled.some(e => String(e.id) === String(course.id));
     const isCompleted = completed.some(c => String(c.id) === String(course.id));
 
@@ -989,10 +1055,10 @@ function getDetailsHeroEnrollSection(course) {
             </div>
         `;
     } else if (isEnrolled) {
-        const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+        const watched = JSON.parse(localStorage.getItem(getUserStorageKey('watchedVideos')) || '[]');
         const isVideoWatched = watched.includes(String(course.id));
 
-        const quizScores = JSON.parse(localStorage.getItem('quizScores') || '[]');
+        const quizScores = JSON.parse(localStorage.getItem(getUserStorageKey('quizScores')) || '[]');
         const attempts = quizScores.filter(q => String(q.courseId) === String(course.id));
         const hasPassedQuiz = attempts.some(q => q.percentage >= 70);
 
@@ -1052,13 +1118,37 @@ function displayCourseDetails() {
 
     const detailsContainer = document.querySelector('.course-details');
     if (detailsContainer) {
-        const session = JSON.parse(localStorage.getItem('session')) || null;
+        const session = getSession();
+        if (!session) {
+            detailsContainer.innerHTML = renderBreadcrumb([
+                { label: '🏠 Home', href: 'index.html' },
+                { label: 'Skills', href: 'skills.html' },
+                { label: course.title, href: null }
+            ]) + `
+                <div style="position: relative;">
+                    ${renderCourseDetailHero(course)}
+                </div>
+                <div class="section" style="min-height: 40vh; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: var(--bg-card); padding: 3rem; border-radius: 16px; border: 1px solid var(--border-color); text-align: center; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+                        <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-dark);">Please register and log in to access this course.</h2>
+                        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+                            <button class="btn btn-primary" onclick="sessionStorage.setItem('pendingEnrollId', '${course.id}'); sessionStorage.setItem('pendingEnrollTitle', '${escapeQuote(course.title)}'); window.location.href='register.html';">Register</button>
+                            <button class="btn btn-secondary" onclick="sessionStorage.setItem('pendingEnrollId', '${course.id}'); sessionStorage.setItem('pendingEnrollTitle', '${escapeQuote(course.title)}'); window.location.href='register.html?mode=login';">Login</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.title = `${course.title} - SkillBridge`;
+            return;
+        }
+
         const isAdmin = session?.role === 'admin';
-        const adminBtn = isAdmin ? `<button onclick="window.location.href='admin/image-editor.html?courseId=${course.id}'" style="position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">🎨 Edit Image</button>` : '';
+        const adminBtn = '';
         
-        const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+        const enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses')) || '[]');
         const isEnrolled = enrolled.some(e => String(e.id) === String(course.id));
-        const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+        const watched = JSON.parse(localStorage.getItem(getUserStorageKey('watchedVideos')) || '[]');
         const isVideoWatched = watched.includes(String(course.id));
 
         let quizBtn = '';
@@ -1082,7 +1172,11 @@ function displayCourseDetails() {
             `;
         }
 
-        detailsContainer.innerHTML = `
+        detailsContainer.innerHTML = renderBreadcrumb([
+            { label: '🏠 Home', href: 'index.html' },
+            { label: 'Skills', href: 'skills.html' },
+            { label: course.title, href: null }
+        ]) + `
             <div style="position: relative;">
                 ${adminBtn}
                 ${renderCourseDetailHero(course)}
@@ -1331,14 +1425,14 @@ function renderFutureOpportunities(courseId) {
 function startQuiz(courseId) {
     const cid = String(courseId);
 
-    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+    const enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses')) || '[]');
     const isEnrolled = enrolled.some(e => String(e.id) === String(courseId));
     if (!isEnrolled) {
         alert('⚠️ Please enroll in this course first before taking the assessment quiz.');
         return;
     }
 
-    const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+    const watched = JSON.parse(localStorage.getItem(getUserStorageKey('watchedVideos')) || '[]');
     const isVideoWatched = watched.includes(String(courseId));
     if (!isVideoWatched) {
         alert('⚠️ Please watch and complete the course video first before taking the assessment quiz.');
@@ -1371,48 +1465,103 @@ function startQuiz(courseId) {
 
 
 function displayQuiz() {
-    const quizData = JSON.parse(sessionStorage.getItem('currentQuiz'));
     const quizContainer = document.getElementById('quizContainer');
-    
-    if (!quizData || !quizContainer) return;
+    if (!quizContainer) return;
 
-    const quizCourseId = sessionStorage.getItem('quizCourseId');
-    if (quizCourseId) {
-        const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
-        const isEnrolled = enrolled.some(e => String(e.id) === String(quizCourseId));
-        if (!isEnrolled) {
+    if (!document.getElementById('quizBreadcrumb')) {
+        const quizCourseIdForBreadcrumb = sessionStorage.getItem('quizCourseId');
+        const quizCourseForBreadcrumb = quizCourseIdForBreadcrumb ? coursesData.find(c => String(c.id) === String(quizCourseIdForBreadcrumb)) : null;
+        const navHtml = renderBreadcrumb([
+            { label: '🏠 Home', href: 'index.html' },
+            { label: 'Skills', href: 'skills.html' },
+            { label: quizCourseForBreadcrumb ? quizCourseForBreadcrumb.title : 'Course', href: quizCourseForBreadcrumb ? `course-details.html?id=${quizCourseForBreadcrumb.id}` : null },
+            { label: 'Quiz', href: null }
+        ]).replace('<nav aria-label="breadcrumb"', '<nav id="quizBreadcrumb" aria-label="breadcrumb"');
+        quizContainer.insertAdjacentHTML('beforebegin', navHtml);
+    }
+
+    let quizCourseId = sessionStorage.getItem('quizCourseId');
+    const enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses')) || '[]');
+    const watched = JSON.parse(localStorage.getItem(getUserStorageKey('watchedVideos')) || '[]');
+
+    if (!quizCourseId) {
+        if (enrolled.length === 0) {
             quizContainer.innerHTML = `
                 <div style="background: rgba(239,68,68,0.1); border: 2px solid #ef4444; border-radius: 12px; padding: 2rem; text-align: center; margin-top: 2rem;">
                     <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
                     <h3 style="color: #f87171; font-weight: 700; margin-bottom: 0.5rem;">Access Denied</h3>
-                    <p style="color: var(--text-light); margin-bottom: 1.5rem;">Please enroll in this course first before taking the assessment quiz.</p>
-                    <a href="skills.html" class="btn btn-primary">Browse Courses</a>
+                    <p style="color: var(--text-light); margin-bottom: 1.5rem;">Please enroll in a course before attempting the quiz.</p>
+                    <a href="skills.html" class="btn btn-primary">Enroll Now</a>
                 </div>
             `;
             return;
+        } else {
+            quizCourseId = enrolled[enrolled.length - 1].id;
+            sessionStorage.setItem('quizCourseId', quizCourseId);
+            if (typeof quizDataComprehensive !== 'undefined' && quizDataComprehensive[quizCourseId]) {
+                sessionStorage.setItem('currentQuiz', JSON.stringify(quizDataComprehensive[quizCourseId]));
+            } else if (typeof window.quizData !== 'undefined' && window.quizData[quizCourseId]) {
+                sessionStorage.setItem('currentQuiz', JSON.stringify(window.quizData[quizCourseId]));
+            }
         }
+    }
 
-        const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
-        const isVideoWatched = watched.includes(String(quizCourseId));
-        if (!isVideoWatched) {
-            quizContainer.innerHTML = `
-                <div style="background: rgba(239,68,68,0.1); border: 2px solid #ef4444; border-radius: 12px; padding: 2rem; text-align: center; margin-top: 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
-                    <h3 style="color: #f87171; font-weight: 700; margin-bottom: 0.5rem;">Quiz Locked</h3>
-                    <p style="color: var(--text-light); margin-bottom: 1.5rem;">Please watch and complete the course video lesson first before attempting this quiz.</p>
-                    <a href="course-details.html?id=${quizCourseId}" class="btn btn-primary">Go to Course Video</a>
-                </div>
-            `;
-            return;
-        }
+    const isEnrolled = enrolled.some(e => String(e.id) === String(quizCourseId));
+    if (!isEnrolled) {
+        quizContainer.innerHTML = `
+            <div style="background: rgba(239,68,68,0.1); border: 2px solid #ef4444; border-radius: 12px; padding: 2rem; text-align: center; margin-top: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <h3 style="color: #f87171; font-weight: 700; margin-bottom: 0.5rem;">Access Denied</h3>
+                <p style="color: var(--text-light); margin-bottom: 1.5rem;">Please enroll in a course before attempting the quiz.</p>
+                <a href="skills.html" class="btn btn-primary">Enroll Now</a>
+            </div>
+        `;
+        return;
+    }
+
+    const isVideoWatched = watched.includes(String(quizCourseId));
+    if (!isVideoWatched) {
+        quizContainer.innerHTML = `
+            <div style="background: rgba(239,68,68,0.1); border: 2px solid #ef4444; border-radius: 12px; padding: 2rem; text-align: center; margin-top: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+                <h3 style="color: #f87171; font-weight: 700; margin-bottom: 0.5rem;">Quiz Locked</h3>
+                <p style="color: var(--text-light); margin-bottom: 1.5rem;">Please complete all course videos before attempting the quiz.</p>
+                <a href="course-details.html?id=${quizCourseId}" class="btn btn-primary">Continue Learning</a>
+            </div>
+        `;
+        return;
+    }
+
+    const quizData = JSON.parse(sessionStorage.getItem('currentQuiz'));
+    if (!quizData) return;
+
+    if (quizData.questions && quizData.questions.length > 20) {
+        quizData.questions = quizData.questions.slice(0, 20);
     }
 
     let currentQuestion = 0;
     let score = 0;
     const userAnswers = [];
+    let timerInterval;
 
     function showQuestion() {
         const question = quizData.questions[currentQuestion];
+        let timeLeft = quizData.timeLimit || 60;
+        clearInterval(timerInterval);
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            const timerEl = document.getElementById('quiz-timer');
+            if (timerEl) {
+                timerEl.innerText = `⏱️ ${timeLeft}s`;
+                if (timeLeft <= 10) timerEl.style.color = '#ef4444';
+            }
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                nextQuestion(currentQuestion, true);
+            }
+        }, 1000);
+
         quizContainer.innerHTML = `
             <style>
                 .quiz-option-label {
@@ -1439,8 +1588,9 @@ function displayQuiz() {
             </style>
             <div class="quiz-container">
                 <div style="margin-bottom: 1rem;">
-                    <div class="quiz-progress-header">
+                    <div class="quiz-progress-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <h3>Question ${currentQuestion + 1}/${quizData.questions.length}</h3>
+                        <div id="quiz-timer" style="font-weight: bold; font-size: 1.1rem; color: var(--text-dark);">⏱️ ${quizData.timeLimit || 60}s</div>
                         <div class="quiz-progress-percentage">
                             ${Math.round((currentQuestion / quizData.questions.length) * 100)}%
                         </div>
@@ -1473,19 +1623,20 @@ function displayQuiz() {
         `;
     }
 
-    window.nextQuestion = function(current) {
+    window.nextQuestion = function(current, isTimeout = false) {
         const selected = document.querySelector('input[name="answer"]:checked');
-        if (!selected) {
+        if (!selected && !isTimeout) {
             alert('Please select an answer');
             return;
         }
 
-        userAnswers[current] = parseInt(selected.value);
+        userAnswers[current] = selected ? parseInt(selected.value) : -1;
         const question = quizData.questions[current];
-        if (parseInt(selected.value) === question.correct) {
+        if (selected && parseInt(selected.value) === question.correct) {
             score++;
         }
 
+        clearInterval(timerInterval);
         currentQuestion++;
         if (currentQuestion < quizData.questions.length) {
             showQuestion();
@@ -1495,6 +1646,7 @@ function displayQuiz() {
     };
 
     window.previousQuestion = function() {
+        clearInterval(timerInterval);
         currentQuestion--;
         showQuestion();
     };
@@ -1554,23 +1706,23 @@ async function checkAndTriggerCourseCompletion(courseId) {
     if (!course) return;
 
     // Check if enrolled
-    const enrolled = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+    const enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses')) || '[]');
     const isEnrolled = enrolled.some(e => String(e.id) === String(courseId));
     if (!isEnrolled) return;
 
     // Check if video watched
-    const watched = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+    const watched = JSON.parse(localStorage.getItem(getUserStorageKey('watchedVideos')) || '[]');
     const isVideoWatched = watched.includes(String(courseId));
     if (!isVideoWatched) return;
 
     // Check if passed quiz (>= 70%)
-    const quizScores = JSON.parse(localStorage.getItem('quizScores') || '[]');
+    const quizScores = JSON.parse(localStorage.getItem(getUserStorageKey('quizScores')) || '[]');
     const attempts = quizScores.filter(q => String(q.courseId) === String(courseId));
     const hasPassedQuiz = attempts.some(q => q.percentage >= 70);
     if (!hasPassedQuiz) return;
 
     // All conditions met! Let's mark as completed
-    let completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
+    let completedCourses = JSON.parse(localStorage.getItem(getUserStorageKey('completedCourses'))) || [];
 if (!completedCourses.find(c => String(c.id) === String(courseId) && c.userEmail === (session?.email || localStorage.getItem('userEmail') || ''))) {
             completedCourses.push({
                 id: parseInt(courseId),
@@ -1578,21 +1730,22 @@ if (!completedCourses.find(c => String(c.id) === String(courseId) && c.userEmail
                 completedAt: new Date().toLocaleString(),
                 userEmail: session?.email || localStorage.getItem('userEmail') || ''
         });
-        localStorage.setItem('completedCourses', JSON.stringify(completedCourses));
+        localStorage.setItem(getUserStorageKey('completedCourses'), JSON.stringify(completedCourses));
         
         // Generate Course Certificate (now async)
         await generateCertificate(parseInt(courseId), course.title, 'course');
         
+        launchConfetti();
         showCertificateNotification(`Congratulations! You completed ${course.title} and earned your Certificate of Achievement! 📜`);
         updateProgressDisplay();
     }
 }
 
 window.markVideoAsWatched = async function(courseId) {
-    let watched = JSON.parse(localStorage.getItem('watchedVideos')) || [];
+    let watched = JSON.parse(localStorage.getItem(getUserStorageKey('watchedVideos'))) || [];
     if (!watched.includes(String(courseId))) {
         watched.push(String(courseId));
-        localStorage.setItem('watchedVideos', JSON.stringify(watched));
+        localStorage.setItem(getUserStorageKey('watchedVideos'), JSON.stringify(watched));
         
         // Sync lesson completion to database
         const session = getSession();
@@ -1634,14 +1787,14 @@ async function enrollCourse(courseId, courseTitle) {
         return;
     }
 
-    let enrolled = JSON.parse(localStorage.getItem('enrolledCourses')) || [];
+    let enrolled = JSON.parse(localStorage.getItem(getUserStorageKey('enrolledCourses'))) || [];
     if (!enrolled.some(e => String(e.id) === String(courseId))) {
         enrolled.push({
             id: parseInt(courseId),
             title: courseTitle,
             enrolledAt: new Date().toLocaleString()
         });
-        localStorage.setItem('enrolledCourses', JSON.stringify(enrolled));
+        localStorage.setItem(getUserStorageKey('enrolledCourses'), JSON.stringify(enrolled));
         
         // Sync to database
         const isOnline = await isApiServerReachable();
@@ -1670,7 +1823,7 @@ async function enrollCourse(courseId, courseTitle) {
 
 async function saveQuizProgress(courseId, score, total) {
     const percentage = Math.round((score / total) * 100);
-    let quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
+    let quizScores = JSON.parse(localStorage.getItem(getUserStorageKey('quizScores'))) || [];
     const session = getSession();
     
     quizScores.push({
@@ -1683,7 +1836,7 @@ async function saveQuizProgress(courseId, score, total) {
         studentUsername: session?.username || 'unknown'
     });
     
-    localStorage.setItem('quizScores', JSON.stringify(quizScores));
+    localStorage.setItem(getUserStorageKey('quizScores'), JSON.stringify(quizScores));
 
     // Sync quiz score to database
     const isOnline = await isApiServerReachable();
@@ -1708,8 +1861,8 @@ async function saveQuizProgress(courseId, score, total) {
 }
 
 function loadProgressFromStorage() {
-    const completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
-    const quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
+    const completedCourses = JSON.parse(localStorage.getItem(getUserStorageKey('completedCourses'))) || [];
+    const quizScores = JSON.parse(localStorage.getItem(getUserStorageKey('quizScores'))) || [];
     
     console.log('Completed Courses:', completedCourses);
     console.log('Quiz Scores:', quizScores);
@@ -1718,8 +1871,8 @@ function loadProgressFromStorage() {
 function updateProgressDisplay() {
     const progressContainer = document.querySelector('.progress-container');
     if (progressContainer) {
-        const completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
-        const quizScores = JSON.parse(localStorage.getItem('quizScores')) || [];
+        const completedCourses = JSON.parse(localStorage.getItem(getUserStorageKey('completedCourses'))) || [];
+        const quizScores = JSON.parse(localStorage.getItem(getUserStorageKey('quizScores'))) || [];
         
         progressContainer.innerHTML = `
             <div style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 2rem; border-radius: 1rem; margin-bottom: 2rem;">
@@ -1863,7 +2016,7 @@ async function generateCertificate(courseId, courseTitle, certificateType = 'cou
     const certificates = JSON.parse(localStorage.getItem('certificates')) || [];
 
     // Get user name from any input or use default
-    const session = JSON.parse(localStorage.getItem('session')) || null;
+    const session = JSON.parse(sessionStorage.getItem('session')) || null;
     const userName = session?.fullName || localStorage.getItem('userFullName') || 'Learner';
 
     // Avoid duplicates for course certificates (one per course completion)
@@ -1947,7 +2100,7 @@ function displayCertificates() {
         // Resolve student's name dynamically
         let displayName = cert.userName;
         if (!displayName || displayName === 'Learner' || displayName === 'Demo Admin') {
-            const session = JSON.parse(localStorage.getItem('session') || 'null');
+            const session = JSON.parse(sessionStorage.getItem('session') || 'null');
             if (session && session.fullName) {
                 displayName = session.fullName;
             } else {
@@ -2028,7 +2181,7 @@ function viewCertificate(certificateId) {
     
     if (!certificate) return;
 
-    const session = JSON.parse(localStorage.getItem('session')) || null;
+    const session = JSON.parse(sessionStorage.getItem('session')) || null;
     if (session?.role === 'student') {
         const currentEmail = (session.email || '').toLowerCase();
         const currentName = (session.fullName || '').trim();
@@ -2170,7 +2323,7 @@ function downloadCertificate(certificate) {
     
     ctx.fillStyle = '#000';
     ctx.font = 'bold 36px Georgia, serif';
-    const session = JSON.parse(localStorage.getItem('session')) || null;
+    const session = JSON.parse(sessionStorage.getItem('session')) || null;
     const currentUserName = session?.fullName || localStorage.getItem('userFullName') || 'Learner';
     const displayName = (certificate.userName && certificate.userName !== 'Learner' && certificate.userName !== 'Demo Admin') ? certificate.userName : currentUserName;
     ctx.fillText(displayName, canvas.width / 2, 480);
@@ -2422,6 +2575,17 @@ function maybeApplyAdminHomeContent() {
             `).join('');
         }
 
+    } catch (e) {
+        // ignore
+    }
+}
+
+function applyAdminFooterEverywhere() {
+    try {
+        const raw = localStorage.getItem('adminSiteContent');
+        if (!raw) return;
+        const content = JSON.parse(raw);
+
         // Footer links + bottom
         const footer = document.querySelector('footer');
         if (footer && content.footer) {
@@ -2544,6 +2708,7 @@ function setupAdminHomeEditor() {
     const session = getSession();
     if (!session || session.role !== 'admin' || !isRootHomePage()) return;
     if (document.getElementById('adminHomeEditorBar')) return;
+    const shouldAutoEdit = localStorage.getItem('triggerInlineHomeEdit') === '1';
 
     const style = document.createElement('style');
     style.textContent = `
@@ -2609,6 +2774,11 @@ function setupAdminHomeEditor() {
     document.getElementById('adminStartEditBtn')?.addEventListener('click', startAdminHomeEditMode);
     document.getElementById('adminSaveEditBtn')?.addEventListener('click', saveAdminHomeTextEdits);
     document.getElementById('adminCancelEditBtn')?.addEventListener('click', () => window.location.reload());
+
+    if (shouldAutoEdit) {
+        localStorage.removeItem('triggerInlineHomeEdit');
+        startAdminHomeEditMode();
+    }
 }
 
 const ADMIN_HOME_INLINE_KEY = 'adminHomeInlineEdits';
@@ -2636,11 +2806,28 @@ function getAdminHomeEditableElements() {
         });
 }
 
-function getAdminHomeInlineId(el, index) {
-    const explicitId = el.id ? `#${el.id}` : '';
-    const className = Array.from(el.classList || []).slice(0, 2).join('.');
-    const classPart = className ? `.${className}` : '';
-    return `${el.tagName.toLowerCase()}${explicitId}${classPart}:${index}`;
+function getAdminHomeInlineId(el) {
+    let path = [];
+    let current = el;
+    while (current && current !== document.body) {
+        let nodeName = current.nodeName.toLowerCase();
+        if (current.id) {
+            path.unshift(`${nodeName}#${current.id}`);
+            break;
+        } else {
+            let index = 1;
+            let sibling = current.previousElementSibling;
+            while (sibling) {
+                if (sibling.nodeName === current.nodeName) {
+                    index++;
+                }
+                sibling = sibling.previousElementSibling;
+            }
+            path.unshift(`${nodeName}:nth-of-type(${index})`);
+        }
+        current = current.parentElement;
+    }
+    return path.join(' > ');
 }
 
 function applyAdminHomeInlineEdits() {
@@ -2658,8 +2845,8 @@ function applyAdminHomeInlineEdits() {
         edits = {};
     }
 
-    getAdminHomeEditableElements().forEach((el, index) => {
-        const id = getAdminHomeInlineId(el, index);
+    getAdminHomeEditableElements().forEach((el) => {
+        const id = getAdminHomeInlineId(el);
         if (Object.prototype.hasOwnProperty.call(edits, id)) {
             el.textContent = edits[id];
         }
@@ -2669,8 +2856,8 @@ function applyAdminHomeInlineEdits() {
 function startAdminHomeEditMode() {
     document.body.classList.add('admin-home-editing');
 
-    getAdminHomeEditableElements().forEach((el, index) => {
-        el.dataset.adminInlineEditId = getAdminHomeInlineId(el, index);
+    getAdminHomeEditableElements().forEach((el) => {
+        el.dataset.adminInlineEditId = getAdminHomeInlineId(el);
         el.dataset.adminOriginalHref = el.getAttribute('href') || '';
         el.setAttribute('contenteditable', 'true');
         el.setAttribute('spellcheck', 'true');
@@ -2751,7 +2938,9 @@ function setupLogoDblClick() {
             if (clicks === 1) {
                 clickTimeout = setTimeout(function() {
                     const href = logo.getAttribute('href') || 'index.html';
-                    window.location.href = href;
+                    document.body.style.transition = 'opacity 0.15s ease';
+                    document.body.style.opacity = '0.4';
+                    setTimeout(() => { window.location.href = href; }, 150);
                     clicks = 0;
                 }, 280);
             } else if (clicks === 2) {
@@ -2800,24 +2989,31 @@ function renderDynamicNavbar() {
 
     let html = '';
 
+    const isSkills = pageName === 'skills.html';
+    const isProgress = pageName === 'progress.html';
+    const isRoadmap = pageName === 'roadmap.html';
+
+    html += `
+        <li><a href="${prefix}index.html" class="${pageName === 'index.html' ? 'active' : ''}">Home</a></li>
+    `;
+
+    if (!session || session.role !== 'admin') {
+        html += `
+        <li><a href="${prefix}skills.html" class="${isSkills ? 'active' : ''}">Skills</a></li>
+        <li><a href="${prefix}progress.html" class="${isProgress ? 'active' : ''}">Progress</a></li>
+        <li><a href="${prefix}roadmap.html" class="${isRoadmap ? 'active' : ''}">Roadmap</a></li>
+        `;
+    }
+
     if (session && session.role === 'student') {
-        // Logged in as student
         const isDashboard = pageName === 'dashboard.html' && path.includes('/student/');
         const isProfile = pageName === 'profile.html';
         const isMyCourses = pageName === 'mycourses.html';
         const isMyCerts = pageName === 'certificates.html' && path.includes('/student/');
-        const isSkills = pageName === 'skills.html';
-        const isProgress = pageName === 'progress.html';
-        const isRoadmap = pageName === 'roadmap.html';
         
-        const studentPath = inSubfolder ? '' : 'student/';
         const initials = session.fullName ? session.fullName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : '👤';
 
         html += `
-            <li><a href="${prefix}index.html" class="${pageName === 'index.html' ? 'active' : ''}">Home</a></li>
-            <li><a href="${prefix}skills.html" class="${isSkills ? 'active' : ''}">Skills</a></li>
-            <li><a href="${prefix}progress.html" class="${isProgress ? 'active' : ''}">Progress</a></li>
-            <li><a href="${prefix}roadmap.html" class="${isRoadmap ? 'active' : ''}">Roadmap</a></li>
             <li class="profile-dropdown-container">
                 <div class="profile-avatar-trigger" onclick="toggleProfileDropdown(event)">${initials}</div>
                 <div class="profile-dropdown-card" id="profileDropdownCard">
@@ -2836,7 +3032,6 @@ function renderDynamicNavbar() {
             </li>
         `;
     } else if (session && session.role === 'admin') {
-        // Logged in as admin
         const isDashboard = pageName === 'dashboard.html' && path.includes('/admin/');
         const isStudents = pageName === 'students.html';
         const isCourses = pageName === 'courses.html';
@@ -2848,7 +3043,10 @@ function renderDynamicNavbar() {
         const initials = session.fullName ? session.fullName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : 'AD';
 
         html += `
-            <li><a href="${prefix}index.html" class="${pageName === 'index.html' ? 'active' : ''}">Home</a></li>
+            <li><a href="${inSubfolder ? '' : 'admin/'}students.html" class="${isStudents ? 'active' : ''}">Students</a></li>
+            <li><a href="${inSubfolder ? '' : 'admin/'}courses.html" class="${isCourses ? 'active' : ''}">Courses</a></li>
+            <li><a href="${inSubfolder ? '' : 'admin/'}roadmap-editor.html" class="${isRoadmapEditor ? 'active' : ''}">Roadmaps</a></li>
+            <li><a href="${inSubfolder ? '' : 'admin/'}reports.html" class="${isReports ? 'active' : ''}">Reports</a></li>
             <li class="profile-dropdown-container">
                 <div class="profile-avatar-trigger" onclick="toggleProfileDropdown(event)" style="background: rgba(99, 102, 241, 0.2); border-color: rgba(99, 102, 241, 0.4);">${initials}</div>
                 <div class="profile-dropdown-card" id="profileDropdownCard">
@@ -2858,10 +3056,6 @@ function renderDynamicNavbar() {
                     </div>
                     <div class="dropdown-divider"></div>
                     <a href="${inSubfolder ? '' : 'admin/'}dashboard.html" class="${isDashboard ? 'active' : ''}">📊 Dashboard</a>
-                    <a href="${inSubfolder ? '' : 'admin/'}students.html" class="${isStudents ? 'active' : ''}">👥 Students</a>
-                    <a href="${inSubfolder ? '' : 'admin/'}courses.html" class="${isCourses ? 'active' : ''}">📚 Courses</a>
-                    <a href="${inSubfolder ? '' : 'admin/'}roadmap-editor.html" class="${isRoadmapEditor ? 'active' : ''}">🧭 Roadmaps</a>
-                    <a href="${inSubfolder ? '' : 'admin/'}reports.html" class="${isReports ? 'active' : ''}">📈 Reports</a>
                     <a href="${inSubfolder ? '' : 'admin/'}settings.html" class="${isSettings ? 'active' : ''}">⚙️ Settings</a>
                     <a href="${inSubfolder ? '' : 'admin/'}site-editor.html" class="${isSiteEditor ? 'active' : ''}">🖊️ Site Editor</a>
                     <div class="dropdown-divider"></div>
@@ -2870,19 +3064,8 @@ function renderDynamicNavbar() {
             </li>
         `;
     } else {
-        // Guest user (not logged in)
-        const isSkills = pageName === 'skills.html';
-        const isProgress = pageName === 'progress.html';
-        const isRoadmap = pageName === 'roadmap.html';
         const isRegister = pageName === 'register.html';
-
-        html += `
-            <li><a href="${prefix}index.html" class="${pageName === 'index.html' ? 'active' : ''}">Home</a></li>
-            <li><a href="${prefix}skills.html" class="${isSkills ? 'active' : ''}">Skills</a></li>
-            <li><a href="${prefix}progress.html" class="${isProgress ? 'active' : ''}">Progress</a></li>
-            <li><a href="${prefix}roadmap.html" class="${isRoadmap ? 'active' : ''}">Roadmap</a></li>
-            <li><a href="${prefix}register.html" class="${isRegister ? 'active' : ''}">Register</a></li>
-        `;
+        html += `<li><a href="${prefix}register.html" class="${isRegister ? 'active' : ''}">Register</a></li>`;
     }
 
     // Append theme toggle to the list
@@ -2975,4 +3158,81 @@ function showHomeFeedbackStatus(message, type) {
             statusDiv.className = '';
         }, 5000);
     }
+}
+
+function renderBreadcrumb(items) {
+    // items: array of { label, href } — href omitted/null for the current (last) page
+    return `
+        <nav aria-label="breadcrumb" style="padding: 1rem 0; font-size: 0.9rem; color: var(--text-light);">
+            <div class="container">
+                ${items.map((item, i) => {
+                    const isLast = i === items.length - 1;
+                    const sep = i > 0 ? '<span style="margin: 0 0.5rem; opacity: 0.5;">›</span>' : '';
+                    return sep + (isLast || !item.href
+                        ? `<span style="color: var(--text-dark); font-weight: 600;">${item.label}</span>`
+                        : `<a href="${item.href}" style="color: var(--primary-color); text-decoration: none;">${item.label}</a>`);
+                }).join('')}
+            </div>
+        </nav>
+    `;
+}
+window.renderBreadcrumb = renderBreadcrumb;
+
+function setupBackToTopButton() {
+    if (document.getElementById('backToTopBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'backToTopBtn';
+    btn.className = 'back-to-top-btn';
+    btn.innerHTML = '↑';
+    btn.setAttribute('aria-label', 'Back to top');
+    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.body.appendChild(btn);
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 400) {
+            btn.classList.add('visible');
+        } else {
+            btn.classList.remove('visible');
+        }
+    });
+}
+window.setupBackToTopButton = setupBackToTopButton;
+
+function launchConfetti() {
+    const colors = ['#10b981', '#6366f1', '#f59e0b', '#ef4444', '#ec4899'];
+    const container = document.createElement('div');
+    container.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:9998; overflow:hidden;';
+    document.body.appendChild(container);
+
+    for (let i = 0; i < 60; i++) {
+        const piece = document.createElement('div');
+        const size = 6 + Math.random() * 6;
+        const startX = Math.random() * 100;
+        const duration = 2.2 + Math.random() * 1.3;
+        const delay = Math.random() * 0.4;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const rotate = Math.random() * 360;
+        piece.style.cssText = `
+            position:absolute; top:-20px; left:${startX}vw; width:${size}px; height:${size * 0.6}px;
+            background:${color}; opacity:0.9; border-radius:2px;
+            transform: rotate(${rotate}deg);
+            animation: confettiFall ${duration}s ${delay}s ease-in forwards;
+        `;
+        container.appendChild(piece);
+    }
+
+    setTimeout(() => container.remove(), 4000);
+}
+window.launchConfetti = launchConfetti;
+
+if (!document.getElementById('confettiStyle')) {
+    const style = document.createElement('style');
+    style.id = 'confettiStyle';
+    style.textContent = `
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(540deg); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
 }
