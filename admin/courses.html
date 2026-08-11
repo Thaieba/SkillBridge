@@ -315,13 +315,16 @@
 <body>
   <nav>
     <div class="container">
-      <a href="../index.html" class="logo">SkillBridge</a>
+      <div class="logo-wrapper">
+            <a href="../index.html" class="logo">SkillBridge</a>
+            <span class="logo-tagline">Learn. Grow. Succeed.</span>
+        </div>
       <ul class="nav-links"></ul>
       <div class="hamburger"><span></span><span></span><span></span></div>
     </div>
   </nav>
 
-  <section class="section" style="padding:2.5rem 1rem;">
+  <section class="section">
     <div class="container" style="max-width:1200px;">
       
       <!-- Back Header -->
@@ -386,7 +389,10 @@
   <!-- Add / Edit Tabbed Modal -->
   <div class="modal-overlay" id="courseModal">
     <div class="modal-box">
-      <h2 id="modalTitle">Add Course</h2>
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+        <h2 id="modalTitle" style="margin-bottom:0;">Add Course</h2>
+        <button type="button" onclick="closeModal()" style="background:none; border:none; font-size:1.4rem; line-height:1; cursor:pointer; color:var(--text-light); padding:0.2rem 0.5rem; border-radius:6px; transition:background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.06)'" onmouseout="this.style.background='none'">✕</button>
+      </div>
       <input type="hidden" id="editingId" value="" />
 
       <!-- Tabs Navigation -->
@@ -446,6 +452,18 @@
             <div id="imagePath" style="color: var(--primary-color); font-weight: 600; font-size: 0.9rem; word-break: break-all; margin-top: 0.3rem;">None</div>
           </div>
           <div id="imagePreview" style="margin-top: 0.5rem; max-width: 200px; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem; background: var(--bg-secondary);"></div>
+        </div>
+        <div class="form-field">
+          <label>Course Detail Banner Image (shown on course details page)</label>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <input id="fDetailImage" type="file" accept="image/*" style="flex: 1;" />
+          </div>
+          <small style="color: var(--text-light); display: block; margin-bottom: 0.5rem;">Or upload JPG, PNG (recommended: 1600x800px, wide banner)</small>
+          <div style="background: var(--bg-secondary); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid var(--border-color);">
+            <small style="color: var(--text-light);">📁 Current Path:</small>
+            <div id="detailImagePath" style="color: var(--primary-color); font-weight: 600; font-size: 0.9rem; word-break: break-all; margin-top: 0.3rem;">None</div>
+          </div>
+          <div id="detailImagePreview" style="margin-top: 0.5rem; max-width: 300px; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem; background: var(--bg-secondary);"></div>
         </div>
       </div>
 
@@ -776,6 +794,9 @@
       document.getElementById('fImage').value = '';
       document.getElementById('imagePreview').innerHTML = '';
       document.getElementById('imagePath').textContent = 'None';
+      document.getElementById('fDetailImage').value = '';
+      document.getElementById('detailImagePreview').innerHTML = '';
+      document.getElementById('detailImagePath').textContent = 'None';
       
       // Default configurations
       const defaultRoadmap = [
@@ -824,6 +845,7 @@
       document.getElementById('fTopics').value = (c.curriculumTopics||[]).join(', ');
       document.getElementById('fCareers').value = (c.careerPaths||[]).join(', ');
       document.getElementById('fImage').value = '';
+      document.getElementById('fDetailImage').value = '';
       
       // Image path preview
       if (c.image) {
@@ -833,6 +855,15 @@
       } else {
         document.getElementById('imagePath').textContent = 'None';
         document.getElementById('imagePreview').innerHTML = '';
+      }
+
+      if (c.detailImage) {
+        document.getElementById('detailImagePath').textContent = c.detailImage.substring(0, 80) + (c.detailImage.length > 80 ? '...' : '');
+        const detailImagePath = c.detailImage.startsWith('data:') || c.detailImage.startsWith('../') ? c.detailImage : '../' + c.detailImage;
+        document.getElementById('detailImagePreview').innerHTML = `<img src="${detailImagePath}" alt="${c.title} Banner" style="width: 100%; border-radius: 6px; border: 1.5px solid var(--border-color);">`;
+      } else {
+        document.getElementById('detailImagePath').textContent = 'None';
+        document.getElementById('detailImagePreview').innerHTML = '';
       }
       
       // Load Roadmap JSON
@@ -877,20 +908,37 @@
       }
 
       const fileInput = document.getElementById('fImage');
+      const detailFileInput = document.getElementById('fDetailImage');
       const file = fileInput.files[0];
+      const detailFile = detailFileInput.files[0];
 
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          saveCoursewithImage(e.target.result);
-        };
-        reader.readAsDataURL(file);
+      let imageData = null;
+      let detailImageData = null;
+
+      const finishSave = () => saveCoursewithImage(imageData, detailImageData);
+
+      if (file && detailFile) {
+          const r1 = new FileReader();
+          const r2 = new FileReader();
+          let loaded = 0;
+          r1.onload = (e) => { imageData = e.target.result; loaded++; if(loaded === 2) finishSave(); };
+          r2.onload = (e) => { detailImageData = e.target.result; loaded++; if(loaded === 2) finishSave(); };
+          r1.readAsDataURL(file);
+          r2.readAsDataURL(detailFile);
+      } else if (file) {
+          const r1 = new FileReader();
+          r1.onload = (e) => { imageData = e.target.result; finishSave(); };
+          r1.readAsDataURL(file);
+      } else if (detailFile) {
+          const r2 = new FileReader();
+          r2.onload = (e) => { detailImageData = e.target.result; finishSave(); };
+          r2.readAsDataURL(detailFile);
       } else {
-        saveCoursewithImage(null);
+          finishSave();
       }
     }
 
-    function saveCoursewithImage(imageData) {
+    function saveCoursewithImage(imageData, detailImageData) {
       const title = document.getElementById('fTitle').value.trim();
       let courses = getAllCourses();
       const editingId = document.getElementById('editingId').value;
@@ -920,6 +968,15 @@
         const existing = courses.find(c => c.id === parseInt(editingId));
         if (existing && existing.image) {
           course.image = existing.image;
+        }
+      }
+
+      if (detailImageData) {
+        course.detailImage = detailImageData;
+      } else if (isEdit) {
+        const existing = courses.find(c => c.id === parseInt(editingId));
+        if (existing && existing.detailImage) {
+          course.detailImage = existing.detailImage;
         }
       }
 
@@ -990,6 +1047,20 @@
         const reader = new FileReader();
         reader.onload = function(e) {
           preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width: 100%; border-radius: 8px; border: 1.5px solid var(--primary-color);">`;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.innerHTML = '';
+      }
+    });
+
+    document.getElementById('fDetailImage').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      const preview = document.getElementById('detailImagePreview');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = `<img src="${e.target.result}" alt="Banner Preview" style="width: 100%; border-radius: 8px; border: 1.5px solid var(--primary-color);">`;
         };
         reader.readAsDataURL(file);
       } else {
