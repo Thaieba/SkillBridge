@@ -305,7 +305,10 @@
 <body>
     <nav>
         <div class="container">
+            <div class="logo-wrapper">
             <a href="../index.html" class="logo">SkillBridge</a>
+            <span class="logo-tagline">Learn. Grow. Succeed.</span>
+        </div>
             <ul class="nav-links">
                 <li><a href="dashboard.html" class="active">Dashboard</a></li>
                 <li><a href="students.html">Students</a></li>
@@ -324,7 +327,7 @@
         </div>
     </nav>
 
-    <section class="section" style="padding: 2.5rem 1rem;">
+    <section class="section">
         <div class="container" style="max-width: 1200px;">
             
             <!-- Dashboard Header Banner -->
@@ -342,6 +345,11 @@
                     <div class="kpi-val" id="statUsers">0</div>
                     <div class="kpi-lbl">Total Registered</div>
                     <div class="kpi-icon">👥</div>
+                </div>
+                <div class="kpi-card" style="border-left: 4px solid #ec4899;">
+                    <div class="kpi-val" id="statTotalCourses">0</div>
+                    <div class="kpi-lbl">Total Courses</div>
+                    <div class="kpi-icon">📚</div>
                 </div>
                 <div class="kpi-card" style="border-left: 4px solid #10b981;">
                     <div class="kpi-val" id="statStudents">0</div>
@@ -524,6 +532,8 @@
 
             // Fill stats HTML
             document.getElementById('statUsers').textContent = users.length;
+            const allCoursesForStat = JSON.parse(localStorage.getItem('customCourses') || 'null') || coursesData;
+            document.getElementById('statTotalCourses').textContent = allCoursesForStat.length;
             document.getElementById('statStudents').textContent = studentCount;
             document.getElementById('statAdmins').textContent = adminCount;
             document.getElementById('statCourses').textContent = completedCourses.length;
