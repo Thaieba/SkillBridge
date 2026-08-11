@@ -7,21 +7,22 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - SkillBridge</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
     <nav>
         <div class="container">
+            <div class="logo-wrapper">
             <a href="../index.html" class="logo">SkillBridge</a>
-            <ul class="nav-links">
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li>
-                    <button
-                        id="adminLogoutBtn"
-                        class="btn btn-primary"
-                        style="display:none; background: linear-gradient(135deg,#ef4444,#dc2626); border:none; color:#fff; font-weight:700; padding:0.45rem 1.1rem; border-radius:8px; cursor:pointer;"
-                        onclick="adminNavLogout()"
-                    >🚪 Logout</button>
-                </li>
-                <li><button id="themeToggle" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">🌙</button></li>
-            </ul>
+            <span class="logo-tagline">Learn. Grow. Succeed.</span>
+        </div>
+            <ul class="nav-links"></ul>
             <div class="hamburger">
                 <span></span>
                 <span></span>
@@ -30,7 +31,7 @@
         </div>
     </nav>
 
-    <section class="section" style="padding: 3rem 1rem;">
+    <section class="section">
         <div class="container" style="max-width: 650px;">
             <h1 class="section-title" style="margin-bottom: 1.5rem;">🛡️ Admin Login</h1>
 
@@ -79,12 +80,6 @@
         // Show logout button if an admin session already exists
         document.addEventListener('DOMContentLoaded', function(){
             const session = getSession();
-            const logoutBtn = document.getElementById('adminLogoutBtn');
-
-            if (session && session.role === 'admin') {
-                logoutBtn.style.display = 'inline-flex';
-                logoutBtn.textContent = '🚪 Logout (' + (session.fullName || session.username) + ')';
-            }
 
             const form = document.getElementById('adminLoginForm');
             const statusEl = document.getElementById('adminLoginStatus');
@@ -112,12 +107,6 @@
                 }
             });
         });
-
-        function adminNavLogout() {
-            logoutUser();
-            // Refresh to update UI (hide logout button)
-            window.location.reload();
-        }
     </script>
 
 </body>
