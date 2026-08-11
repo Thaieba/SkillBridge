@@ -385,7 +385,7 @@
             font-size: 4rem;
             display: block;
             margin-bottom: 1rem;
-            animation: float 3s ease-in-out infinite;
+            animation: emptyStateFloat 2.5s ease-in-out infinite;
         }
 
         @keyframes float {
@@ -400,7 +400,10 @@
 <body>
     <nav>
         <div class="container">
+            <div class="logo-wrapper">
             <a href="../index.html" class="logo">SkillBridge</a>
+            <span class="logo-tagline">Learn. Grow. Succeed.</span>
+        </div>
             <ul class="nav-links">
                 <li><a href="dashboard.html">Dashboard</a></li>
                 <li><a href="profile.html">My Profile</a></li>
@@ -478,6 +481,14 @@
             <p>Complete courses and pass quizzes to unlock certificates.</p>
             <a href="../skills.html" class="btn-explore" style="display:inline-flex; margin-top: 1rem;">🚀 Start Learning</a>
         </div>
+
+        <!-- Missing Certificates (Recovery / Self-Healing Grid) -->
+        <div id="missingCertsSection" style="margin-top: 3.5rem; display: none; padding-top: 1.5rem; border-top: 1px dashed var(--border-color);">
+            <div class="section-label" style="border-left: 5px solid #f59e0b; padding-left: 0.75rem; color: #f59e0b;">🔄 Missing Certificates (Earned Achievements)</div>
+            <div id="missingCertsGrid" class="courses-grid" style="margin-top: 1.25rem;">
+                <!-- Populated by JS -->
+            </div>
+        </div>
     </div>
 
     <!-- CERTIFICATE PREVIEW MODAL -->
@@ -536,6 +547,27 @@
 
         function loadAndRender() {
             let localCerts = JSON.parse(localStorage.getItem('certificates')) || [];
+            const session = JSON.parse(localStorage.getItem('session') || 'null');
+
+            // Only show certificates for the currently logged-in student
+            let currentEmail = '';
+            let currentName = '';
+            if (session && session.role === 'student') {
+                currentEmail = (session.email || '').toLowerCase();
+                currentName = (session.fullName || '').trim();
+
+                localCerts = localCerts.filter(cert => {
+                    if (currentEmail && cert.userEmail && cert.userEmail.toLowerCase() === currentEmail) {
+                        return true;
+                    }
+                    if (currentName && cert.userName === currentName) {
+                        return true;
+                    }
+                    return false;
+                });
+            } else {
+                localCerts = [];
+            }
 
             // Remove quiz-type certs permanently
             const quizExists = localCerts.some(c => c.type === 'quiz');
@@ -548,6 +580,70 @@
 
             updateSummaryStats(allCerts);
             filterCerts();
+
+            // Check and render missing certificates (Self-Healing)
+            renderMissingCertificates(session, currentEmail);
+        }
+
+        function renderMissingCertificates(session, currentEmail) {
+            const missingSection = document.getElementById('missingCertsSection');
+            const missingGrid = document.getElementById('missingCertsGrid');
+            if (!missingSection || !missingGrid) return;
+
+            if (!session || session.role !== 'student') {
+                missingSection.style.display = 'none';
+                return;
+            }
+
+            let completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
+            // Filter completed courses by user email
+            completedCourses = completedCourses.filter(c => {
+                return currentEmail && c.userEmail && c.userEmail.toLowerCase() === currentEmail;
+            });
+
+            // Find courses that do not have an active certificate in allCerts
+            const missing = completedCourses.filter(c => {
+                return !allCerts.some(cert => String(cert.courseId) === String(c.id));
+            });
+
+            if (missing.length === 0) {
+                missingSection.style.display = 'none';
+                return;
+            }
+
+            missingSection.style.display = 'block';
+
+            /* Palette for cards */
+            const bandColors = [
+                'linear-gradient(90deg,#f59e0b,#fcd34d)',
+                'linear-gradient(90deg,#3b82f6,#93c5fd)',
+                'linear-gradient(90deg,#6366f1,#a78bfa)'
+            ];
+
+            missingGrid.innerHTML = missing.map((course, idx) => {
+                const band = bandColors[idx % bandColors.length];
+                return `
+                <div class="course-card" style="animation-delay:${idx * 0.06}s; position:relative; overflow:hidden;">
+                    <div class="course-card-band" style="background:${band};"></div>
+                    <div class="course-card-body" style="padding: 1.25rem;">
+                        <div class="course-card-top" style="margin-bottom: 1rem;">
+                            <div class="course-icon-wrap" style="background: rgba(245,158,11,0.15); font-size: 1.5rem; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">🕒</div>
+                            <div class="course-card-info" style="margin-left: 1rem;">
+                                <h3 style="font-size: 1.1rem; margin: 0; font-weight: 700;">${course.title}</h3>
+                                <div class="cat-row" style="margin-top: 0.25rem;">
+                                    <span class="tag tag-cat" style="background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); font-size: 0.72rem; padding: 0.1rem 0.5rem; border-radius: 4px;">Completed • Unissued</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-divider" style="height: 1px; background: var(--border-color); margin: 1rem 0;"></div>
+                        <div class="course-card-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                            <span style="font-size: 0.8rem; color: var(--text-light);">Ready for generation</span>
+                            <button class="btn-cert" onclick="openCertificateForCourse('${encodeURIComponent(course.title)}')" style="padding: 0.4rem 0.8rem; background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #d97706;">🔄 Re-issue</button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
         }
 
         function updateSummaryStats(certs) {
@@ -684,11 +780,17 @@
             }).join('');
         }
 
-        function removeCertificate(certId) {
+        async function removeCertificate(certId) {
             const certs = JSON.parse(localStorage.getItem('certificates')) || [];
             const cert = certs.find(c => c.id === certId);
             if (!cert) return;
             if (!confirm('Remove "' + cert.courseTitle + ' Course Completion Certificate"?')) return;
+
+            // Delete from Database (if online)
+            if (typeof deleteCertificateFromDatabase === 'function') {
+                await deleteCertificateFromDatabase(cert.courseId);
+            }
+
             const updated = certs.filter(c => c.id !== certId);
             localStorage.setItem('certificates', JSON.stringify(updated));
             loadAndRender();
@@ -699,39 +801,50 @@
 
             // 1. Look for existing certificate entry
             let certs = JSON.parse(localStorage.getItem('certificates')) || [];
+            const session = JSON.parse(localStorage.getItem('session') || 'null');
+            const currentEmail = (session?.email || '').toLowerCase();
+            const currentName = (session?.fullName || '').trim();
+
+            certs = certs.filter(c => {
+                if (!session || session.role !== 'student') return true;
+                if (currentEmail && c.userEmail && c.userEmail.toLowerCase() === currentEmail) return true;
+                if (currentName && c.userName === currentName) return true;
+                return false;
+            });
+
             let cert = certs.find(c =>
                 c.courseTitle && c.courseTitle.toLowerCase() === decoded.toLowerCase()
             );
 
             // 2. If not found, try to auto-generate from completedCourses
             if (!cert) {
-                const completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
+                let completedCourses = JSON.parse(localStorage.getItem('completedCourses')) || [];
+                if (session && session.role === 'student') {
+                    const currentEmail = (session.email || '').toLowerCase();
+                    completedCourses = completedCourses.filter(c => {
+                        if (currentEmail && c.userEmail && c.userEmail.toLowerCase() === currentEmail) return true;
+                        return false;
+                    });
+                }
                 const match = completedCourses.find(c =>
                     c.title && c.title.toLowerCase() === decoded.toLowerCase()
                 );
                 if (match) {
-                    const session = JSON.parse(localStorage.getItem('session') || 'null');
-                    const userName = session?.fullName || localStorage.getItem('userFullName') || 'Learner';
-                    const completedDate = match.completedAt
-                        ? new Date(match.completedAt).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })
-                        : new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-                    cert = {
-                        id: 'CERT-' + Date.now() + '-' + Math.random().toString(36).substr(2,9).toUpperCase(),
-                        courseId: match.id || decoded,
-                        courseTitle: match.title,
-                        type: 'course',
-                        userName: userName,
-                        issuedDate: completedDate,
-                        timestamp: Date.now(),
-                        verified: true
-                    };
-                    // Avoid duplicates before saving
-                    const alreadyExists = certs.some(c =>
-                        String(c.courseId) === String(cert.courseId) && c.type === 'course'
-                    );
-                    if (!alreadyExists) {
-                        certs.push(cert);
-                        localStorage.setItem('certificates', JSON.stringify(certs));
+                    if (typeof generateCertificate === 'function') {
+                        generateCertificate(match.id, match.title, 'course').then(newCert => {
+                            if (newCert) {
+                                viewCertificate(newCert.id);
+                                loadAndRender();
+                            } else {
+                                // If generation returned null (e.g. duplicate or error), try to find it again
+                                let updatedCerts = JSON.parse(localStorage.getItem('certificates')) || [];
+                                let found = updatedCerts.find(c => String(c.courseId) === String(match.id));
+                                if (found) {
+                                    viewCertificate(found.id);
+                                }
+                            }
+                        });
+                        return;
                     }
                 }
             }
