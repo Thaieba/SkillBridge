@@ -203,19 +203,25 @@
 <body>
   <nav>
     <div class="container">
-      <a href="../index.html" class="logo">SkillBridge</a>
+      <div class="logo-wrapper">
+            <a href="../index.html" class="logo">SkillBridge</a>
+            <span class="logo-tagline">Learn. Grow. Succeed.</span>
+        </div>
       <ul class="nav-links"></ul>
       <div class="hamburger"><span></span><span></span><span></span></div>
     </div>
   </nav>
 
-  <section class="section" style="padding: 2.5rem 1rem;">
+  <section class="section">
     <div class="container" style="max-width: 1100px;">
       
       <!-- Back Header -->
-      <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-        <a href="dashboard.html" style="text-decoration: none; font-size: 1.4rem;" title="Back to Dashboard">⬅️</a>
-        <h1 class="section-title" style="margin: 0;">🖊️ Homepage Builder</h1>
+      <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <a href="dashboard.html" style="text-decoration: none; font-size: 1.4rem;" title="Back to Dashboard">⬅️</a>
+          <h1 class="section-title" style="margin: 0;">🖊️ Homepage Builder</h1>
+        </div>
+        <button class="btn" onclick="localStorage.setItem('triggerInlineHomeEdit', '1'); window.location.href = '../index.html';" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">✏️ Edit Homepage Inline</button>
       </div>
       <p style="color: var(--text-light); margin-top: -1rem; margin-bottom: 2rem;">Modify banner text, about statements, home features, and navigation links of the public website.</p>
 
