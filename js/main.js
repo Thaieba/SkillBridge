@@ -2205,22 +2205,52 @@ function viewCertificate(certificateId) {
     const completionLabel = 'Course Completion Certificate';
     
     certificateDisplay.innerHTML = `
-        <div class="certificate-display">
-            <div class="certificate-header">
-                <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary-color); margin-bottom: 0.5rem; letter-spacing: 1px;">SkillBridge</div>
-                <h2>${completionLabel}</h2>
-                <p>IN RECOGNITION OF DEDICATION AND EXCELLENCE</p>
+    <div class="certificate-display">
+        <div class="certificate-corner certificate-corner-tl"></div>
+        <div class="certificate-corner certificate-corner-tr"></div>
+        <div class="certificate-corner certificate-corner-bl"></div>
+        <div class="certificate-corner certificate-corner-br"></div>
+        <div class="certificate-header">
+            <div class="certificate-brand">
+                <span class="certificate-brand-icon">🎓</span>
+                <div>
+                    <div class="certificate-brand-name">SkillBridge</div>
+                    <div class="certificate-brand-tagline">Learn. Grow. Succeed.</div>
+                </div>
             </div>
-            
-            <div class="certificate-body">
-                <h3>This is to certify that</h3>
-                <div class="certificate-recipient">${displayName}</div>
-                <p>has successfully ${completionTypeText}</p>
-                <h3 style="font-size: 1.4rem; color: var(--primary-color); font-weight: bold;">${certificate.courseTitle}</h3>
-                <p><strong>Completion date:</strong> ${certificate.issuedDate}</p>
-            </div>
-            
+            <h2>CERTIFICATE</h2>
+            <div class="certificate-subheading">OF COMPLETION</div>
         </div>
+
+        <div class="certificate-body">
+            <h3>This is to certify that</h3>
+            <div class="certificate-recipient">${displayName}</div>
+            <p>
+                <span class="certificate-laurel">🌿</span>
+                has successfully completed the course
+                <span class="certificate-laurel">🌿</span>
+            </p>
+            <h3 class="certificate-course-title">"${certificate.courseTitle}"</h3>
+            <p class="certificate-date">Completed on ${certificate.issuedDate}</p>
+        </div>
+
+        <div class="certificate-footer">
+            <div class="certificate-seal-wrapper">
+                <div class="certificate-seal">
+                    <span>★</span>
+                </div>
+                <div class="certificate-seal-ribbons">
+                    <div class="certificate-seal-ribbon"></div>
+                    <div class="certificate-seal-ribbon"></div>
+                </div>
+            </div>
+            <div class="certificate-signature">
+                <div class="certificate-signature-ink">SkillBridge</div>
+                <div class="certificate-signature-line"></div>
+                <div class="certificate-signature-text">Academic Head</div>
+            </div>
+        </div>
+    </div>
     `;
     
     // Show modal
@@ -2267,7 +2297,7 @@ function setupCertificateActions(certificate) {
     
     if (printBtn) {
         printBtn.onclick = function() {
-            printCertificate();
+            printCertificate(certificate);
         };
     }
     
@@ -2278,83 +2308,129 @@ function setupCertificateActions(certificate) {
     }
 }
 
+// Function to handle certificate download
 function downloadCertificate(certificate) {
-    const certificateDisplay = document.getElementById('certificateDisplay');
-    if (!certificateDisplay) return;
+    if (!certificate) return;
     
-    // Create a canvas from the certificate
     const canvas = document.createElement('canvas');
-    canvas.width = 1600;
-    canvas.height = 1000;
+    canvas.width = 950;
+    canvas.height = 700;
     const ctx = canvas.getContext('2d');
     
-    // Draw certificate background
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#fff9e6');
-    gradient.addColorStop(1, '#fff0cc');
-    ctx.fillStyle = gradient;
+    // Background
+    ctx.fillStyle = '#fffdf5';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Draw border
+    // Double Navy Border
+    ctx.strokeStyle = '#1E293B';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+    ctx.strokeRect(38, 38, canvas.width - 76, canvas.height - 76);
+    
+    // Outer Gold Outline
     ctx.strokeStyle = '#d4af37';
-    ctx.lineWidth = 8;
-    ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
-    
-    // Draw inner border
     ctx.lineWidth = 2;
-    ctx.strokeRect(60, 60, canvas.width - 120, canvas.height - 120);
+    ctx.strokeRect(18, 18, canvas.width - 36, canvas.height - 36);
+    // Inset Gold Accent Line
+    ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
     
-    // Draw text
-    ctx.fillStyle = '#6366f1';
-    ctx.font = 'bold 36px Georgia, serif';
+    // Header (Centered)
+    ctx.fillStyle = '#1E293B';
     ctx.textAlign = 'center';
-    ctx.fillText('SkillBridge', canvas.width / 2, 120);
-
-    ctx.fillStyle = '#d4af37';
-    ctx.font = 'bold 48px Georgia, serif';
-    ctx.fillText('Certificate of Achievement', canvas.width / 2, 190);
-    
-    ctx.fillStyle = '#666';
-    ctx.font = '18px Georgia, serif';
-    ctx.fillText('IN RECOGNITION OF DEDICATION AND EXCELLENCE', canvas.width / 2, 250);
-    
-    ctx.font = 'normal 24px Georgia, serif';
-    ctx.fillText('This is to certify that', canvas.width / 2, 380);
-    
-    ctx.fillStyle = '#000';
     ctx.font = 'bold 36px Georgia, serif';
+    ctx.fillText('SkillBridge', canvas.width / 2 + 30, 110);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '16px system-ui, -apple-system, sans-serif';
+    ctx.fillText('LEARN. GROW. SUCCEED.', canvas.width / 2 + 30, 140);
+    
+    // Icon
+    ctx.fillStyle = '#1E293B';
+    ctx.font = '50px Arial';
+    ctx.fillText('🎓', canvas.width / 2 - 120, 125);
+    
+    // Title
+    ctx.fillStyle = '#1E293B';
+    ctx.font = 'bold 56px Georgia, serif';
+    ctx.fillText('CERTIFICATE', canvas.width / 2, 220);
+    
+    ctx.fillStyle = '#d4af37';
+    ctx.font = 'bold 20px Georgia, serif';
+    ctx.fillText('OF COMPLETION', canvas.width / 2, 260);
+    
+    // Subtitle Flouishes
+    ctx.fillRect(canvas.width / 2 - 180, 255, 80, 1);
+    ctx.fillRect(canvas.width / 2 + 100, 255, 80, 1);
+    
+    // Body Text
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'italic 18px Georgia, serif';
+    ctx.fillText('This is to certify that', canvas.width / 2, 320);
+    
+    // Recipient Name
     const session = JSON.parse(sessionStorage.getItem('session')) || null;
     const currentUserName = session?.fullName || localStorage.getItem('userFullName') || 'Learner';
     const displayName = (certificate.userName && certificate.userName !== 'Learner' && certificate.userName !== 'Demo Admin') ? certificate.userName : currentUserName;
-    ctx.fillText(displayName, canvas.width / 2, 480);
     
-    ctx.fillStyle = '#666';
-    ctx.font = 'normal 24px Georgia, serif';
-    const completionTypeText = 'completed the course';
-    ctx.fillText('has successfully ' + completionTypeText, canvas.width / 2, 580);
+    ctx.fillStyle = '#1E293B';
+    ctx.font = 'italic 72px "Brush Script MT", "Great Vibes", cursive';
+    ctx.fillText(displayName, canvas.width / 2, 400);
     
-    ctx.fillStyle = '#6366f1';
-    ctx.font = 'bold 28px Georgia, serif';
-    ctx.fillText(certificate.courseTitle, canvas.width / 2, 660);
+    // Name Underline
+    ctx.fillStyle = '#d4af37';
+    ctx.fillRect(canvas.width / 2 - 200, 415, 400, 2);
     
-    ctx.fillStyle = '#666';
-    ctx.font = 'normal 20px Georgia, serif';
-    ctx.fillText('on this ' + certificate.issuedDate, canvas.width / 2, 750);
+    // Completion Text
+    ctx.fillStyle = '#64748b';
+    ctx.font = '18px Georgia, serif';
+    ctx.fillText('has successfully completed the course', canvas.width / 2, 460);
     
-    // Download
+    // Course Title
+    ctx.fillStyle = '#1E293B';
+    ctx.font = 'bold 36px Georgia, serif';
+    ctx.fillText('"' + certificate.courseTitle + '"', canvas.width / 2, 510);
+    
+    // Date & ID
+    ctx.fillStyle = '#64748b';
+    ctx.font = '16px Georgia, serif';
+    ctx.fillText(`Completed on ${certificate.issuedDate}  |  ID: ${certificate.id}`, canvas.width / 2, 550);
+    
+    // Footer Signatures
+    // Left Signature
+    ctx.fillStyle = '#1E293B';
+    ctx.font = '40px "Brush Script MT", cursive';
+    ctx.fillText('Jane Doe', 250, 620);
+    ctx.fillRect(150, 640, 200, 1);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '14px system-ui, -apple-system, sans-serif';
+    ctx.fillText('COURSE INSTRUCTOR', 250, 660);
+    
+    // Seal
+    ctx.font = '70px Arial';
+    ctx.fillText('🏅', canvas.width / 2, 650);
+    
+    // Right Signature
+    ctx.fillStyle = '#1E293B';
+    ctx.font = '40px "Brush Script MT", cursive';
+    ctx.fillText('John Smith', canvas.width - 250, 620);
+    ctx.fillRect(canvas.width - 350, 640, 200, 1);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '14px system-ui, -apple-system, sans-serif';
+    ctx.fillText('ACADEMIC HEAD', canvas.width - 250, 660);
+    
+    // Create download link
     const link = document.createElement('a');
+    link.download = `SkillBridge-Certificate-${certificate.id}.png`;
     link.href = canvas.toDataURL('image/png');
-    link.download = `${certificate.courseTitle}_Certificate_${Date.now()}.png`;
     link.click();
 }
 
-function printCertificate() {
-    const printWindow = window.open('', '', 'width=1000,height=600');
-    const certificateDisplay = document.getElementById('certificateDisplay');
+function printCertificate(certificate) {
+    const printWindow = window.open('', '', 'width=1000,height=700');
+    const certificateDisplay = document.querySelector('.certificate-display');
     
     if (!certificateDisplay) return;
     
-    const certificateHTML = certificateDisplay.innerHTML;
+    const certificateHTML = certificateDisplay.outerHTML;
     
     printWindow.document.write(`
         <!DOCTYPE html>
@@ -2362,32 +2438,79 @@ function printCertificate() {
         <head>
             <title>Certificate</title>
             <style>
-                body { margin: 0; padding: 20px; font-family: Georgia, serif; }
+                body { margin: 0; padding: 20px; font-family: Georgia, serif; display: flex; justify-content: center; }
+                /* Load exact CSS rules inline for printing */
                 .certificate-display { 
-                    width: 100%; 
-                    aspect-ratio: 16/10; 
-                    background: linear-gradient(135deg, #fff9e6 0%, #fff0cc 100%);
-                    padding: 30px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-between;
-                    align-items: center;
+                    width: 100%;
+                    max-width: 950px;
+                    background: #fffdf5;
+                    border: 8px double #1E293B;
+                    outline: 2px solid #d4af37;
+                    outline-offset: -12px;
+                    padding: 3.5rem 4rem;
                     text-align: center;
+                    color: #1E293B !important; 
+                    position: relative;
+                    border-radius: 2px;
+                    box-sizing: border-box;
                     page-break-after: always;
                 }
+                .certificate-display > * { position: relative; z-index: 2; }
+                .certificate-display p, .certificate-display div { color: #1E293B !important; }
+                .cert-header-layout { display: flex; align-items: center; justify-content: center; gap: 1rem; text-align: left; margin-bottom: 2rem; }
+                .cert-logo-icon { font-size: 3rem; }
+                .cert-brand { font-size: 1.8rem; font-weight: 900; font-family: 'Georgia', serif; }
+                .cert-tagline { font-size: 0.85rem; color: #64748b !important; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 1px; text-transform: uppercase; }
+                .cert-title-section { margin: 2.5rem 0; }
+                .cert-title-section h1 { font-size: 3.5rem; font-weight: 900; letter-spacing: 4px; margin: 0; font-family: 'Georgia', serif; }
+                .cert-subtitle { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 0.5rem; }
+                .cert-subtitle h2 { font-size: 1.2rem; color: #d4af37 !important; letter-spacing: 6px; margin: 0; font-weight: 700; font-family: 'Georgia', serif; }
+                .cert-line { height: 1px; width: 80px; background-color: #d4af37; }
+                .cert-flourish { color: #d4af37; font-size: 0.8rem; }
+                .cert-body-section { margin: 3rem 0; }
+                .cert-certify-text { font-size: 1.1rem; color: #64748b !important; font-style: italic; margin-bottom: 1.5rem; }
+                .certificate-recipient { font-size: 4.5rem; font-family: 'Brush Script MT', 'Great Vibes', cursive; margin: 1rem 0; line-height: 1.2; border-bottom: 2px solid #d4af37; display: inline-block; padding: 0 2rem 0.5rem; min-width: 400px; }
+                .cert-completed-text { display: flex; align-items: center; justify-content: center; gap: 0.8rem; margin: 2rem 0 1.5rem; }
+                .cert-completed-text p { font-size: 1.1rem; color: #64748b !important; }
+                .laurel { color: #d4af37; font-size: 1.2rem; }
+                .certificate-course-title { font-size: 2.2rem !important; font-weight: 900 !important; margin-bottom: 1.5rem; }
+                .cert-date-text { font-size: 1rem; color: #64748b !important; }
+                .certificate-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4rem; padding: 0 1rem; }
+                .certificate-signature { text-align: center; width: 200px; }
+                .signature-font { font-family: 'Brush Script MT', cursive; font-size: 2.5rem; margin-bottom: 0.5rem; line-height: 1; }
+                .certificate-signature-line { border-top: 1px solid #1E293B; margin-bottom: 0.5rem; width: 100%; }
+                .certificate-signature-text { font-size: 0.9rem; color: #64748b !important; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-family: system-ui, -apple-system, sans-serif; }
+                .cert-seal { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+                .seal-icon { font-size: 4.5rem; color: #d4af37; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+                .certificate-bg-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 15rem; opacity: 0.03; z-index: 0; pointer-events: none; }
+                
+                .corner-accent { position: absolute; width: 120px; height: 120px; border: 4px solid #1E293B; z-index: 1; }
+                .corner-accent.top-left { top: -60px; left: -60px; border-radius: 50%; }
+                .corner-accent.bottom-right { bottom: -60px; right: -60px; border-radius: 50%; }
+                .corner-accent::after { content: ''; position: absolute; width: 140px; height: 140px; border: 1px solid #d4af37; border-radius: 50%; top: -14px; left: -14px; }
+                
                 @media print {
+                    @page { size: landscape; margin: 0; }
                     body { padding: 0; }
+                    .certificate-display { -webkit-print-color-adjust: exact; print-color-adjust: exact; border-radius: 0; border-width: 0; outline: none; }
                 }
             </style>
         </head>
         <body>
             ${certificateHTML}
+            <script>
+                window.onload = () => {
+                    setTimeout(() => {
+                        window.print();
+                        window.close();
+                    }, 500);
+                }
+            </script>
         </body>
         </html>
     `);
     
     printWindow.document.close();
-    printWindow.print();
 }
 
 function shareCertificate(certificate) {
@@ -3194,7 +3317,7 @@ function setupBackToTopButton() {
         } else {
             btn.classList.remove('visible');
         }
-    });
+    });a
 }
 window.setupBackToTopButton = setupBackToTopButton;
 
