@@ -3284,16 +3284,20 @@ function showHomeFeedbackStatus(message, type) {
 }
 
 function renderBreadcrumb(items) {
-    // items: array of { label, href } — href omitted/null for the current (last) page
+    // items: array of { label, href } - href omitted/null for the current (last) page
     return `
-        <nav aria-label="breadcrumb" style="padding: 1rem 0; font-size: 0.9rem; color: var(--text-light);">
+        <nav aria-label="breadcrumb" style="padding: 1rem 0; font-size: 0.95rem; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">
             <div class="container">
                 ${items.map((item, i) => {
                     const isLast = i === items.length - 1;
-                    const sep = i > 0 ? '<span style="margin: 0 0.5rem; opacity: 0.5;">›</span>' : '';
+                    const sep = i > 0 ? '<span style="margin: 0 0.5rem; color: #ffffff; opacity: 1;">></span>' : '';
+                    
+                    // Replace the emoji with one wrapped in a span for consistent styling if it's the home icon
+                    const label = item.label.replace('🏠', '<span style="display: inline-block; transform: scale(1.1); margin-right: 2px;">🏠</span>');
+                    
                     return sep + (isLast || !item.href
-                        ? `<span style="color: var(--text-dark); font-weight: 600;">${item.label}</span>`
-                        : `<a href="${item.href}" style="color: var(--primary-color); text-decoration: none;">${item.label}</a>`);
+                        ? `<span style="color: #ffffff; font-weight: 800;">${label}</span>`
+                        : `<a href="${item.href}" style="color: rgba(255,255,255,0.85); text-decoration: none; font-weight: 500; transition: color 0.2s;">${label}</a>`);
                 }).join('')}
             </div>
         </nav>
