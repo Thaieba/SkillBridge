@@ -2580,7 +2580,6 @@ const PUBLIC_PAGES = [
     'getting-started.html',
     'admin-login.html',
     'course-details.html',
-    'roadmap.html',
     'skills.html',
     'quiz.html'
 ];
@@ -3042,6 +3041,7 @@ function checkOnboardingRedirect() {
     // Every other page requires a valid session
     const session = getSession();
     if (!session) {
+        sessionStorage.setItem('redirectUrl', window.location.href);
         // Build the correct relative path back to register.html
         const isInSubfolder = path.includes('/student/');
         window.location.href = isInSubfolder ? '../register.html' : 'register.html';
