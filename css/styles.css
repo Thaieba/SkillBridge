@@ -731,7 +731,8 @@ html[data-theme="dark"] label {
         position: absolute;
         left: 0;
         right: 0;
-        top: 72px;
+        top: 100%;
+        z-index: 1000;
         display: none;
         flex-direction: column;
         align-items: stretch;
@@ -2030,26 +2031,67 @@ div[style*="overflow-x: auto"] {
     .course-details-layout,
     .profile-layout,
     .settings-layout,
-    .career-container {
+    .career-container,
+    .skills-grid,
+    .about-grid,
+    .features-grid,
+    .certificates-grid,
+    .future-opportunities,
+    .roadmap-grid {
         grid-template-columns: 1fr !important;
         gap: 1.5rem !important;
     }
 
-    .roadmap-grid,
-    .features-grid {
-        grid-template-columns: 1fr !important;
-    }
-    
     .course-meta {
         flex-wrap: wrap;
         gap: 0.5rem;
     }
 
-    /* Keep profile dropdown from extending past right edge */
-    .profile-dropdown-card {
-        right: -10px !important;
-        max-width: 90vw !important;
-        width: 250px !important;
+    /* Forms */
+    .contact-form,
+    .form-group {
+        width: 100% !important;
+    }
+
+    /* Quiz */
+    .quiz-container {
+        padding: 1rem !important;
+    }
+    .quiz-option-label {
+        padding: 0.75rem !important;
+        font-size: 0.95rem !important;
+        word-break: break-word;
+    }
+    .quiz-progress-bar {
+        max-width: 100% !important;
+    }
+
+    /* Certificate Modal */
+    .certificate-modal-content {
+        padding: 1rem !important;
+        margin: 0.5rem !important;
+        width: 100% !important;
+        max-width: calc(100vw - 1rem) !important;
+        overflow-x: auto;
+    }
+    .certificate-display {
+        transform: scale(0.9);
+        transform-origin: top center;
+        margin-bottom: -10%; /* Compensate for scaled height */
+    }
+    .modal-close {
+        top: 0.5rem !important;
+        right: 0.5rem !important;
+        z-index: 1050;
+    }
+
+    /* Tables fallback */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
     }
 }
 
@@ -2082,11 +2124,13 @@ div[style*="overflow-x: auto"] {
         padding: 0.6rem 1rem !important;
         font-size: 0.95rem !important;
         justify-content: center;
+        width: 100%;
     }
     
     .hero-buttons {
         flex-direction: column;
         gap: 0.75rem !important;
+        width: 100%;
     }
     
     .hero-buttons .btn {
@@ -2097,6 +2141,23 @@ div[style*="overflow-x: auto"] {
         padding: 1.5rem !important;
         margin: 1rem !important;
         width: auto !important;
+    }
+    
+    /* Certificate */
+    .certificate-display {
+        padding: 1.5rem 1rem !important;
+        transform: scale(0.75);
+        margin-bottom: -25%;
+    }
+    .certificate-header h1,
+    .certificate-header h2 {
+        font-size: 1.5rem !important;
+    }
+    .certificate-recipient {
+        font-size: 1.5rem !important;
+    }
+    .certificate-course-title {
+        font-size: 1.1rem !important;
     }
 }
 
@@ -2121,6 +2182,26 @@ div[style*="overflow-x: auto"] {
 
     .course-title, .modal-title, .card-title {
         font-size: 1.25rem !important;
+    }
+
+    .certificate-display {
+        transform: scale(0.65);
+        margin-bottom: -35%;
+    }
+}
+
+/* ULTRA SMALL MOBILE FIXES (< 320px) */
+@media (max-width: 320px) {
+    .hero h1 {
+        font-size: 1.5rem !important;
+    }
+    .btn {
+        font-size: 0.85rem !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+    .certificate-display {
+        transform: scale(0.55);
+        margin-bottom: -45%;
     }
 }
 @keyframes skeletonPulse {
