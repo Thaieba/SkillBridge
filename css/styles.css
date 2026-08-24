@@ -46,6 +46,7 @@ html[data-theme="dark"] :focus-visible {
 
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
 }
 
 * {
@@ -61,6 +62,7 @@ body {
     background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
     line-height: 1.6;
     overflow-x: hidden;
+    overflow-wrap: anywhere;
 }
 
 a {
@@ -196,6 +198,8 @@ nav .container {
     padding: 5rem 1rem;
     text-align: center;
     color: #fff;
+    width: 100%;
+    box-sizing: border-box;
     background:
         linear-gradient(135deg, rgba(17, 24, 39, 0.78), rgba(99, 102, 241, 0.72)),
         url("../images/hero.jpeg") center/cover;
@@ -2042,6 +2046,28 @@ div[style*="overflow-x: auto"] {
         gap: 1.5rem !important;
     }
 
+    /* Prevent flex/grid children from causing overflow */
+    .dashboard-grid > *,
+    .courses-grid > *,
+    .stats-grid > *,
+    .admin-stats-grid > *,
+    .course-details-layout > *,
+    .profile-layout > *,
+    .settings-layout > *,
+    .career-container > *,
+    .skills-grid > *,
+    .about-grid > *,
+    .features-grid > *,
+    .certificates-grid > *,
+    .future-opportunities > *,
+    .roadmap-grid > *,
+    .nav-links > *,
+    .hero-buttons > *,
+    .contact-form > *,
+    .form-group > * {
+        min-width: 0;
+    }
+
     .course-meta {
         flex-wrap: wrap;
         gap: 0.5rem;
@@ -2071,7 +2097,7 @@ div[style*="overflow-x: auto"] {
         padding: 1rem !important;
         margin: 0.5rem !important;
         width: 100% !important;
-        max-width: calc(100vw - 1rem) !important;
+        max-width: calc(100% - 1rem) !important;
         overflow-x: auto;
     }
     .certificate-display {
