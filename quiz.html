@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Assessment Quiz - SkillBridge</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- NAVIGATION BAR -->
+    <nav>
+        <div class="container">
+            <div class="logo-wrapper">
+            <a href="index.html" class="logo">SkillBridge</a>
+            <span class="logo-tagline">Learn. Grow. Succeed.</span>
+        </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="skills.html">Skills</a></li>
+                <li><a href="progress.html">Progress</a></li>
+                <li><a href="roadmap.html">Roadmap</a></li>
+                  <li><button id="themeToggle" class="theme-toggle-btn">??</button></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- QUIZ SECTION -->
+    <section class="section">
+        <div class="container" style="max-width: 700px;">
+            <div id="quizContainer"></div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>About SkillBridge</h4>
+                <ul>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Courses</h4>
+                <ul>
+                    <li><a href="skills.html">All Courses</a></li>
+                    <li><a href="skills.html#categories">Categories</a></li>
+                    <li><a href="roadmap.html">Career Roadmap</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Student Portal</h4>
+                <ul>
+                    <li><a href="progress.html">Your Progress</a></li>
+                    </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SkillBridge. All rights reserved. | Empowering careers through education</p>
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="quiz-data.js"></script>
+    <script src="js/main.js?v=24f5cbdc"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            displayQuiz();
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
